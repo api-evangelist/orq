@@ -1,0 +1,46 @@
+generated: '2026-10-21'
+method: searched
+generator: extract-docs-artifacts.py (local)
+source: https://docs.orq.ai/changelog/release-4-16.md
+sources:
+- https://docs.orq.ai/changelog/release-4-16.md
+- https://docs.orq.ai/changelog/release-4-15.md
+- https://docs.orq.ai/changelog/release-4-14.md
+- https://docs.orq.ai/changelog/release-4-13.md
+entries:
+- breaking: false
+  highlights:
+  - Release 4.16 adds custom Monitors built from Traces, Metrics, and Logs, rebuilds the Traces page around search and filters, and adds dark
+    mode.
+  - Monitors let you create a custom page of widgets charting queries over Traces, Metrics, or Logs, with six visualizations and alert creation
+    from a widget.
+  - A new Traces page turns any attribute or metadata field into a filter or a column, and the activity chart updates with every query.
+  - New features include a Decisions API (Beta), Logs (Beta), Evaluator webhooks, Python Evaluator explanations, a Trace conversation endpoint,
+    expanded PII redaction, and keyboard navigation.
+  version: '4.16'
+- breaking: false
+  highlights:
+  - Release 4.15 adds OAuth and egress controls to the MCP Gateway, a Python editor for Evaluators, and a Beta Telemetry API for platform usage.
+  - OAuth becomes the default connection for MCP Gateways, allowing browser sign‑in and scoped tokens instead of long‑lived API keys.
+  - The new Python editor provides completions, error highlighting, and formatting to catch broken Evaluators before they run.
+  - Bug fixes include corrected GPT‑5 temperature handling, deployment retry logic, cache TTL fixes, and improved OTLP trace ingestion.
+  version: '4.15'
+- breaking: false
+  highlights:
+  - Release 4.14 introduces the MCP Gateway for governing agent tool access, adds caching and tracing to Routing rules, and new Evaluator variables.
+  - The MCP Gateway consolidates multiple MCP Servers into a single governed endpoint with centralized access, audit, and project scoping.
+  - Routing rules now carry controls for plugins, caching, and tracing, allowing per‑rule enforcement instead of workspace‑wide switches.
+  - Evaluator variables such as {{input.system_instructions}} and {{output.tools_called[0].name}} enable checks against instructions, tool usage,
+    and retrievals.
+  version: '4.14'
+- breaking: false
+  highlights:
+  - Release 4.13 adds metric Alerts on traces, JSON response healing in the Router, a redesigned Smart Router page, and Advisor and Sidekick tools.
+  - Alerts can watch Cost, Latency, Errors, Guardrails, or custom metrics over rolling windows and notify via email, Slack, or webhooks.
+  - Response healing plugin repairs malformed JSON, markdown fences, trailing commas, and other issues before the response reaches the caller.
+  - Advisor and Sidekick tools let an Agent consult a second model mid‑turn for guidance or discrete tasks, with separate metering and graceful
+    degradation.
+  version: '4.13'
+scheme: major.minor
+current_version: '4.16'
+docs: https://docs.orq.ai/changelog/release-4-16.md

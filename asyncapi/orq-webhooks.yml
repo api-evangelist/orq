@@ -1,0 +1,43 @@
+generated: '2026-10-21'
+method: searched
+generator: extract-docs-artifacts.py (local)
+source: https://docs.orq.ai/ai-studio/organization/webhooks.md
+sources:
+- https://docs.orq.ai/ai-studio/organization/webhooks.md
+- https://docs.orq.ai/reference/sdk/webhooks
+description: Orq.ai provides webhook notifications for resource changes.
+events:
+- event: agent.created
+  description: Sent when an agent is created.
+- event: agent.updated
+  description: Sent when an agent is updated.
+- event: agent.deleted
+  description: Sent when an agent is deleted.
+- event: deployment.created
+  description: Sent when a deployment is created.
+- event: deployment.updated
+  description: Sent when a deployment is updated.
+- event: deployment.deleted
+  description: Sent when a deployment is deleted.
+- event: deployment.invoked
+  description: Sent when a deployment is invoked.
+- event: prompt.created
+  description: Sent when a prompt is created.
+- event: prompt.updated
+  description: Sent when a prompt is updated.
+- event: prompt.deleted
+  description: Sent when a prompt is deleted.
+- event: llm.chat_completion
+  description: Sent for LLM chat completion events.
+- event: llm.response
+  description: Sent for LLM response events.
+- event: llm.embedding
+  description: Sent for LLM embedding events.
+- event: llm.rerank
+  description: Sent for LLM rerank events.
+- event: llm.evaluator
+  description: Sent for LLM evaluator events.
+delivery:
+  signature: A signing secret is generated when the webhook is created; use it to verify incoming requests.
+  retries: Retry behavior is not documented.
+docs: https://docs.orq.ai/ai-studio/organization/webhooks.md

@@ -1,0 +1,12 @@
+{
+  "schema_version": "v1",
+  "name_for_human": "orq.ai",
+  "name_for_model": "orq_ai",
+  "description_for_human": "LLM gateway, prompt management, evaluators, datasets, experiments, deployments, and tracing.",
+  "description_for_model": "Access orq.ai to route requests to LLMs via an OpenAI-compatible API, run evaluators, manage prompts and deployments, and read/write datasets. API: https://api.orq.ai/v3/router. MCP: https://my.orq.ai/v2/mcp.",
+  "auth": { "type": "user_http", "authorization_type": "bearer" },
+  "api": { "type": "openapi", "url": "https://docs.orq.ai/openapi.json" },
+  "logo_url": "https://gravatar.com/avatar/66cbc0f0d593f14941114a9edba58366?size=256",
+  "contact_email": "info@orq.ai",
+  "legal_info_url": "https://orq.ai/legal"
+}

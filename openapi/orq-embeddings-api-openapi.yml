@@ -1,0 +1,398 @@
+openapi: 3.2.0
+info:
+  title: orq.ai Embeddings API
+  version: '2.0'
+  description: orq.ai API documentation
+servers:
+- url: https://my.orq.ai
+security:
+- ApiKey: []
+tags:
+- name: Embeddings
+paths:
+  /v2/router/embeddings:
+    post:
+      description: Get a vector representation of a given input that can be easily consumed by machine learning models and algorithms.
+      operationId: createEmbedding
+      requestBody:
+        content:
+          application/json:
+            examples:
+              array_of_strings:
+                summary: Array of strings input
+                value:
+                  input:
+                  - The food was delicious
+                  - And the waiter was friendly
+                  model: openai/text-embedding-3-small
+              single_string:
+                summary: Single string input
+                value:
+                  input: The food was delicious and the waiter...
+                  model: openai/text-embedding-3-small
+            schema:
+              additionalProperties: false
+              properties:
+                cache:
+                  $ref: '#/components/schemas/EmbeddingCacheConfig'
+                  description: Cache configuration for the request.
+                dimensions:
+                  description: The number of dimensions the resulting output embeddings should have.
+                  format: int64
+                  type: integer
+                encoding_format:
+                  description: The format to return the embeddings in. Can be either float or base64.
+                  enum:
+                  - float
+                  - base64
+                  type: string
+                fallbacks:
+                  description: Array of fallback models to use if primary model fails.
+                  items:
+                    $ref: '#/components/schemas/FallbackConfig'
+                  type:
+                  - array
+                  - 'null'
+                input:
+                  anyOf:
+                  - description: A single text string to embed. Must be non-empty.
+                    minLength: 1
+                    title: String
+                    type: string
+                  - description: An array of strings or token arrays to embed. Must be non-empty.
+                    items:
+                      anyOf:
+                      - minLength: 1
+                        type: string
+                      - items:
+                          type: integer
+                        minItems: 1
+                        type: array
+                    minItems: 1
+                    title: Array
+                    type: array
+                  description: Input text to embed, encoded as a string or array of tokens.
+                load_balancer:
+                  $ref: '#/components/schemas/EmbeddingLoadBalancerConfig'
+                  description: Load balancer configuration for the request.
+                model:
+                  description: ID of the model to use.
+                  type: string
+                name:
+                  description: The name to display on the trace. If not specified, the default system name will be used.
+                  type: string
+                orq:
+                  $ref: '#/components/schemas/EmbeddingOrqParams'
+                  description: Orq platform extension parameters. Top-level equivalents take priority when both are set.
+                retry:
+                  $ref: '#/components/schemas/EmbeddingRetryConfig'
+                  description: Retry configuration for the request.
+                timeout:
+                  $ref: '#/components/schemas/EmbeddingTimeoutConfig'
+                  description: Timeout configuration to apply to the request.
+                user:
+                  description: A unique identifier representing your end-user.
+                  type: string
+                fallback_on_codes:
+                  description: HTTP status codes that trigger fallback. Defaults to [408,429,500,502,503,504,529]. Each code must be unique and between 400 and 599.
+                  items:
+                    format: int64
+                    type: integer
+                  maxItems: 20
+                  type:
+                  - array
+                  - 'null'
+              required:
+              - model
+              - input
+              type: object
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    description: List of embedding objects.
+                    items:
+                      $ref: '#/components/schemas/PublicEmbeddingData'
+                    minItems: 0
+                    type:
+                    - array
+                    - 'null'
+                  model:
+                    description: ID of the model used.
+                    type: string
+                  object:
+                    description: Always "list".
+                    enum:
+                    - list
+                    type: string
+                  usage:
+                    $ref: '#/components/schemas/PublicEmbeddingUsage'
+                    description: The usage information for the request.
+                required:
+                - object
+                - data
+                - model
+                - usage
+                type: object
+          description: Returns the embedding vector.
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIErrorResponse'
+      summary: Create embeddings
+      tags:
+      - Embeddings
+      x-cli-group: embeddings
+      x-cli-name: create
+      x-orq-gateway-group: true
+      x-speakeasy-group: router.embeddings
+      x-speakeasy-name-override: create
+components:
+  schemas:
+    PublicEmbeddingUsage:
+      additionalProperties: false
+      properties:
+        prompt_tokens:
+          description: The number of tokens used by the prompt.
+          format: int64
+          type: integer
+        total_tokens:
+          description: The total number of tokens used by the request.
+          format: int64
+          type: integer
+      required:
+      - prompt_tokens
+      - total_tokens
+      type: object
+    EmbeddingTimeoutConfig:
+      additionalProperties: false
+      properties:
+        call_timeout:
+          description: Timeout value in milliseconds.
+          format: int64
+          type: integer
+      required:
+      - call_timeout
+      type: object
+    APIErrorResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        error:
+          $ref: '#/components/schemas/APIError'
+      required:
+      - error
+    FallbackConfig:
+      additionalProperties: false
+      properties:
+        model:
+          type: string
+      required:
+      - model
+      type: object
+    ResponseIdentity:
+      additionalProperties: false
+      properties:
+        display_name:
+          type: string
+        email:
+          type: string
+        id:
+          type: string
+        metadata:
+          items:
+            additionalProperties: {}
+            type: object
+          type:
+          - array
+          - 'null'
+        tags:
+          items:
+            type: string
+          type:
+          - array
+          - 'null'
+      required:
+      - id
+      type: object
+    EmbeddingLoadBalancerModelConfig:
+      additionalProperties: false
+      properties:
+        model:
+          description: Model identifier for load balancing.
+          type: string
+        weight:
+          description: Weight assigned to this model for load balancing.
+          format: double
+          type: number
+      required:
+      - model
+      - weight
+      type: object
+    EmbeddingLoadBalancerConfig:
+      additionalProperties: false
+      properties:
+        models:
+          description: Array of models with weights for load balancing requests.
+          items:
+            $ref: '#/components/schemas/EmbeddingLoadBalancerModelConfig'
+          type:
+          - array
+          - 'null'
+        type:
+          description: Load balancer type.
+          enum:
+          - weight_based
+          type: string
+      required:
+      - type
+      - models
+      type: object
+    EmbeddingOrqParams:
+      additionalProperties: false
+      properties:
+        cache:
+          $ref: '#/components/schemas/EmbeddingCacheConfig'
+          description: 'Deprecated: use top-level cache instead.'
+        contact:
+          $ref: '#/components/schemas/EmbeddingContactParams'
+          description: 'Deprecated: use identity instead. Information about the contact making the request.'
+        fallbacks:
+          description: 'Deprecated: use top-level fallbacks instead.'
+          items:
+            $ref: '#/components/schemas/FallbackConfig'
+          type:
+          - array
+          - 'null'
+        identity:
+          $ref: '#/components/schemas/ResponseIdentity'
+          description: Information about the identity making the request.
+        load_balancer:
+          $ref: '#/components/schemas/EmbeddingLoadBalancerConfig'
+          description: 'Deprecated: use top-level load_balancer instead.'
+        name:
+          description: 'Deprecated: use top-level name instead.'
+          type: string
+        retry:
+          $ref: '#/components/schemas/EmbeddingRetryConfig'
+          description: 'Deprecated: use top-level retry instead.'
+        timeout:
+          $ref: '#/components/schemas/EmbeddingTimeoutConfig'
+          description: 'Deprecated: use top-level timeout instead.'
+      type: object
+    EmbeddingContactParams:
+      additionalProperties: false
+      properties:
+        display_name:
+          type: string
+        email:
+          type: string
+        id:
+          type: string
+        metadata:
+          items:
+            additionalProperties: {}
+            type: object
+          type:
+          - array
+          - 'null'
+        tags:
+          items:
+            type: string
+          type:
+          - array
+          - 'null'
+      required:
+      - id
+      type: object
+    APIError:
+      additionalProperties: false
+      properties:
+        code:
+          type:
+          - string
+          - 'null'
+        failures: {}
+        message:
+          type: string
+        param:
+          type:
+          - string
+          - 'null'
+        type:
+          type: string
+      required:
+      - message
+      - type
+      - param
+      - code
+      type: object
+    EmbeddingCacheConfig:
+      additionalProperties: false
+      properties:
+        ttl:
+          description: Time to live for cached responses in seconds. Maximum 259200 seconds (3 days).
+          format: int64
+          type: integer
+        type:
+          description: Cache type.
+          enum:
+          - exact_match
+          type: string
+      required:
+      - type
+      type: object
+    EmbeddingRetryConfig:
+      additionalProperties: false
+      properties:
+        count:
+          description: Number of retry attempts (1-5).
+          format: int64
+          type: integer
+        on_codes:
+          description: HTTP status codes that trigger retry logic.
+          items:
+            format: int64
+            type: integer
+          type:
+          - array
+          - 'null'
+      required:
+      - count
+      - on_codes
+      type: object
+    PublicEmbeddingData:
+      additionalProperties: false
+      properties:
+        embedding:
+          description: The embedding vector, which is a list of floats. The length of vector depends on the model. Can also be a base64-encoded string when encoding_format is base64.
+        index:
+          description: The index of the embedding in the list of embeddings.
+          format: int64
+          type: integer
+        object:
+          description: The object type, which is always "embedding".
+          enum:
+          - embedding
+          type: string
+      required:
+      - object
+      - index
+      - embedding
+      type: object
+  securitySchemes:
+    ApiKey:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+externalDocs:
+  url: https://docs.orq.ai
+  description: orq.ai Documentation
+x-speakeasy-timeout: 600000

@@ -1,0 +1,1005 @@
+openapi: 3.2.0
+info:
+  title: orq.ai Human Review Sets API
+  version: '2.0'
+  description: orq.ai API documentation
+servers:
+- url: https://my.orq.ai
+security:
+- ApiKey: []
+tags:
+- name: Human Review Sets
+paths:
+  /v2/human-eval-sets:
+    get:
+      tags:
+      - Human Review Sets
+      x-cli-group: human-review-sets
+      x-cli-name: getAll
+      x-cli-hidden: true
+      x-speakeasy-name-override: list
+      deprecated: true
+      description: 'Deprecated: Human Review Sets are replaced by project-level human reviews (Annotations) and will be removed in release 4.18.'
+      summary: Get all human review sets
+      parameters:
+      - schema:
+          anyOf:
+          - type: string
+          - type: string
+            format: ulid
+            pattern: ^[0-9A-HJKMNP-TV-Z]{26}$
+            readOnly: true
+            description: The id of the resource
+          description: Optional project ID to filter human review sets by project
+        required: false
+        description: Optional project ID to filter human review sets by project
+        name: project_id
+        in: query
+      responses:
+        '200':
+          description: Successfully retrieved all human review sets
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  oneOf:
+                  - type: object
+                    properties:
+                      _id:
+                        type: string
+                        format: ulid
+                        pattern: ^[0-9A-HJKMNP-TV-Z]{26}$
+                        readOnly: true
+                        description: The id of the resource
+                      display_name:
+                        type: string
+                        minLength: 1
+                        maxLength: 255
+                        description: Display name of the human review set
+                      description:
+                        type: string
+                        description: Detailed description of the human review set
+                      human_eval_ids:
+                        type: array
+                        items:
+                          type: string
+                          format: ulid
+                          pattern: ^[0-9A-HJKMNP-TV-Z]{26}$
+                          readOnly: true
+                          description: The id of the resource
+                        minItems: 1
+                        description: Array of human review IDs to be applied to matching spans
+                      workspace_id:
+                        type: string
+                      project_id:
+                        anyOf:
+                        - type: string
+                        - type: string
+                          format: ulid
+                          pattern: ^[0-9A-HJKMNP-TV-Z]{26}$
+                          readOnly: true
+                          description: The id of the resource
+                        description: Optional project ID to scope this human review set to a specific project
+                      created_by_id:
+                        type: string
+                      updated_by_id:
+                        type: string
+                      created:
+                        anyOf:
+                        - type: string
+                          format: date-time
+                        - type: string
+                          format: date-time
+                        default: '2026-09-15T17:33:09.320Z'
+                        readOnly: true
+                        format: date-time
+                        description: The date and time the resource was created
+                      updated:
+                        anyOf:
+                        - type: string
+                          format: date-time
+                          default: '2026-09-15T17:33:09.324Z'
+                        - type: string
+                          format: date-time
+                        readOnly: true
+                        format: date-time
+                        description: The date and time the resource was last updated
+                      filter_type:
+                        type: string
+                        enum:
+                        - span_type
+                      filter_values:
+                        type: array
+                        items:
+                          type: string
+                        minItems: 1
+                        description: Array of span types to match
+                    required:
+                    - _id
+                    - display_name
+                    - human_eval_ids
+                    - workspace_id
+                    - filter_type
+                    - filter_values
+                  - type: object
+                    properties:
+                      _id:
+                        type: string
+                        format: ulid
+                        pattern: ^[0-9A-HJKMNP-TV-Z]{26}$
+                        readOnly: true
+                        description: The id of the resource
+                      display_name:
+                        type: string
+                        minLength: 1
+                        maxLength: 255
+                        description: Display name of the human review set
+                      description:
+                        type: string
+                        description: Detailed description of the human review set
+                      human_eval_ids:
+                        type: array
+                        items:
+                          type: string
+                          format: ulid
+                          pattern: ^[0-9A-HJKMNP-TV-Z]{26}$
+                          readOnly: true
+                          description: The id of the resource
+                        minItems: 1
+                        description: Array of human review IDs to be applied to matching spans
+                      workspace_id:
+                        type: string
+                      project_id:
+                        anyOf:
+                        - type: string
+                        - type: string
+                          format: ulid
+                          pattern: ^[0-9A-HJKMNP-TV-Z]{26}$
+                          readOnly: true
+                          description: The id of the resource
+                        description: Optional project ID to scope this human review set to a specific project
+                      created_by_id:
+                        type: string
+                      updated_by_id:
+                        type: string
+                      created:
+                        anyOf:
+                        - type: string
+                          format: date-time
+                        - type: string
+                          format: date-time
+                        default: '2026-09-15T17:33:09.320Z'
+                        readOnly: true
+                        format: date-time
+                        description: The date and time the resource was created
+                      updated:
+                        anyOf:
+                        - type: string
+                          format: date-time
+                          default: '2026-09-15T17:33:09.324Z'
+                        - type: string
+                          format: date-time
+                        readOnly: true
+                        format: date-time
+                        description: The date and time the resource was last updated
+                      filter_type:
+                        type: string
+                        enum:
+                        - name
+                      filter_value:
+                        type: string
+                        minLength: 1
+                        description: Name pattern to match
+                    required:
+                    - _id
+                    - display_name
+                    - human_eval_ids
+                    - workspace_id
+                    - filter_type
+                    - filter_value
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      operationId: getV2HumanEvalSets
+      x-operation-id-source: derived
+    post:
+      tags:
+      - Human Review Sets
+      x-cli-group: human-review-sets
+      x-cli-name: create
+      x-cli-hidden: true
+      x-speakeasy-name-override: create
+      deprecated: true
+      description: 'Deprecated: Human Review Sets are replaced by project-level human reviews (Annotations) and will be removed in release 4.18.'
+      summary: Create a human review set
+      requestBody:
+        content:
+          application/json:
+            schema:
+              oneOf:
+              - type: object
+                properties:
+                  display_name:
+                    type: string
+                    minLength: 1
+                    maxLength: 255
+                    description: Display name of the human review set
+                  description:
+                    type: string
+                    description: Detailed description of the human review set
+                  human_eval_ids:
+                    type: array
+                    items:
+                      type: string
+                      format: ulid
+                      pattern: ^[0-9A-HJKMNP-TV-Z]{26}$
+                      readOnly: true
+                      description: The id of the resource
+                    minItems: 1
+                    description: Array of human review IDs to be applied to matching spans
+                  project_id:
+                    anyOf:
+                    - type: string
+                    - type: string
+                      format: ulid
+                      pattern: ^[0-9A-HJKMNP-TV-Z]{26}$
+                      readOnly: true
+                      description: The id of the resource
+                    description: Optional project ID to scope this human review set to a specific project
+                  filter_type:
+                    type: string
+                    enum:
+                    - span_type
+                  filter_values:
+                    type: array
+                    items:
+                      type: string
+                    minItems: 1
+                    description: Array of span types to match
+                required:
+                - display_name
+                - human_eval_ids
+                - filter_type
+                - filter_values
+              - type: object
+                properties:
+                  display_name:
+                    type: string
+                    minLength: 1
+                    maxLength: 255
+                    description: Display name of the human review set
+                  description:
+                    type: string
+                    description: Detailed description of the human review set
+                  human_eval_ids:
+                    type: array
+                    items:
+                      type: string
+                      format: ulid
+                      pattern: ^[0-9A-HJKMNP-TV-Z]{26}$
+                      readOnly: true
+                      description: The id of the resource
+                    minItems: 1
+                    description: Array of human review IDs to be applied to matching spans
+                  project_id:
+                    anyOf:
+                    - type: string
+                    - type: string
+                      format: ulid
+                      pattern: ^[0-9A-HJKMNP-TV-Z]{26}$
+                      readOnly: true
+                      description: The id of the resource
+                    description: Optional project ID to scope this human review set to a specific project
+                  filter_type:
+                    type: string
+                    enum:
+                    - name
+                  filter_value:
+                    type: string
+                    minLength: 1
+                    description: Name pattern to match
+                required:
+                - display_name
+                - human_eval_ids
+                - filter_type
+                - filter_value
+      responses:
+        '200':
+          description: Successfully created a human review set
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - type: object
+                  properties:
+                    _id:
+                      type: string
+                      format: ulid
+                      pattern: ^[0-9A-HJKMNP-TV-Z]{26}$
+                      readOnly: true
+                      description: The id of the resource
+                    display_name:
+                      type: string
+                      minLength: 1
+                      maxLength: 255
+                      description: Display name of the human review set
+                    description:
+                      type: string
+                      description: Detailed description of the human review set
+                    human_eval_ids:
+                      type: array
+                      items:
+                        type: string
+                        format: ulid
+                        pattern: ^[0-9A-HJKMNP-TV-Z]{26}$
+                        readOnly: true
+                        description: The id of the resource
+                      minItems: 1
+                      description: Array of human review IDs to be applied to matching spans
+                    workspace_id:
+                      type: string
+                    project_id:
+                      anyOf:
+                      - type: string
+                      - type: string
+                        format: ulid
+                        pattern: ^[0-9A-HJKMNP-TV-Z]{26}$
+                        readOnly: true
+                        description: The id of the resource
+                      description: Optional project ID to scope this human review set to a specific project
+                    created_by_id:
+                      type: string
+                    updated_by_id:
+                      type: string
+                    created:
+                      anyOf:
+                      - type: string
+                        format: date-time
+                      - type: string
+                        format: date-time
+                      default: '2026-09-15T17:33:09.320Z'
+                      readOnly: true
+                      format: date-time
+                      description: The date and time the resource was created
+                    updated:
+                      anyOf:
+                      - type: string
+                        format: date-time
+                        default: '2026-09-15T17:33:09.324Z'
+                      - type: string
+                        format: date-time
+                      readOnly: true
+                      format: date-time
+                      description: The date and time the resource was last updated
+                    filter_type:
+                      type: string
+                      enum:
+                      - span_type
+                    filter_values:
+                      type: array
+                      items:
+                        type: string
+                      minItems: 1
+                      description: Array of span types to match
+                  required:
+                  - _id
+                  - display_name
+                  - human_eval_ids
+                  - workspace_id
+                  - filter_type
+                  - filter_values
+                - type: object
+                  properties:
+                    _id:
+                      type: string
+                      format: ulid
+                      pattern: ^[0-9A-HJKMNP-TV-Z]{26}$
+                      readOnly: true
+                      description: The id of the resource
+                    display_name:
+                      type: string
+                      minLength: 1
+                      maxLength: 255
+                      description: Display name of the human review set
+                    description:
+                      type: string
+                      description: Detailed description of the human review set
+                    human_eval_ids:
+                      type: array
+                      items:
+                        type: string
+                        format: ulid
+                        pattern: ^[0-9A-HJKMNP-TV-Z]{26}$
+                        readOnly: true
+                        description: The id of the resource
+                      minItems: 1
+                      description: Array of human review IDs to be applied to matching spans
+                    workspace_id:
+                      type: string
+                    project_id:
+                      anyOf:
+                      - type: string
+                      - type: string
+                        format: ulid
+                        pattern: ^[0-9A-HJKMNP-TV-Z]{26}$
+                        readOnly: true
+                        description: The id of the resource
+                      description: Optional project ID to scope this human review set to a specific project
+                    created_by_id:
+                      type: string
+                    updated_by_id:
+                      type: string
+                    created:
+                      anyOf:
+                      - type: string
+                        format: date-time
+                      - type: string
+                        format: date-time
+                      default: '2026-09-15T17:33:09.320Z'
+                      readOnly: true
+                      format: date-time
+                      description: The date and time the resource was created
+                    updated:
+                      anyOf:
+                      - type: string
+                        format: date-time
+                        default: '2026-09-15T17:33:09.324Z'
+                      - type: string
+                        format: date-time
+                      readOnly: true
+                      format: date-time
+                      description: The date and time the resource was last updated
+                    filter_type:
+                      type: string
+                      enum:
+                      - name
+                    filter_value:
+                      type: string
+                      minLength: 1
+                      description: Name pattern to match
+                  required:
+                  - _id
+                  - display_name
+                  - human_eval_ids
+                  - workspace_id
+                  - filter_type
+                  - filter_value
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      operationId: postV2HumanEvalSets
+      x-operation-id-source: derived
+  /v2/human-eval-sets/{id}:
+    get:
+      tags:
+      - Human Review Sets
+      x-cli-group: human-review-sets
+      x-cli-name: get
+      x-cli-hidden: true
+      x-speakeasy-name-override: get
+      deprecated: true
+      description: 'Deprecated: Human Review Sets are replaced by project-level human reviews (Annotations) and will be removed in release 4.18.'
+      summary: Get a human review set by ID
+      parameters:
+      - schema:
+          type: string
+          description: The ID of the human review set to retrieve
+        required: true
+        description: The ID of the human review set to retrieve
+        name: id
+        in: path
+      responses:
+        '200':
+          description: Successfully retrieved the human review set
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - type: object
+                  properties:
+                    _id:
+                      type: string
+                      format: ulid
+                      pattern: ^[0-9A-HJKMNP-TV-Z]{26}$
+                      readOnly: true
+                      description: The id of the resource
+                    display_name:
+                      type: string
+                      minLength: 1
+                      maxLength: 255
+                      description: Display name of the human review set
+                    description:
+                      type: string
+                      description: Detailed description of the human review set
+                    human_eval_ids:
+                      type: array
+                      items:
+                        type: string
+                        format: ulid
+                        pattern: ^[0-9A-HJKMNP-TV-Z]{26}$
+                        readOnly: true
+                        description: The id of the resource
+                      minItems: 1
+                      description: Array of human review IDs to be applied to matching spans
+                    workspace_id:
+                      type: string
+                    project_id:
+                      anyOf:
+                      - type: string
+                      - type: string
+                        format: ulid
+                        pattern: ^[0-9A-HJKMNP-TV-Z]{26}$
+                        readOnly: true
+                        description: The id of the resource
+                      description: Optional project ID to scope this human review set to a specific project
+                    created_by_id:
+                      type: string
+                    updated_by_id:
+                      type: string
+                    created:
+                      anyOf:
+                      - type: string
+                        format: date-time
+                      - type: string
+                        format: date-time
+                      default: '2026-09-15T17:33:09.320Z'
+                      readOnly: true
+                      format: date-time
+                      description: The date and time the resource was created
+                    updated:
+                      anyOf:
+                      - type: string
+                        format: date-time
+                        default: '2026-09-15T17:33:09.324Z'
+                      - type: string
+                        format: date-time
+                      readOnly: true
+                      format: date-time
+                      description: The date and time the resource was last updated
+                    filter_type:
+                      type: string
+                      enum:
+                      - span_type
+                    filter_values:
+                      type: array
+                      items:
+                        type: string
+                      minItems: 1
+                      description: Array of span types to match
+                  required:
+                  - _id
+                  - display_name
+                  - human_eval_ids
+                  - workspace_id
+                  - filter_type
+                  - filter_values
+                - type: object
+                  properties:
+                    _id:
+                      type: string
+                      format: ulid
+                      pattern: ^[0-9A-HJKMNP-TV-Z]{26}$
+                      readOnly: true
+                      description: The id of the resource
+                    display_name:
+                      type: string
+                      minLength: 1
+                      maxLength: 255
+                      description: Display name of the human review set
+                    description:
+                      type: string
+                      description: Detailed description of the human review set
+                    human_eval_ids:
+                      type: array
+                      items:
+                        type: string
+                        format: ulid
+                        pattern: ^[0-9A-HJKMNP-TV-Z]{26}$
+                        readOnly: true
+                        description: The id of the resource
+                      minItems: 1
+                      description: Array of human review IDs to be applied to matching spans
+                    workspace_id:
+                      type: string
+                    project_id:
+                      anyOf:
+                      - type: string
+                      - type: string
+                        format: ulid
+                        pattern: ^[0-9A-HJKMNP-TV-Z]{26}$
+                        readOnly: true
+                        description: The id of the resource
+                      description: Optional project ID to scope this human review set to a specific project
+                    created_by_id:
+                      type: string
+                    updated_by_id:
+                      type: string
+                    created:
+                      anyOf:
+                      - type: string
+                        format: date-time
+                      - type: string
+                        format: date-time
+                      default: '2026-09-15T17:33:09.320Z'
+                      readOnly: true
+                      format: date-time
+                      description: The date and time the resource was created
+                    updated:
+                      anyOf:
+                      - type: string
+                        format: date-time
+                        default: '2026-09-15T17:33:09.324Z'
+                      - type: string
+                        format: date-time
+                      readOnly: true
+                      format: date-time
+                      description: The date and time the resource was last updated
+                    filter_type:
+                      type: string
+                      enum:
+                      - name
+                    filter_value:
+                      type: string
+                      minLength: 1
+                      description: Name pattern to match
+                  required:
+                  - _id
+                  - display_name
+                  - human_eval_ids
+                  - workspace_id
+                  - filter_type
+                  - filter_value
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: The resource does not exist. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      operationId: getV2HumanEvalSetsById
+      x-operation-id-source: derived
+    patch:
+      tags:
+      - Human Review Sets
+      x-cli-group: human-review-sets
+      x-cli-name: update
+      x-cli-hidden: true
+      x-speakeasy-name-override: update
+      deprecated: true
+      description: 'Deprecated: Human Review Sets are replaced by project-level human reviews (Annotations) and will be removed in release 4.18.'
+      summary: Update a human review set
+      parameters:
+      - schema:
+          type: string
+          description: The ID of the human review set to retrieve
+        required: true
+        description: The ID of the human review set to retrieve
+        name: id
+        in: path
+      requestBody:
+        content:
+          application/json:
+            schema:
+              oneOf:
+              - type: object
+                properties:
+                  display_name:
+                    type: string
+                    minLength: 1
+                    maxLength: 255
+                    description: Display name of the human review set
+                  description:
+                    type: string
+                    description: Detailed description of the human review set
+                  human_eval_ids:
+                    type: array
+                    items:
+                      type: string
+                      format: ulid
+                      pattern: ^[0-9A-HJKMNP-TV-Z]{26}$
+                      readOnly: true
+                      description: The id of the resource
+                    minItems: 1
+                    description: Array of human review IDs to be applied to matching spans
+                  project_id:
+                    anyOf:
+                    - type: string
+                    - type: string
+                      format: ulid
+                      pattern: ^[0-9A-HJKMNP-TV-Z]{26}$
+                      readOnly: true
+                      description: The id of the resource
+                    description: Optional project ID to scope this human review set to a specific project
+                  filter_type:
+                    type: string
+                    enum:
+                    - span_type
+                  filter_values:
+                    type: array
+                    items:
+                      type: string
+                    minItems: 1
+                    description: Array of span types to match
+                required:
+                - display_name
+                - human_eval_ids
+                - filter_type
+                - filter_values
+              - type: object
+                properties:
+                  display_name:
+                    type: string
+                    minLength: 1
+                    maxLength: 255
+                    description: Display name of the human review set
+                  description:
+                    type: string
+                    description: Detailed description of the human review set
+                  human_eval_ids:
+                    type: array
+                    items:
+                      type: string
+                      format: ulid
+                      pattern: ^[0-9A-HJKMNP-TV-Z]{26}$
+                      readOnly: true
+                      description: The id of the resource
+                    minItems: 1
+                    description: Array of human review IDs to be applied to matching spans
+                  project_id:
+                    anyOf:
+                    - type: string
+                    - type: string
+                      format: ulid
+                      pattern: ^[0-9A-HJKMNP-TV-Z]{26}$
+                      readOnly: true
+                      description: The id of the resource
+                    description: Optional project ID to scope this human review set to a specific project
+                  filter_type:
+                    type: string
+                    enum:
+                    - name
+                  filter_value:
+                    type: string
+                    minLength: 1
+                    description: Name pattern to match
+                required:
+                - display_name
+                - human_eval_ids
+                - filter_type
+                - filter_value
+      responses:
+        '200':
+          description: Successfully updated the human review set
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - type: object
+                  properties:
+                    _id:
+                      type: string
+                      format: ulid
+                      pattern: ^[0-9A-HJKMNP-TV-Z]{26}$
+                      readOnly: true
+                      description: The id of the resource
+                    display_name:
+                      type: string
+                      minLength: 1
+                      maxLength: 255
+                      description: Display name of the human review set
+                    description:
+                      type: string
+                      description: Detailed description of the human review set
+                    human_eval_ids:
+                      type: array
+                      items:
+                        type: string
+                        format: ulid
+                        pattern: ^[0-9A-HJKMNP-TV-Z]{26}$
+                        readOnly: true
+                        description: The id of the resource
+                      minItems: 1
+                      description: Array of human review IDs to be applied to matching spans
+                    workspace_id:
+                      type: string
+                    project_id:
+                      anyOf:
+                      - type: string
+                      - type: string
+                        format: ulid
+                        pattern: ^[0-9A-HJKMNP-TV-Z]{26}$
+                        readOnly: true
+                        description: The id of the resource
+                      description: Optional project ID to scope this human review set to a specific project
+                    created_by_id:
+                      type: string
+                    updated_by_id:
+                      type: string
+                    created:
+                      anyOf:
+                      - type: string
+                        format: date-time
+                      - type: string
+                        format: date-time
+                      default: '2026-09-15T17:33:09.320Z'
+                      readOnly: true
+                      format: date-time
+                      description: The date and time the resource was created
+                    updated:
+                      anyOf:
+                      - type: string
+                        format: date-time
+                        default: '2026-09-15T17:33:09.324Z'
+                      - type: string
+                        format: date-time
+                      readOnly: true
+                      format: date-time
+                      description: The date and time the resource was last updated
+                    filter_type:
+                      type: string
+                      enum:
+                      - span_type
+                    filter_values:
+                      type: array
+                      items:
+                        type: string
+                      minItems: 1
+                      description: Array of span types to match
+                  required:
+                  - _id
+                  - display_name
+                  - human_eval_ids
+                  - workspace_id
+                  - filter_type
+                  - filter_values
+                - type: object
+                  properties:
+                    _id:
+                      type: string
+                      format: ulid
+                      pattern: ^[0-9A-HJKMNP-TV-Z]{26}$
+                      readOnly: true
+                      description: The id of the resource
+                    display_name:
+                      type: string
+                      minLength: 1
+                      maxLength: 255
+                      description: Display name of the human review set
+                    description:
+                      type: string
+                      description: Detailed description of the human review set
+                    human_eval_ids:
+                      type: array
+                      items:
+                        type: string
+                        format: ulid
+                        pattern: ^[0-9A-HJKMNP-TV-Z]{26}$
+                        readOnly: true
+                        description: The id of the resource
+                      minItems: 1
+                      description: Array of human review IDs to be applied to matching spans
+                    workspace_id:
+                      type: string
+                    project_id:
+                      anyOf:
+                      - type: string
+                      - type: string
+                        format: ulid
+                        pattern: ^[0-9A-HJKMNP-TV-Z]{26}$
+                        readOnly: true
+                        description: The id of the resource
+                      description: Optional project ID to scope this human review set to a specific project
+                    created_by_id:
+                      type: string
+                    updated_by_id:
+                      type: string
+                    created:
+                      anyOf:
+                      - type: string
+                        format: date-time
+                      - type: string
+                        format: date-time
+                      default: '2026-09-15T17:33:09.320Z'
+                      readOnly: true
+                      format: date-time
+                      description: The date and time the resource was created
+                    updated:
+                      anyOf:
+                      - type: string
+                        format: date-time
+                        default: '2026-09-15T17:33:09.324Z'
+                      - type: string
+                        format: date-time
+                      readOnly: true
+                      format: date-time
+                      description: The date and time the resource was last updated
+                    filter_type:
+                      type: string
+                      enum:
+                      - name
+                    filter_value:
+                      type: string
+                      minLength: 1
+                      description: Name pattern to match
+                  required:
+                  - _id
+                  - display_name
+                  - human_eval_ids
+                  - workspace_id
+                  - filter_type
+                  - filter_value
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      operationId: patchV2HumanEvalSetsById
+      x-operation-id-source: derived
+    delete:
+      tags:
+      - Human Review Sets
+      x-cli-group: human-review-sets
+      x-cli-name: delete
+      x-cli-hidden: true
+      x-speakeasy-name-override: delete
+      deprecated: true
+      description: 'Deprecated: Human Review Sets are replaced by project-level human reviews (Annotations) and will be removed in release 4.18.'
+      summary: Delete a human review set
+      parameters:
+      - schema:
+          type: string
+          description: The ID of the human review set to retrieve
+        required: true
+        description: The ID of the human review set to retrieve
+        name: id
+        in: path
+      responses:
+        '200':
+          description: Successfully deleted the human review set
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      operationId: deleteV2HumanEvalSetsById
+      x-operation-id-source: derived
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Human-readable error message.
+        code:
+          type: integer
+          description: gRPC status code, when the service reports one.
+        details:
+          type: array
+          items: {}
+          description: Additional error details, when the service reports any.
+      required:
+      - message
+  securitySchemes:
+    ApiKey:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+externalDocs:
+  url: https://docs.orq.ai
+  description: orq.ai Documentation
+x-speakeasy-timeout: 600000

@@ -1,23 +1,1439 @@
 aid: orq
 name: Orq.ai
-description: 'Orq.ai is a company surfaced via the API Evangelist harvest backlog (source: g2-catalog)
-  and added to the network as a stub for full-pipeline profiling.'
+image: https://framerusercontent.com/images/2WPqC5CejT04oQzpwkTC8lYFeL0.jpg
+description: Orq.ai provides a sovereign AI gateway and software factory enabling enterprises to build, govern, and deploy AI-driven applications
+  with robust observability, risk management, and compliance features. The platform offers AI model management, policy enforcement, and a unified
+  API to integrate large language models, tools, and custom agents, targeting use cases from coding assistants to enterprise AI governance.
 url: https://raw.githubusercontent.com/api-evangelist/orq/refs/heads/main/apis.yml
 x-type: company
 x-source: harvest:g2-catalog
-x-tier: stub
-x-tier-reason: harvest
+x-tier: profiled
+x-tier-reason: enrichment pass 2026-10-21 (modular-v1; was harvest)
 specificationVersion: '0.20'
 created: '2026-10-21'
 modified: '2026-10-21'
 tags:
-- Company
-apis: []
+- AI
+- Platform
+- Enterprise
+- Governance
+- SoftwareFactory
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
 - FN: APIs.json
   email: info@apis.io
 common:
+- type: AgenticAccess
+  url: agentic-access/orq-agentic-access.yml
+- type: Plans
+  url: plans/orq-plans-pricing.yml
+- type: Spectral
+  url: rules/orq-rules.yml
+- type: JSONLD
+  url: json-ld/orq-context.jsonld
+- type: Vocabulary
+  url: vocabulary/orq-vocabulary.yml
+- type: AgentSkill
+  url: skills/_index.yml
+- type: Webhooks
+  url: asyncapi/orq-webhooks.yml
+- type: DataModel
+  url: data-model/orq-data-model.yml
+- type: ChangeLog
+  url: changelog/orq-changelog.yml
+- type: Security
+  url: security/orq-vulnerability-disclosure.yml
+- type: ErrorCatalog
+  url: errors/orq-problem-types.yml
+- type: Conformance
+  url: conformance/orq-conformance.yml
+- type: LLMsTxt
+  url: llms/orq-llms.txt
+- type: AgentCard
+  url: a2a/orq-a2a.yml
+- type: SecurityTxt
+  url: well-known/orq-security.txt
+- type: SecurityTxt
+  url: well-known/orq-docs-security.txt
+- type: WellKnown
+  url: well-known/orq-well-known.yml
+- type: Hosts
+  url: hosts/orq-hosts.yml
+- type: Vendors
+  url: vendors/orq-vendors.yml
+- type: Authentication
+  url: authentication/orq-authentication.yml
+- type: VulnerabilityDisclosure
+  url: security/orq-vulnerability-disclosure.yml
+- type: DomainSecurity
+  url: security/orq-domain-security.yml
 - type: Website
   url: https://orq.ai/
+- type: DeveloperPortal
+  url: https://orq.ai/
+- type: Documentation
+  url: https://docs.orq.ai/
+- type: APIReference
+  url: https://docs.orq.ai/reference/client-libraries
+- type: GettingStarted
+  url: https://docs.orq.ai/ai-gateway/get-started/introduction
+- type: Support
+  url: https://orq.ai/contact
+- type: Blog
+  url: https://orq.ai/blog
+- type: Pricing
+  url: https://orq.ai/pricing
+- type: SignUp
+  url: https://my.orq.ai/auth/signup
+- type: PrivacyPolicy
+  url: https://orq.ai/privacy
+- type: Postman
+  url: https://www.postman.com/orq/workspace
+apis:
+- aid: orq:orq-agent-feedback-api
+  name: Orq.ai Agent Feedback API
+  description: The Agent Feedback API from Orq.ai — 1 operation(s) for agent feedback.
+  humanURL: https://docs.orq.ai/reference
+  baseURL: https://my.orq.ai
+  tags:
+  - Agent Feedback
+  properties:
+  - type: OpenAPI
+    url: openapi/orq-agent-feedback-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/orq-invoke-deployment-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-search-knowledge-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-response-stream-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-thought-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-started-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-model-metadata-schema.json
+- aid: orq:orq-agent-schedules-api
+  name: Orq.ai Agent Schedules API
+  description: Run agents on a cron cadence. Minimum firing interval is 1 hour.
+  humanURL: https://docs.orq.ai/reference
+  baseURL: https://my.orq.ai
+  tags:
+  - Agent Schedules
+  properties:
+  - type: OpenAPI
+    url: openapi/orq-agent-schedules-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/orq-invoke-deployment-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-search-knowledge-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-response-stream-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-thought-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-started-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-model-metadata-schema.json
+- aid: orq:orq-agents-api
+  name: Orq.ai Agents API
+  description: The Agents API from Orq.ai — 12 operation(s) for agents.
+  humanURL: https://docs.orq.ai/reference
+  baseURL: https://my.orq.ai
+  tags:
+  - Agents
+  properties:
+  - type: OpenAPI
+    url: openapi/orq-agents-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/orq-invoke-deployment-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-search-knowledge-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-response-stream-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-thought-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-started-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-model-metadata-schema.json
+- aid: orq:orq-alerts-api
+  name: Orq.ai Alerts API
+  description: >-
+    Alerts evaluate a Reporting API metric on a fixed interval and fire notifications through notifiers
+    when the value breaches a threshold. Each breach opens a trigger that tracks the incident until the
+    value recovers.
+  humanURL: https://docs.orq.ai/reference
+  baseURL: https://my.orq.ai
+  tags:
+  - Alerts
+  properties:
+  - type: OpenAPI
+    url: openapi/orq-alerts-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/orq-invoke-deployment-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-search-knowledge-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-response-stream-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-thought-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-started-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-model-metadata-schema.json
+- aid: orq:orq-annotation-queues-api
+  name: Orq.ai Annotation Queues API
+  description: Annotation queues collect spans for human review.
+  humanURL: https://docs.orq.ai/reference
+  baseURL: https://my.orq.ai
+  tags:
+  - Annotation Queues
+  properties:
+  - type: OpenAPI
+    url: openapi/orq-annotation-queues-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/orq-invoke-deployment-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-search-knowledge-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-response-stream-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-thought-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-started-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-model-metadata-schema.json
+- aid: orq:orq-annotations-api
+  name: Orq.ai Annotations API
+  description: The Annotations API from Orq.ai — 1 operation(s) for annotations.
+  humanURL: https://docs.orq.ai/reference
+  baseURL: https://my.orq.ai
+  tags:
+  - Annotations
+  properties:
+  - type: OpenAPI
+    url: openapi/orq-annotations-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/orq-invoke-deployment-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-search-knowledge-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-response-stream-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-thought-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-started-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-model-metadata-schema.json
+- aid: orq:orq-api-keys-api
+  name: Orq.ai API keys API
+  description: >-
+    API keys authenticate programmatic access to the workspace. They expose opaque tokens, per-domain
+    access grants, and budget and rate-limit constraints.
+  humanURL: https://docs.orq.ai/reference
+  baseURL: https://my.orq.ai
+  tags:
+  - API keys
+  properties:
+  - type: OpenAPI
+    url: openapi/orq-api-keys-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/orq-invoke-deployment-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-search-knowledge-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-response-stream-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-thought-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-started-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-model-metadata-schema.json
+- aid: orq:orq-audio-api
+  name: Orq.ai Audio API
+  description: The Audio API from Orq.ai — 3 operation(s) for audio.
+  humanURL: https://docs.orq.ai/reference
+  baseURL: https://my.orq.ai
+  tags:
+  - Audio
+  properties:
+  - type: OpenAPI
+    url: openapi/orq-audio-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/orq-invoke-deployment-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-search-knowledge-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-response-stream-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-thought-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-started-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-model-metadata-schema.json
+- aid: orq:orq-audit-logs-api
+  name: Orq.ai Audit Logs API
+  description: Audit logs record workspace entity changes and access-relevant events.
+  humanURL: https://docs.orq.ai/reference
+  baseURL: https://my.orq.ai
+  tags:
+  - Audit Logs
+  properties:
+  - type: OpenAPI
+    url: openapi/orq-audit-logs-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/orq-invoke-deployment-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-search-knowledge-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-response-stream-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-thought-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-started-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-model-metadata-schema.json
+- aid: orq:orq-budgets-api
+  name: Orq.ai Budgets API
+  description: >-
+    Budgets govern spend, token usage, and request rate across six scopes: workspace, project, identity,
+    API key, provider, and model. Every applicable budget is enforced, and the most restrictive limit
+    applies per dimension.
+  humanURL: https://docs.orq.ai/reference
+  baseURL: https://my.orq.ai
+  tags:
+  - Budgets
+  properties:
+  - type: OpenAPI
+    url: openapi/orq-budgets-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/orq-invoke-deployment-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-search-knowledge-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-response-stream-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-thought-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-started-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-model-metadata-schema.json
+- aid: orq:orq-chunking-api
+  name: Orq.ai Chunking API
+  description: Split text into smaller chunks for retrieval and generation workflows.
+  humanURL: https://docs.orq.ai/reference
+  baseURL: https://my.orq.ai
+  tags:
+  - Chunking
+  properties:
+  - type: OpenAPI
+    url: openapi/orq-chunking-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/orq-invoke-deployment-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-search-knowledge-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-response-stream-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-thought-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-started-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-model-metadata-schema.json
+- aid: orq:orq-classify-api
+  name: Orq.ai Classify API
+  description: Beta. Run typed classification questions against a classify model.
+  humanURL: https://docs.orq.ai/reference
+  baseURL: https://my.orq.ai
+  tags:
+  - Classify
+  properties:
+  - type: OpenAPI
+    url: openapi/orq-classify-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/orq-invoke-deployment-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-search-knowledge-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-response-stream-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-thought-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-started-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-model-metadata-schema.json
+- aid: orq:orq-completions-api
+  name: Orq.ai Completions API
+  description: The Completions API from Orq.ai — 1 operation(s) for completions.
+  humanURL: https://docs.orq.ai/reference
+  baseURL: https://my.orq.ai
+  tags:
+  - Completions
+  properties:
+  - type: OpenAPI
+    url: openapi/orq-completions-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/orq-invoke-deployment-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-search-knowledge-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-response-stream-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-thought-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-started-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-model-metadata-schema.json
+- aid: orq:orq-datasets-api
+  name: Orq.ai Datasets API
+  description: The Datasets API from Orq.ai — 5 operation(s) for datasets.
+  humanURL: https://docs.orq.ai/reference
+  baseURL: https://my.orq.ai
+  tags:
+  - Datasets
+  properties:
+  - type: OpenAPI
+    url: openapi/orq-datasets-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/orq-invoke-deployment-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-search-knowledge-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-response-stream-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-thought-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-started-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-model-metadata-schema.json
+- aid: orq:orq-decisions-api
+  name: Orq.ai Decisions API
+  description: Beta. Run classification decisions with the classify contract.
+  humanURL: https://docs.orq.ai/reference
+  baseURL: https://my.orq.ai
+  tags:
+  - Decisions
+  properties:
+  - type: OpenAPI
+    url: openapi/orq-decisions-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/orq-invoke-deployment-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-search-knowledge-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-response-stream-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-thought-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-started-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-model-metadata-schema.json
+- aid: orq:orq-deployments-api
+  name: Orq.ai Deployments API
+  description: The Deployments API from Orq.ai — 5 operation(s) for deployments.
+  humanURL: https://docs.orq.ai/reference
+  baseURL: https://my.orq.ai
+  tags:
+  - Deployments
+  properties:
+  - type: OpenAPI
+    url: openapi/orq-deployments-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/orq-invoke-deployment-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-search-knowledge-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-response-stream-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-thought-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-started-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-model-metadata-schema.json
+- aid: orq:orq-embeddings-api
+  name: Orq.ai Embeddings API
+  description: The Embeddings API from Orq.ai — 1 operation(s) for embeddings.
+  humanURL: https://docs.orq.ai/reference
+  baseURL: https://my.orq.ai
+  tags:
+  - Embeddings
+  properties:
+  - type: OpenAPI
+    url: openapi/orq-embeddings-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/orq-invoke-deployment-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-search-knowledge-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-response-stream-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-thought-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-started-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-model-metadata-schema.json
+- aid: orq:orq-evals-api
+  name: Orq.ai Evals API
+  description: Run an evaluator against a conversation and its result
+  humanURL: https://docs.orq.ai/reference
+  baseURL: https://my.orq.ai
+  tags:
+  - Evals
+  properties:
+  - type: OpenAPI
+    url: openapi/orq-evals-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/orq-invoke-deployment-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-search-knowledge-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-response-stream-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-thought-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-started-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-model-metadata-schema.json
+- aid: orq:orq-feedback-api
+  name: Orq.ai Feedback API
+  description: The Feedback API from Orq.ai — 2 operation(s) for feedback.
+  humanURL: https://docs.orq.ai/reference
+  baseURL: https://my.orq.ai
+  tags:
+  - Feedback
+  properties:
+  - type: OpenAPI
+    url: openapi/orq-feedback-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/orq-invoke-deployment-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-search-knowledge-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-response-stream-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-thought-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-started-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-model-metadata-schema.json
+- aid: orq:orq-files-api
+  name: Orq.ai Files API
+  description: File upload and retrieval operations.
+  humanURL: https://docs.orq.ai/reference
+  baseURL: https://my.orq.ai
+  tags:
+  - Files
+  properties:
+  - type: OpenAPI
+    url: openapi/orq-files-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/orq-invoke-deployment-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-search-knowledge-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-response-stream-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-thought-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-started-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-model-metadata-schema.json
+- aid: orq:orq-guardrail-rules-api
+  name: Orq.ai Guardrail Rules API
+  description: >-
+    Guardrail Rules conditionally enforce evaluators and plugins for AI Gateway traffic. Rules may be
+    scoped to a project or the whole workspace.
+  humanURL: https://docs.orq.ai/reference
+  baseURL: https://my.orq.ai
+  tags:
+  - Guardrail Rules
+  properties:
+  - type: OpenAPI
+    url: openapi/orq-guardrail-rules-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/orq-invoke-deployment-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-search-knowledge-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-response-stream-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-thought-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-started-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-model-metadata-schema.json
+- aid: orq:orq-hub-api
+  name: Orq.ai Hub API
+  description: Hub items are reusable templates available to a workspace.
+  humanURL: https://docs.orq.ai/reference
+  baseURL: https://my.orq.ai
+  tags:
+  - Hub
+  properties:
+  - type: OpenAPI
+    url: openapi/orq-hub-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/orq-invoke-deployment-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-search-knowledge-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-response-stream-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-thought-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-started-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-model-metadata-schema.json
+- aid: orq:orq-human-review-sets-api
+  name: Orq.ai Human Review Sets API
+  description: The Human Review Sets API from Orq.ai — 2 operation(s) for human review sets.
+  humanURL: https://docs.orq.ai/reference
+  baseURL: https://my.orq.ai
+  tags:
+  - Human Review Sets
+  properties:
+  - type: OpenAPI
+    url: openapi/orq-human-review-sets-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/orq-invoke-deployment-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-search-knowledge-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-response-stream-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-thought-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-started-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-model-metadata-schema.json
+- aid: orq:orq-identities-api
+  name: Orq.ai Identities API
+  description: Identities represent end users from your system for usage and engagement tracking.
+  humanURL: https://docs.orq.ai/reference
+  baseURL: https://my.orq.ai
+  tags:
+  - Identities
+  properties:
+  - type: OpenAPI
+    url: openapi/orq-identities-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/orq-invoke-deployment-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-search-knowledge-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-response-stream-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-thought-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-started-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-model-metadata-schema.json
+- aid: orq:orq-images-api
+  name: Orq.ai Images API
+  description: The Images API from Orq.ai — 3 operation(s) for images.
+  humanURL: https://docs.orq.ai/reference
+  baseURL: https://my.orq.ai
+  tags:
+  - Images
+  properties:
+  - type: OpenAPI
+    url: openapi/orq-images-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/orq-invoke-deployment-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-search-knowledge-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-response-stream-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-thought-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-started-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-model-metadata-schema.json
+- aid: orq:orq-knowledge-bases-api
+  name: Orq.ai Knowledge Bases API
+  description: Create and manage knowledge bases used by agents and retrieval workflows.
+  humanURL: https://docs.orq.ai/reference
+  baseURL: https://my.orq.ai
+  tags:
+  - Knowledge Bases
+  properties:
+  - type: OpenAPI
+    url: openapi/orq-knowledge-bases-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/orq-invoke-deployment-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-search-knowledge-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-response-stream-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-thought-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-started-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-model-metadata-schema.json
+- aid: orq:orq-logs-api
+  name: Orq.ai Logs API
+  description: >-
+    OpenTelemetry log query API. Search, filter, aggregate, and facet log records ingested via OTLP.
+  humanURL: https://docs.orq.ai/reference
+  baseURL: https://my.orq.ai
+  tags:
+  - Logs
+  properties:
+  - type: OpenAPI
+    url: openapi/orq-logs-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/orq-invoke-deployment-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-search-knowledge-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-response-stream-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-thought-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-started-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-model-metadata-schema.json
+- aid: orq:orq-management-keys-api
+  name: Orq.ai Management keys API
+  description: >-
+    Management keys are workspace-scoped credentials that authenticate programmatic access to workspace
+    administration surfaces (API keys, budgets). Unlike project-scoped API keys, a management key always
+    operates at the workspace level.
+  humanURL: https://docs.orq.ai/reference
+  baseURL: https://my.orq.ai
+  tags:
+  - Management keys
+  properties:
+  - type: OpenAPI
+    url: openapi/orq-management-keys-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/orq-invoke-deployment-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-search-knowledge-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-response-stream-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-thought-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-started-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-model-metadata-schema.json
+- aid: orq:orq-mcp-gateway-api
+  name: Orq.ai MCP Gateway API
+  description: >-
+    Register upstream MCP servers, discover and sync their tools, and assemble gateways that expose a
+    curated tool surface to MCP clients.
+  humanURL: https://docs.orq.ai/reference
+  baseURL: https://my.orq.ai
+  tags:
+  - MCP Gateway
+  properties:
+  - type: OpenAPI
+    url: openapi/orq-mcp-gateway-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/orq-invoke-deployment-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-search-knowledge-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-response-stream-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-thought-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-started-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-model-metadata-schema.json
+- aid: orq:orq-memory-stores-api
+  name: Orq.ai Memory Stores API
+  description: Create and manage memory stores, memories, and memory documents.
+  humanURL: https://docs.orq.ai/reference
+  baseURL: https://my.orq.ai
+  tags:
+  - Memory Stores
+  properties:
+  - type: OpenAPI
+    url: openapi/orq-memory-stores-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/orq-invoke-deployment-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-search-knowledge-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-response-stream-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-thought-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-started-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-model-metadata-schema.json
+- aid: orq:orq-model-catalog-api
+  name: Orq.ai Model Catalog API
+  description: >-
+    Browse the orq.ai model catalog: every model orq offers, across every provider, with pricing, capabilities
+    and benchmark data. List endpoints only return models that are not deprecated. This API is public,
+    requires no authentication, and is rate limited to 120 requests per minute per IP. Responses carry
+    a 5-minute cache-control max-age.
+  humanURL: https://docs.orq.ai/reference
+  baseURL: https://my.orq.ai
+  tags:
+  - Model Catalog
+  properties:
+  - type: OpenAPI
+    url: openapi/orq-model-catalog-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/orq-invoke-deployment-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-search-knowledge-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-response-stream-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-thought-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-started-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-model-metadata-schema.json
+- aid: orq:orq-models-api
+  name: Orq.ai Models API
+  description: List models available through the AI Router.
+  humanURL: https://docs.orq.ai/reference
+  baseURL: https://my.orq.ai
+  tags:
+  - Models
+  properties:
+  - type: OpenAPI
+    url: openapi/orq-models-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/orq-invoke-deployment-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-search-knowledge-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-response-stream-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-thought-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-started-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-model-metadata-schema.json
+- aid: orq:orq-moderations-api
+  name: Orq.ai Moderations API
+  description: The Moderations API from Orq.ai — 1 operation(s) for moderations.
+  humanURL: https://docs.orq.ai/reference
+  baseURL: https://my.orq.ai
+  tags:
+  - Moderations
+  properties:
+  - type: OpenAPI
+    url: openapi/orq-moderations-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/orq-invoke-deployment-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-search-knowledge-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-response-stream-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-thought-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-started-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-model-metadata-schema.json
+- aid: orq:orq-monitors-api
+  name: Orq.ai Monitors API
+  description: >-
+    Monitors are custom observability dashboards for traces, runtime metrics, and logs. Each monitor holds
+    widgets that chart one telemetry query. List the metrics, operations, and dimensions available to
+    your workspace with `GET /v3/telemetry/capabilities`, or start from a preset with `GET /v2/monitors/presets`.
+  humanURL: https://docs.orq.ai/reference
+  baseURL: https://my.orq.ai
+  tags:
+  - Monitors
+  properties:
+  - type: OpenAPI
+    url: openapi/orq-monitors-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/orq-invoke-deployment-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-search-knowledge-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-response-stream-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-thought-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-started-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-model-metadata-schema.json
+- aid: orq:orq-notifiers-api
+  name: Orq.ai Notifiers API
+  description: Notifier destinations used to send delivery and workflow notifications.
+  humanURL: https://docs.orq.ai/reference
+  baseURL: https://my.orq.ai
+  tags:
+  - Notifiers
+  properties:
+  - type: OpenAPI
+    url: openapi/orq-notifiers-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/orq-invoke-deployment-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-search-knowledge-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-response-stream-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-thought-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-started-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-model-metadata-schema.json
+- aid: orq:orq-pii-api
+  name: Orq.ai Pii API
+  description: The Pii API from Orq.ai — 4 operation(s) for pii.
+  humanURL: https://docs.orq.ai/reference
+  baseURL: https://my.orq.ai
+  tags:
+  - Pii
+  properties:
+  - type: OpenAPI
+    url: openapi/orq-pii-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/orq-invoke-deployment-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-search-knowledge-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-response-stream-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-thought-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-started-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-model-metadata-schema.json
+- aid: orq:orq-policies-api
+  name: Orq.ai Policies API
+  description: The Policies API from Orq.ai — 2 operation(s) for policies.
+  humanURL: https://docs.orq.ai/reference
+  baseURL: https://my.orq.ai
+  tags:
+  - Policies
+  properties:
+  - type: OpenAPI
+    url: openapi/orq-policies-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/orq-invoke-deployment-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-search-knowledge-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-response-stream-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-thought-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-started-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-model-metadata-schema.json
+- aid: orq:orq-projects-api
+  name: Orq.ai Projects API
+  description: Projects organize resources within a workspace
+  humanURL: https://docs.orq.ai/reference
+  baseURL: https://my.orq.ai
+  tags:
+  - Projects
+  properties:
+  - type: OpenAPI
+    url: openapi/orq-projects-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/orq-invoke-deployment-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-search-knowledge-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-response-stream-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-thought-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-started-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-model-metadata-schema.json
+- aid: orq:orq-prompts-api
+  name: Orq.ai Prompts API
+  description: The Prompts API from Orq.ai — 4 operation(s) for prompts.
+  humanURL: https://docs.orq.ai/reference
+  baseURL: https://my.orq.ai
+  tags:
+  - Prompts
+  properties:
+  - type: OpenAPI
+    url: openapi/orq-prompts-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/orq-invoke-deployment-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-search-knowledge-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-response-stream-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-thought-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-started-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-model-metadata-schema.json
+- aid: orq:orq-reporting-api
+  name: Orq.ai Reporting API
+  description: >-
+    GenAI reporting API over canonical analytics rollups. Accepts a metric name, time range, grain, group-by,
+    and filters; returns a typed time series and optional totals.
+  humanURL: https://docs.orq.ai/reference
+  baseURL: https://my.orq.ai
+  tags:
+  - Reporting
+  properties:
+  - type: OpenAPI
+    url: openapi/orq-reporting-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/orq-invoke-deployment-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-search-knowledge-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-response-stream-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-thought-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-started-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-model-metadata-schema.json
+- aid: orq:orq-rerank-api
+  name: Orq.ai Rerank API
+  description: The Rerank API from Orq.ai — 1 operation(s) for rerank.
+  humanURL: https://docs.orq.ai/reference
+  baseURL: https://my.orq.ai
+  tags:
+  - Rerank
+  properties:
+  - type: OpenAPI
+    url: openapi/orq-rerank-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/orq-invoke-deployment-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-search-knowledge-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-response-stream-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-thought-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-started-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-model-metadata-schema.json
+- aid: orq:orq-responses-api
+  name: Orq.ai Responses API
+  description: The Responses API from Orq.ai — 2 operation(s) for responses.
+  humanURL: https://docs.orq.ai/reference
+  baseURL: https://my.orq.ai
+  tags:
+  - Responses
+  properties:
+  - type: OpenAPI
+    url: openapi/orq-responses-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/orq-invoke-deployment-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-search-knowledge-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-response-stream-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-thought-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-started-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-model-metadata-schema.json
+- aid: orq:orq-router-api
+  name: Orq.ai Router API
+  description: The Router API from Orq.ai — 1 operation(s) for router.
+  humanURL: https://docs.orq.ai/reference
+  baseURL: https://my.orq.ai
+  tags:
+  - Router
+  properties:
+  - type: OpenAPI
+    url: openapi/orq-router-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/orq-invoke-deployment-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-search-knowledge-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-response-stream-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-thought-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-started-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-model-metadata-schema.json
+- aid: orq:orq-routing-rules-api
+  name: Orq.ai Routing Rules API
+  description: >-
+    Routing Rules conditionally select models and enforce request plugins for AI Gateway traffic. Rules
+    are evaluated by ascending priority and may be scoped to a project or the whole workspace.
+  humanURL: https://docs.orq.ai/reference
+  baseURL: https://my.orq.ai
+  tags:
+  - Routing Rules
+  properties:
+  - type: OpenAPI
+    url: openapi/orq-routing-rules-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/orq-invoke-deployment-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-search-knowledge-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-response-stream-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-thought-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-started-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-model-metadata-schema.json
+- aid: orq:orq-skills-api
+  name: Orq.ai Skills API
+  description: Skills are modular instructions you can use to codify processes and conventions
+  humanURL: https://docs.orq.ai/reference
+  baseURL: https://my.orq.ai
+  tags:
+  - Skills
+  properties:
+  - type: OpenAPI
+    url: openapi/orq-skills-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/orq-invoke-deployment-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-search-knowledge-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-response-stream-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-thought-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-started-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-model-metadata-schema.json
+- aid: orq:orq-smart-routers-api
+  name: Orq.ai Smart Routers API
+  description: >-
+    Create and manage workspace Smart Routers. A Smart Router selects a model from an eligible pool for
+    each request according to a quality, balanced, or cost profile.
+  humanURL: https://docs.orq.ai/reference
+  baseURL: https://my.orq.ai
+  tags:
+  - Smart Routers
+  properties:
+  - type: OpenAPI
+    url: openapi/orq-smart-routers-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/orq-invoke-deployment-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-search-knowledge-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-response-stream-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-thought-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-started-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-model-metadata-schema.json
+- aid: orq:orq-telemetry-api
+  name: Orq.ai Telemetry API
+  description: >-
+    Unified query envelope for traces, metrics, and logs. One request shape, one filter dialect, and one
+    response shape per source, validated by a per-source registry.
+  humanURL: https://docs.orq.ai/reference
+  baseURL: https://my.orq.ai
+  tags:
+  - Telemetry
+  properties:
+  - type: OpenAPI
+    url: openapi/orq-telemetry-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/orq-invoke-deployment-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-search-knowledge-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-response-stream-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-thought-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-started-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-model-metadata-schema.json
+- aid: orq:orq-threads-api
+  name: Orq.ai Threads API
+  description: Threads group related trace invocations and their aggregate usage
+  humanURL: https://docs.orq.ai/reference
+  baseURL: https://my.orq.ai
+  tags:
+  - Threads
+  properties:
+  - type: OpenAPI
+    url: openapi/orq-threads-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/orq-invoke-deployment-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-search-knowledge-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-response-stream-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-thought-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-started-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-model-metadata-schema.json
+- aid: orq:orq-tools-api
+  name: Orq.ai Tools API
+  description: The Tools API from Orq.ai — 4 operation(s) for tools.
+  humanURL: https://docs.orq.ai/reference
+  baseURL: https://my.orq.ai
+  tags:
+  - Tools
+  properties:
+  - type: OpenAPI
+    url: openapi/orq-tools-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/orq-invoke-deployment-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-search-knowledge-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-response-stream-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-thought-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-started-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-model-metadata-schema.json
+- aid: orq:orq-traces-api
+  name: Orq.ai Traces API
+  description: >-
+    Query and inspect ingested trace data: search trace summaries, aggregate metrics, and read individual
+    traces and their spans.
+  humanURL: https://docs.orq.ai/reference
+  baseURL: https://my.orq.ai
+  tags:
+  - Traces
+  properties:
+  - type: OpenAPI
+    url: openapi/orq-traces-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/orq-invoke-deployment-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-search-knowledge-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-response-stream-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-thought-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-started-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-model-metadata-schema.json
+- aid: orq:orq-users-api
+  name: Orq.ai Users API
+  description: >-
+    Workspace user administration. Requires a Management Key with user permissions or an authenticated
+    workspace admin session. Standard API keys are not supported.
+  humanURL: https://docs.orq.ai/reference
+  baseURL: https://my.orq.ai
+  tags:
+  - Users
+  properties:
+  - type: OpenAPI
+    url: openapi/orq-users-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/orq-invoke-deployment-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-search-knowledge-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-response-stream-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-thought-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-started-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-model-metadata-schema.json
+- aid: orq:orq-views-api
+  name: Orq.ai Views API
+  description: The Views API from Orq.ai — 2 operation(s) for views.
+  humanURL: https://docs.orq.ai/reference
+  baseURL: https://my.orq.ai
+  tags:
+  - Views
+  properties:
+  - type: OpenAPI
+    url: openapi/orq-views-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/orq-invoke-deployment-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-search-knowledge-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-response-stream-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-thought-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-started-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-model-metadata-schema.json
+- aid: orq:orq-web-search-api
+  name: Orq.ai Web Search API
+  description: Search Gateway with managed credits or BYOK.
+  humanURL: https://docs.orq.ai/reference
+  baseURL: https://my.orq.ai
+  tags:
+  - Web Search
+  properties:
+  - type: OpenAPI
+    url: openapi/orq-web-search-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/orq-invoke-deployment-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-search-knowledge-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-response-stream-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-thought-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-started-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-model-metadata-schema.json
+- aid: orq:orq-webhooks-api
+  name: Orq.ai Webhooks API
+  description: Create and manage webhooks that deliver workspace events to external HTTPS endpoints.
+  humanURL: https://docs.orq.ai/reference
+  baseURL: https://my.orq.ai
+  tags:
+  - Webhooks
+  properties:
+  - type: OpenAPI
+    url: openapi/orq-webhooks-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/orq-invoke-deployment-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-search-knowledge-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-response-stream-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-thought-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-started-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-model-metadata-schema.json
+- aid: orq:orq-workspace-security-api
+  name: Orq.ai Workspace Security API
+  description: >-
+    Workspace-level domain verification and IP allowlist controls. These operations are restricted to
+    workspace administrators.
+  humanURL: https://docs.orq.ai/reference
+  baseURL: https://my.orq.ai
+  tags:
+  - Workspace Security
+  properties:
+  - type: OpenAPI
+    url: openapi/orq-workspace-security-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/orq-invoke-deployment-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-search-knowledge-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-response-stream-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-thought-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-started-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-model-metadata-schema.json
+- aid: orq:orq-workspace-settings-api
+  name: Orq.ai Workspace Settings API
+  description: >-
+    Workspace-level settings managed with a workspace credential. A workspace is the tenant, so these
+    settings are a singleton — there is nothing to create or delete, only read and update.
+  humanURL: https://docs.orq.ai/reference
+  baseURL: https://my.orq.ai
+  tags:
+  - Workspace Settings
+  properties:
+  - type: OpenAPI
+    url: openapi/orq-workspace-settings-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/orq-invoke-deployment-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-search-knowledge-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-response-stream-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-thought-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-started-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-model-metadata-schema.json
+- aid: orq:orq-workspaces-api
+  name: Orq.ai Workspaces API
+  description: >-
+    A workspace is the tenant. Create is called from a user session during onboarding; Get, List, and
+    Update are the public management surface.
+  humanURL: https://docs.orq.ai/reference
+  baseURL: https://my.orq.ai
+  tags:
+  - Workspaces
+  properties:
+  - type: OpenAPI
+    url: openapi/orq-workspaces-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/orq-invoke-deployment-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-search-knowledge-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-response-stream-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-thought-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-started-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-model-metadata-schema.json
+- aid: orq:orq-chat-completions-api
+  name: Orq.ai Chat Completions API
+  description: The Chat Completions API from Orq.ai — 1 operation(s) for chat completions.
+  humanURL: https://docs.orq.ai/reference
+  baseURL: https://my.orq.ai
+  tags:
+  - Chat Completions
+  properties:
+  - type: OpenAPI
+    url: openapi/orq-chat-completions-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/orq-invoke-deployment-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-search-knowledge-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-response-stream-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-thought-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-started-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-model-metadata-schema.json
+- aid: orq:orq-filesystems-api
+  name: Orq.ai Filesystems API
+  description: >-
+    Create and manage persistent file systems that agents and MCP clients read from and write to.
+  humanURL: https://docs.orq.ai/reference
+  baseURL: https://my.orq.ai
+  tags:
+  - Filesystems
+  properties:
+  - type: OpenAPI
+    url: openapi/orq-filesystems-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/orq-invoke-deployment-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-search-knowledge-request-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-response-stream-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-thought-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-agent-started-streaming-event-schema.json
+  - type: JSONSchema
+    url: json-schema/orq-model-metadata-schema.json
+x-enrichment:
+  date: '2026-10-21'
+  status: enriched
+  artifacts_added: 48
+  pass: modular-v1
+  engine: identity=local,contract=local,surfaces=local,docs=local,regulatory=local

@@ -1,0 +1,380 @@
+openapi: 3.2.0
+info:
+  title: orq.ai Projects API
+  version: '2.0'
+  description: orq.ai API documentation
+servers:
+- url: https://my.orq.ai
+security:
+- ApiKey: []
+tags:
+- name: Projects
+  description: Projects organize resources within a workspace
+paths:
+  /v2/projects:
+    get:
+      tags:
+      - Projects
+      summary: List all projects
+      description: Returns projects visible to the current workspace, ordered by creation time with the newest project first. Use `starting_after` or `ending_before` to page through large collections.
+      operationId: ProjectList
+      parameters:
+      - name: limit
+        in: query
+        description: Page size, 1-200. Unset uses the server default.
+        schema:
+          type: integer
+          format: int32
+      - name: starting_after
+        in: query
+        description: "Cursor for forward pagination. Set to the `project_id` of the last\n item from the previous page."
+        schema:
+          type: string
+      - name: ending_before
+        in: query
+        description: "Cursor for backward pagination. Set to the `project_id` of the first\n item from the previous page."
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListProjectsResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: projects
+      x-speakeasy-name-override: list
+      x-code-samples:
+      - lang: curl
+        label: Core - List projects
+        source: "curl --get 'https://my.orq.ai/v2/projects' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\" \\\n  --data-urlencode 'limit=25'\n"
+      - lang: python
+        label: Python - List projects
+        source: "import os\nfrom orq_ai_sdk import Orq\n\nclient = Orq(api_key=os.environ[\"ORQ_API_KEY\"])\n\npage = client.projects.list(\n    limit=25,\n)\n\nfor project in page.data:\n    print(project.project_id, project.name)\n"
+      - lang: typescript
+        label: Node.js - List projects
+        source: "import { Orq } from '@orq-ai/node';\n\nconst client = new Orq({\n  apiKey: process.env.ORQ_API_KEY,\n});\n\nconst page = await client.projects.list({\n  limit: 25,\n});\n\nfor (const project of page.data) {\n  console.log(project.projectId, project.name);\n}\n"
+    post:
+      tags:
+      - Projects
+      summary: Create a new project
+      description: Creates a project in the current workspace. Projects are workspace-level containers for resources such as skills, deployments, datasets, rules, and related team access. Requires a workspace-scoped management key or API key with Projects write access, or an admin session. Project-scoped API keys cannot be granted Projects access.
+      operationId: ProjectCreate
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProjectRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateProjectResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: projects
+      x-speakeasy-name-override: create
+      x-code-samples:
+      - lang: curl
+        label: Core - Create project
+        source: "curl --request POST \\\n  --url 'https://my.orq.ai/v2/projects' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\" \\\n  --header 'Content-Type: application/json' \\\n  --data '{\n    \"name\": \"Customer Success\",\n    \"description\": \"Production automations for customer success workflows\",\n    \"teams\": [\"team_support\", \"team_growth\"]\n  }'\n"
+      - lang: python
+        label: Python - Create project
+        source: "import os\nfrom orq_ai_sdk import Orq\n\nclient = Orq(api_key=os.environ[\"ORQ_API_KEY\"])\n\nresult = client.projects.create(\n    name=\"Customer Success\",\n    description=\"Production automations for customer success workflows\",\n    teams=[\"team_support\", \"team_growth\"],\n)\n\nprint(result.project.project_id)\n"
+      - lang: typescript
+        label: Node.js - Create project
+        source: "import { Orq } from '@orq-ai/node';\n\nconst client = new Orq({\n  apiKey: process.env.ORQ_API_KEY,\n});\n\nconst result = await client.projects.create({\n  name: 'Customer Success',\n  description: 'Production automations for customer success workflows',\n  teams: ['team_support', 'team_growth'],\n});\n\nconsole.log(result.project.projectId);\n"
+  /v2/projects/{project_id}:
+    get:
+      tags:
+      - Projects
+      summary: Retrieve a project
+      description: Retrieves the details of an existing project by its unique project ID.
+      operationId: ProjectGet
+      parameters:
+      - name: project_id
+        in: path
+        description: Project ID to retrieve.
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetProjectResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Not permitted for this key, project or workspace. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: projects
+      x-speakeasy-name-override: get
+      x-code-samples:
+      - lang: curl
+        label: Core - Retrieve project
+        source: "curl --request GET \\\n  --url 'https://my.orq.ai/v2/projects/proj_01HZXW2K7Y8Q9M0N1P2R3S4T5V' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\"\n"
+      - lang: python
+        label: Python - Retrieve project
+        source: "import os\nfrom orq_ai_sdk import Orq\n\nclient = Orq(api_key=os.environ[\"ORQ_API_KEY\"])\n\nresult = client.projects.get(\n    project_id=\"proj_01HZXW2K7Y8Q9M0N1P2R3S4T5V\",\n)\n\nprint(result.project.name)\n"
+      - lang: typescript
+        label: Node.js - Retrieve project
+        source: "import { Orq } from '@orq-ai/node';\n\nconst client = new Orq({\n  apiKey: process.env.ORQ_API_KEY,\n});\n\nconst result = await client.projects.get({\n  projectId: 'proj_01HZXW2K7Y8Q9M0N1P2R3S4T5V',\n});\n\nconsole.log(result.project.name);\n"
+    delete:
+      tags:
+      - Projects
+      summary: Delete a project
+      description: Deletes a project from the workspace. The response body is empty when the delete succeeds. Requires a workspace-scoped management key or API key with Projects write access, or an admin session. Project-scoped API keys cannot be granted Projects access.
+      operationId: ProjectDelete
+      parameters:
+      - name: project_id
+        in: path
+        description: Project ID to delete.
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteProjectResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: projects
+      x-speakeasy-name-override: delete
+      x-code-samples:
+      - lang: curl
+        label: Core - Delete project
+        source: "curl --request DELETE \\\n  --url 'https://my.orq.ai/v2/projects/proj_01HZXW2K7Y8Q9M0N1P2R3S4T5V' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\"\n"
+      - lang: python
+        label: Python - Delete project
+        source: "import os\nfrom orq_ai_sdk import Orq\n\nclient = Orq(api_key=os.environ[\"ORQ_API_KEY\"])\n\nclient.projects.delete(\n    project_id=\"proj_01HZXW2K7Y8Q9M0N1P2R3S4T5V\",\n)\n"
+      - lang: typescript
+        label: Node.js - Delete project
+        source: "import { Orq } from '@orq-ai/node';\n\nconst client = new Orq({\n  apiKey: process.env.ORQ_API_KEY,\n});\n\nawait client.projects.delete({\n  projectId: 'proj_01HZXW2K7Y8Q9M0N1P2R3S4T5V',\n});\n"
+    patch:
+      tags:
+      - Projects
+      summary: Update a project
+      description: Updates the specified project by setting the values of the parameters passed. Requires a workspace-scoped management key or API key with Projects write access, or an admin session. Project-scoped API keys cannot be granted Projects access.
+      operationId: ProjectUpdate
+      parameters:
+      - name: project_id
+        in: path
+        description: Project ID to update.
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProjectRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateProjectResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: projects
+      x-speakeasy-name-override: update
+      x-code-samples:
+      - lang: curl
+        label: Core - Update project
+        source: "curl --request PATCH \\\n  --url 'https://my.orq.ai/v2/projects/proj_01HZXW2K7Y8Q9M0N1P2R3S4T5V' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\" \\\n  --header 'Content-Type: application/json' \\\n  --data '{\n    \"name\": \"Customer Success Production\",\n    \"description\": \"Production support and retention automations\",\n    \"teams\": [\"team_support\"]\n  }'\n"
+      - lang: python
+        label: Python - Update project
+        source: "import os\nfrom orq_ai_sdk import Orq\n\nclient = Orq(api_key=os.environ[\"ORQ_API_KEY\"])\n\nresult = client.projects.update(\n    project_id=\"proj_01HZXW2K7Y8Q9M0N1P2R3S4T5V\",\n    name=\"Customer Success Production\",\n    description=\"Production support and retention automations\",\n    teams=[\"team_support\"],\n)\n\nprint(result.project.name)\n"
+      - lang: typescript
+        label: Node.js - Update project
+        source: "import { Orq } from '@orq-ai/node';\n\nconst client = new Orq({\n  apiKey: process.env.ORQ_API_KEY,\n});\n\nconst result = await client.projects.update({\n  projectId: 'proj_01HZXW2K7Y8Q9M0N1P2R3S4T5V',\n  name: 'Customer Success Production',\n  description: 'Production support and retention automations',\n  teams: ['team_support'],\n});\n\nconsole.log(result.project.name);\n"
+components:
+  schemas:
+    CreateProjectRequest:
+      required:
+      - name
+      type: object
+      properties:
+        name:
+          type: string
+          description: Project name. Names must be non-empty and at most 128 characters.
+        teams:
+          type: array
+          items:
+            type: string
+          description: Team identifiers to associate with the project.
+        description:
+          type: string
+          description: Optional human-readable description, at most 500 characters.
+    ListProjectsResponse:
+      required:
+      - object
+      - data
+      - has_more
+      type: object
+      properties:
+        object:
+          type: string
+          description: Object discriminator for list responses; always `list`.
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Project'
+          description: Page of projects, ordered newest first.
+        has_more:
+          type: boolean
+          description: "Whether more projects are available in the selected pagination\n direction."
+    CreateProjectResponse:
+      required:
+      - project
+      type: object
+      properties:
+        project:
+          allOf:
+          - $ref: '#/components/schemas/Project'
+          description: Newly created project.
+    UpdateProjectRequest:
+      required: []
+      type: object
+      properties:
+        name:
+          type: string
+          description: New project name. Omit to keep the current name.
+        teams:
+          type: array
+          items:
+            type: string
+          description: "Replacement list of team identifiers associated with the project.\n Leave empty to remove all team associations."
+        description:
+          type: string
+          description: New project description. Omit to keep the current description.
+    Project:
+      required:
+      - project_id
+      - name
+      - key
+      - is_archived
+      - is_default
+      - teams
+      - created_at
+      - updated_at
+      type: object
+      properties:
+        project_id:
+          type: string
+          description: "Unique project identifier assigned by ORQ. Use this value in\n retrieve, update, and delete requests."
+        name:
+          type: string
+          description: Human-readable project name.
+        key:
+          type: string
+          description: Stable project key generated from the name.
+        is_archived:
+          type: boolean
+          description: "Whether the project is archived and hidden from normal active\n project lists."
+        is_default:
+          type: boolean
+          description: Whether this is the workspace default project.
+        teams:
+          type: array
+          items:
+            type: string
+          description: "Team identifiers associated with the project for access and\n organization."
+        created_at:
+          type: string
+          description: Time when the project was created.
+          format: date-time
+        updated_at:
+          type: string
+          description: Time when the project was last updated.
+          format: date-time
+        created_by_id:
+          type: string
+          description: User ID that created the project.
+        updated_by_id:
+          type: string
+          description: User ID that last updated the project.
+        description:
+          type: string
+          description: Optional human-readable description of the project.
+    UpdateProjectResponse:
+      required:
+      - project
+      type: object
+      properties:
+        project:
+          allOf:
+          - $ref: '#/components/schemas/Project'
+          description: Updated project.
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Human-readable error message.
+        code:
+          type: integer
+          description: gRPC status code, when the service reports one.
+        details:
+          type: array
+          items: {}
+          description: Additional error details, when the service reports any.
+      required:
+      - message
+    GetProjectResponse:
+      required:
+      - project
+      type: object
+      properties:
+        project:
+          allOf:
+          - $ref: '#/components/schemas/Project'
+          description: Requested project.
+    DeleteProjectResponse:
+      type: object
+      properties: {}
+  securitySchemes:
+    ApiKey:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+externalDocs:
+  url: https://docs.orq.ai
+  description: orq.ai Documentation
+x-speakeasy-timeout: 600000

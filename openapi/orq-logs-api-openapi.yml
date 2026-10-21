@@ -1,0 +1,848 @@
+openapi: 3.2.0
+info:
+  title: orq.ai Logs API
+  version: '2.0'
+  description: orq.ai API documentation
+servers:
+- url: https://my.orq.ai
+security:
+- ApiKey: []
+tags:
+- name: Logs
+  description: OpenTelemetry log query API. Search, filter, aggregate, and facet log records ingested via OTLP.
+paths:
+  /v3/logs/aggregate:
+    post:
+      tags:
+      - Logs
+      summary: Aggregate logs
+      description: Return severity counts grouped by time buckets at a configurable grain (auto, minute, hour, day).
+      operationId: AggregateLogs
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AggregateLogsRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AggregateLogsResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: logs
+      x-speakeasy-name-override: aggregate
+  /v3/logs/facets:
+    post:
+      tags:
+      - Logs
+      summary: List log facets
+      description: 'Return the facet hierarchy: attribute families (native, attribute, resource, scope) with their keys, counts, and top values. Accepts optional filters and free-text query to narrow the counted subset.'
+      operationId: ListLogFacets
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ListLogFacetsRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListLogFacetsResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: logs
+      x-speakeasy-name-override: listFacets
+  /v3/logs/facets/{field}:
+    get:
+      tags:
+      - Logs
+      summary: List facet values
+      description: Return distinct values with occurrence counts for a given facet field.
+      operationId: ListLogFacetValues
+      parameters:
+      - name: field
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          format: int32
+      - name: from
+        in: query
+        schema:
+          type: string
+          format: date-time
+      - name: to
+        in: query
+        schema:
+          type: string
+          format: date-time
+      - name: search
+        in: query
+        description: Optional case-insensitive substring search over facet values.
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListLogFacetValuesResponse'
+        '400':
+          description: The request is invalid. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: logs
+      x-speakeasy-name-override: listFacetValues
+  /v3/logs/fields:
+    get:
+      tags:
+      - Logs
+      summary: List log fields
+      description: 'Return all queryable fields: static columns and dynamic attribute families (attribute.*, resource.*).'
+      operationId: ListLogFields
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListLogFieldsResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: logs
+      x-speakeasy-name-override: listFields
+  /v3/logs/patterns:
+    post:
+      tags:
+      - Logs
+      summary: Find log patterns
+      description: Find stable templates in a bounded sample of matching log bodies. The response reports sampling and truncation metadata and never returns an unbounded list of raw bodies.
+      operationId: FindLogPatterns
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FindLogPatternsRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FindLogPatternsResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: logs
+      x-speakeasy-name-override: findPatterns
+  /v3/logs/query:
+    post:
+      tags:
+      - Logs
+      summary: Query logs with OQL
+      description: Run an OQL log query using the pipeline grammar `fetch logs | filter | sort timestamp desc | limit N`. The query is compiled onto the same engine as SearchLogs; timestamp desc is the only supported sort.
+      operationId: QueryLogs
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QueryLogsRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueryLogsResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: logs
+      x-speakeasy-name-override: query
+  /v3/logs/search:
+    post:
+      tags:
+      - Logs
+      summary: Search logs
+      description: Query log records with filters, free-text search, and keyset pagination. Results are ordered timestamp desc (the only supported sort, mirroring traces). See the filter grammar for the field and operator reference.
+      operationId: SearchLogs
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchLogsRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchLogsResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: logs
+      x-speakeasy-name-override: search
+  /v3/logs/{id}:
+    get:
+      tags:
+      - Logs
+      summary: Get a single log
+      description: Retrieve a log record by its ULID. Returns 404 if the record does not exist or belongs to another workspace.
+      operationId: GetLog
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetLogResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: The resource does not exist. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: logs
+      x-speakeasy-name-override: get
+  /v3/logs/{id}/context:
+    post:
+      tags:
+      - Logs
+      summary: Get surrounding log context
+      description: Retrieve the matching log records immediately before and after an anchor log. Neighbors use the same free-text and structured filter dialect as SearchLogs and are returned in chronological order.
+      operationId: GetLogContext
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetLogContextRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetLogContextResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: logs
+      x-speakeasy-name-override: context
+  /v3/traces/{trace_id}/logs:
+    get:
+      tags:
+      - Logs
+      summary: List logs for a trace
+      description: Return all log records correlated with a given trace_id. Results are scoped to the authenticated workspace.
+      operationId: ListTraceLogs
+      parameters:
+      - name: trace_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          format: int32
+      - name: page_token
+        in: query
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListTraceLogsResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: logs
+      x-speakeasy-name-override: listTraceLogs
+components:
+  schemas:
+    FindLogPatternsResponse:
+      required:
+      - object
+      - data
+      - meta
+      type: object
+      properties:
+        object:
+          type: string
+          description: Object discriminator; always "list".
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/LogPattern'
+        meta:
+          $ref: '#/components/schemas/FindLogPatternsMeta'
+    FieldInfo:
+      type: object
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+    GetLogContextResponse:
+      required:
+      - anchor
+      - before
+      - after
+      - has_more_before
+      - has_more_after
+      type: object
+      properties:
+        anchor:
+          $ref: '#/components/schemas/Log'
+        before:
+          type: array
+          items:
+            $ref: '#/components/schemas/Log'
+          description: Matching records earlier than the anchor, ordered oldest to newest.
+        after:
+          type: array
+          items:
+            $ref: '#/components/schemas/Log'
+          description: Matching records later than the anchor, ordered oldest to newest.
+        has_more_before:
+          type: boolean
+        has_more_after:
+          type: boolean
+    FacetGroup:
+      type: object
+      properties:
+        name:
+          type: string
+        keys:
+          type: array
+          items:
+            $ref: '#/components/schemas/FacetKey'
+      description: "FacetGroup is one attribute family in the facet hierarchy. name is one of\n \"native\" (promoted columns), \"attribute\" (log_attributes), \"resource\"\n (resource_attributes), or \"scope\" (scope_attributes)."
+    FacetKey:
+      type: object
+      properties:
+        key:
+          type: string
+        field:
+          type: string
+        log_count:
+          type: string
+        distinct_value_count:
+          type: string
+        top_values:
+          type: array
+          items:
+            $ref: '#/components/schemas/FacetValue'
+        filterable:
+          type: boolean
+      description: "FacetKey is one facetable key inside a group, with its observed volume and\n top values for the requested range. field is the name usable in filters /\n sort (e.g. \"attribute.http.method\" or \"service_name\"); it is empty when the\n key is not filterable (the scope group)."
+    SearchLogsRequest:
+      type: object
+      properties:
+        from:
+          type: string
+          format: date-time
+        to:
+          type: string
+          format: date-time
+        query:
+          type: string
+          description: Free-text query matched against the body field (case-insensitive).
+        filter_operator:
+          type: string
+          description: "How to combine multiple filters: \"and\" (default) or \"or\", mirroring\n the traces filter_operator."
+        filters:
+          type: array
+          items:
+            $ref: '#/components/schemas/TraceFilter'
+        sort:
+          type: array
+          items:
+            $ref: '#/components/schemas/TraceSort'
+        limit:
+          type: integer
+          description: Maximum rows to return. Defaults to 100 and is capped at 1000.
+          format: int32
+        page_token:
+          type: string
+          description: Opaque cursor for pagination; empty or absent means the first page.
+    ListLogFacetsRequest:
+      type: object
+      properties:
+        from:
+          type: string
+          format: date-time
+        to:
+          type: string
+          format: date-time
+        key_limit:
+          type: integer
+          format: int32
+        value_limit:
+          type: integer
+          format: int32
+        query:
+          type: string
+        filter_operator:
+          type: string
+        filters:
+          type: array
+          items:
+            $ref: '#/components/schemas/TraceFilter'
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Human-readable error message.
+        code:
+          type: integer
+          description: gRPC status code, when the service reports one.
+        details:
+          type: array
+          items: {}
+          description: Additional error details, when the service reports any.
+      required:
+      - message
+    QueryLogsRequest:
+      required:
+      - from
+      - to
+      - oql
+      type: object
+      properties:
+        oql:
+          type: string
+          description: "OQL query string, e.g.\n `fetch logs | filter severity_number > 10 | filter body contains \"error\"`."
+        limit:
+          type: integer
+          description: Maximum rows to return; a `| limit N` pipeline command takes precedence.
+          format: int32
+        from:
+          type: string
+          format: date-time
+        to:
+          type: string
+          format: date-time
+        page_token:
+          type: string
+          description: Opaque cursor for pagination.
+    ListTraceLogsResponse:
+      type: object
+      properties:
+        object:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Log'
+        has_more:
+          type: boolean
+        next_page_token:
+          type: string
+    TraceSearchMeta:
+      type: object
+      properties:
+        request_id:
+          type: string
+        from:
+          type: string
+          format: date-time
+        to:
+          type: string
+          format: date-time
+        row_count:
+          type: integer
+          format: int32
+    TraceFilter:
+      type: object
+      properties:
+        field:
+          type: string
+        op:
+          type: string
+        values:
+          type: array
+          items:
+            type: string
+    FacetValue:
+      type: object
+      properties:
+        value:
+          type: string
+        count:
+          type: string
+    Log:
+      type: object
+      properties:
+        id:
+          type: string
+        trace_id:
+          type: string
+        span_id:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        observed_timestamp:
+          type: string
+          format: date-time
+        severity_number:
+          type: integer
+          format: int32
+        severity_text:
+          type: string
+        body:
+          type: string
+        body_is_json:
+          type: boolean
+        event_name:
+          type: string
+        dropped_attributes_count:
+          type: integer
+          format: int32
+        trace_flags:
+          type: integer
+          format: uint32
+        scope_name:
+          type: string
+        scope_version:
+          type: string
+        scope_attributes:
+          type: object
+          additionalProperties:
+            type: string
+        log_attributes:
+          type: object
+          additionalProperties:
+            type: string
+        resource_attributes:
+          type: object
+          additionalProperties:
+            type: string
+        service_name:
+          type: string
+        service_version:
+          type: string
+        deployment_environment:
+          type: string
+        host_name:
+          type: string
+        project_id:
+          type: string
+      description: Log is a log record returned by the log endpoints.
+    TraceSort:
+      type: object
+      properties:
+        field:
+          type: string
+        order:
+          type: string
+    LogPattern:
+      required:
+      - id
+      - template
+      - count
+      - percentage
+      - first_seen
+      - last_seen
+      - sample_log_ids
+      - severity_summary
+      - service_summary
+      type: object
+      properties:
+        id:
+          type: string
+          description: Stable hash of the normalized template.
+        template:
+          type: string
+        count:
+          type: string
+          description: "Number of sampled records assigned to this pattern. This is exact when\n meta.truncated is false."
+        percentage:
+          type: number
+          description: Percentage of sampled records assigned to this pattern, from 0 to 100.
+          format: double
+        first_seen:
+          type: string
+          format: date-time
+        last_seen:
+          type: string
+          format: date-time
+        sample_log_ids:
+          type: array
+          items:
+            type: string
+          description: A bounded set of example record identifiers; raw bodies are not repeated.
+        severity_summary:
+          type: array
+          items:
+            $ref: '#/components/schemas/FacetValue'
+          description: Top severity and service values observed inside this pattern.
+        service_summary:
+          type: array
+          items:
+            $ref: '#/components/schemas/FacetValue'
+        suggested_query:
+          type: string
+          description: "Bounded literal fragment that can be sent through SearchLogs to find\n representative raw records for this normalized pattern."
+    AggregateLogsResponse:
+      type: object
+      properties:
+        object:
+          type: string
+        buckets:
+          type: array
+          items:
+            $ref: '#/components/schemas/AggregateBucket'
+    GetLogContextRequest:
+      required:
+      - from
+      - to
+      type: object
+      properties:
+        from:
+          type: string
+          format: date-time
+        to:
+          type: string
+          format: date-time
+        query:
+          type: string
+        filter_operator:
+          type: string
+        filters:
+          type: array
+          items:
+            $ref: '#/components/schemas/TraceFilter'
+        before:
+          type: integer
+          description: Number of matching records earlier than the anchor. Defaults to 10.
+          format: int32
+        after:
+          type: integer
+          description: Number of matching records later than the anchor. Defaults to 10.
+          format: int32
+        oql:
+          type: string
+          description: Optional OQL pipeline. It cannot be combined with query or filters.
+    FindLogPatternsRequest:
+      required:
+      - from
+      - to
+      type: object
+      properties:
+        from:
+          type: string
+          format: date-time
+        to:
+          type: string
+          format: date-time
+        query:
+          type: string
+        filter_operator:
+          type: string
+        filters:
+          type: array
+          items:
+            $ref: '#/components/schemas/TraceFilter'
+        limit:
+          type: integer
+          description: Maximum patterns to return. Defaults to 50.
+          format: int32
+    ListLogFieldsResponse:
+      type: object
+      properties:
+        fields:
+          type: array
+          items:
+            $ref: '#/components/schemas/FieldInfo'
+    GetLogResponse:
+      type: object
+      properties:
+        log:
+          $ref: '#/components/schemas/Log'
+    FindLogPatternsMeta:
+      required:
+      - request_id
+      - from
+      - to
+      - total_count
+      - sampled_count
+      - truncated
+      - warnings
+      type: object
+      properties:
+        request_id:
+          type: string
+        from:
+          type: string
+          format: date-time
+        to:
+          type: string
+          format: date-time
+        total_count:
+          type: string
+          description: Exact number of records matching the request before bounded sampling.
+        sampled_count:
+          type: string
+        truncated:
+          type: boolean
+        warnings:
+          type: array
+          items:
+            type: string
+    ListLogFacetsResponse:
+      type: object
+      properties:
+        groups:
+          type: array
+          items:
+            $ref: '#/components/schemas/FacetGroup'
+    SearchLogsResponse:
+      type: object
+      properties:
+        object:
+          type: string
+          description: Object discriminator; always "list". Mirrors SearchTracesResponse.
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Log'
+        has_more:
+          type: boolean
+        next_page_token:
+          type: string
+          description: Keyset cursor for the next page; empty when has_more is false.
+        meta:
+          $ref: '#/components/schemas/TraceSearchMeta'
+        total_count:
+          type: string
+          description: "Exact match count for the full time range. Constant across pages.\n Serialized as a JSON string."
+    AggregateLogsRequest:
+      type: object
+      properties:
+        from:
+          type: string
+          format: date-time
+        to:
+          type: string
+          format: date-time
+        grain:
+          type: string
+          description: "Time bucket grain: \"auto\" | \"minute\" | \"hour\" | \"day\". \"auto\" picks the\n grain from the requested time range. Empty returns rows without time\n buckets."
+        filters:
+          type: array
+          items:
+            $ref: '#/components/schemas/TraceFilter'
+    QueryLogsResponse:
+      type: object
+      properties:
+        object:
+          type: string
+          description: Object discriminator; always "query". Mirrors QueryTracesResponse.
+        search:
+          $ref: '#/components/schemas/SearchLogsResponse'
+    ListLogFacetValuesResponse:
+      type: object
+      properties:
+        values:
+          type: array
+          items:
+            $ref: '#/components/schemas/FacetValue'
+    AggregateBucket:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        severity_counts:
+          type: object
+          additionalProperties:
+            type: string
+          description: severity_number → count
+        total_count:
+          type: string
+  securitySchemes:
+    ApiKey:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+externalDocs:
+  url: https://docs.orq.ai
+  description: orq.ai Documentation
+x-speakeasy-timeout: 600000

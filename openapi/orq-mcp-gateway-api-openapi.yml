@@ -1,0 +1,1426 @@
+openapi: 3.2.0
+info:
+  title: orq.ai MCP Gateway API
+  version: '2.0'
+  description: orq.ai API documentation
+servers:
+- url: https://my.orq.ai
+security:
+- ApiKey: []
+tags:
+- name: MCP Gateway
+  description: Register upstream MCP servers, discover and sync their tools, and assemble gateways that expose a curated tool surface to MCP clients.
+paths:
+  /v2/mcp-gateways:
+    get:
+      tags:
+      - MCP Gateway
+      summary: List MCP gateways
+      description: Returns a paginated list of MCP gateways in the workspace.
+      operationId: McpGatewayList
+      parameters:
+      - name: limit
+        in: query
+        description: Page size between 1 and 200. Defaults to 25.
+        schema:
+          type: integer
+          format: int32
+      - name: starting_after
+        in: query
+        description: Cursor for the page after the given item id. Mutually exclusive with `ending_before`.
+        schema:
+          type: string
+      - name: ending_before
+        in: query
+        description: Cursor for the page before the given item id. Mutually exclusive with `starting_after`.
+        schema:
+          type: string
+      - name: search
+        in: query
+        description: Case-insensitive match against the gateway key and display name.
+        schema:
+          type: string
+      - name: status
+        in: query
+        description: Returns only gateways in this status.
+        schema:
+          $ref: '#/components/schemas/McpGatewayStatus'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListMcpGatewaysResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: mcpGateways
+      x-speakeasy-name-override: list
+      x-cli-group: mcpGateways
+      x-cli-name: list
+      x-code-samples:
+      - lang: curl
+        label: Core - List MCP gateways
+        source: "curl --get 'https://my.orq.ai/v2/mcp-gateways' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\" \\\n  --data-urlencode 'limit=25' \\\n  --data-urlencode 'status=MCP_GATEWAY_STATUS_ACTIVE'\n"
+      - lang: python
+        label: Python - List MCP gateways
+        source: "import os\nfrom orq_ai_sdk import Orq\n\nclient = Orq(api_key=os.environ[\"ORQ_API_KEY\"])\n\npage = client.mcp_gateways.list(\n    limit=25,\n    status=\"MCP_GATEWAY_STATUS_ACTIVE\",\n)\n\nfor gateway in page.data:\n    print(gateway.key, gateway.public_url, gateway.exposed_tools_count)\n"
+      - lang: typescript
+        label: Node.js - List MCP gateways
+        source: "import { Orq } from '@orq-ai/node';\n\nconst client = new Orq({\n  apiKey: process.env.ORQ_API_KEY,\n});\n\nconst page = await client.mcpGateways.list({\n  limit: 25,\n  status: 'MCP_GATEWAY_STATUS_ACTIVE',\n});\n\nfor (const gateway of page.data) {\n  console.log(gateway.key, gateway.publicUrl, gateway.exposedToolsCount);\n}\n"
+    post:
+      tags:
+      - MCP Gateway
+      summary: Create an MCP gateway
+      description: Creates a client-facing MCP gateway that links one or more synced upstream servers and exposes a unified MCP endpoint.
+      operationId: McpGatewayCreate
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMcpGatewayRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateMcpGatewayResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: mcpGateways
+      x-speakeasy-name-override: create
+      x-cli-group: mcpGateways
+      x-cli-name: create
+      x-code-samples:
+      - lang: curl
+        label: Core - Create MCP gateway
+        source: "curl --request POST \\\n  --url 'https://my.orq.ai/v2/mcp-gateways' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\" \\\n  --header 'Content-Type: application/json' \\\n  --data '{\n    \"key\": \"support-desk\",\n    \"display_name\": \"Support Desk\",\n    \"description\": \"Tools the support agent is allowed to call.\",\n    \"server_links\": [\n      {\n        \"mcp_server_id\": \"01JQ0K5R8N2ZC7X4M9T3V6HWBD\",\n        \"alias\": \"github\",\n        \"enabled\": true,\n        \"tool_exposure\": { \"mode\": \"MCP_TOOL_EXPOSURE_MODE_ALL\" }\n      }\n    ],\n    \"tool_naming\": \"MCP_TOOL_NAMING_PREFIX_ON_COLLISION\",\n    \"mode\": \"MCP_GATEWAY_MODE_DIRECT\"\n  }'\n"
+      - lang: python
+        label: Python - Create MCP gateway
+        source: "import os\nfrom orq_ai_sdk import Orq\n\nclient = Orq(api_key=os.environ[\"ORQ_API_KEY\"])\n\n# Each link needs an alias and a tool_exposure; both are required.\nresult = client.mcp_gateways.create(\n    key=\"support-desk\",\n    display_name=\"Support Desk\",\n    description=\"Tools the support agent is allowed to call.\",\n    server_links=[\n        {\n            \"mcp_server_id\": \"01JQ0K5R8N2ZC7X4M9T3V6HWBD\",\n            \"alias\": \"github\",\n            \"enabled\": True,\n            \"tool_exposure\": {\"mode\": \"MCP_TOOL_EXPOSURE_MODE_ALL\"},\n        },\n    ],\n    tool_naming=\"MCP_TOOL_NAMING_PREFIX_ON_COLLISION\",\n    mode=\"MCP_GATEWAY_MODE_DIRECT\",\n)\n\nprint(result.mcp_gateway.public_url)\n"
+      - lang: typescript
+        label: Node.js - Create MCP gateway
+        source: "import { Orq } from '@orq-ai/node';\n\nconst client = new Orq({\n  apiKey: process.env.ORQ_API_KEY,\n});\n\n// Each link needs an alias and a toolExposure; both are required.\nconst result = await client.mcpGateways.create({\n  key: 'support-desk',\n  displayName: 'Support Desk',\n  description: 'Tools the support agent is allowed to call.',\n  serverLinks: [\n    {\n      mcpServerId: '01JQ0K5R8N2ZC7X4M9T3V6HWBD',\n      alias: 'github',\n      enabled: true,\n      toolExposure: { mode: 'MCP_TOOL_EXPOSURE_MODE_ALL' },\n    },\n  ],\n  toolNaming: 'MCP_TOOL_NAMING_PREFIX_ON_COLLISION',\n  mode: 'MCP_GATEWAY_MODE_DIRECT',\n});\n\nconsole.log(result.mcpGateway.publicUrl);\n"
+  /v2/mcp-gateways/{gateway_id}/tools:
+    get:
+      tags:
+      - MCP Gateway
+      summary: List exposed tools for a gateway
+      description: Returns the namespaced tool view for a gateway.
+      operationId: McpGatewayListTools
+      parameters:
+      - name: gateway_id
+        in: path
+        description: Unique identifier of the MCP gateway.
+        required: true
+        schema:
+          type: string
+      - name: limit
+        in: query
+        description: Page size between 1 and 200. Defaults to 25.
+        schema:
+          type: integer
+          format: int32
+      - name: starting_after
+        in: query
+        description: Cursor for the page after the given `exposed_name`. Mutually exclusive with `ending_before`.
+        schema:
+          type: string
+      - name: ending_before
+        in: query
+        description: Cursor for the page before the given `exposed_name`. Mutually exclusive with `starting_after`.
+        schema:
+          type: string
+      - name: mcp_server_id
+        in: query
+        description: Returns only tools contributed by this upstream server.
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListMcpGatewayToolsResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: The resource does not exist. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: mcpGateways
+      x-speakeasy-name-override: listTools
+      x-cli-group: mcpGateways
+      x-cli-name: listTools
+      x-code-samples:
+      - lang: curl
+        label: Core - List the tools a gateway exposes
+        source: "curl --get 'https://my.orq.ai/v2/mcp-gateways/01JQ0M8W4T5YB2Q7N1F6K3PZRC/tools' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\" \\\n  --data-urlencode 'limit=100'\n"
+      - lang: curl
+        label: Core - List the tools contributed by one server
+        source: "curl --get 'https://my.orq.ai/v2/mcp-gateways/01JQ0M8W4T5YB2Q7N1F6K3PZRC/tools' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\" \\\n  --data-urlencode 'mcp_server_id=01JQ0K5R8N2ZC7X4M9T3V6HWBD'\n"
+      - lang: python
+        label: Python - List the tools a gateway exposes
+        source: "import os\nfrom orq_ai_sdk import Orq\n\nclient = Orq(api_key=os.environ[\"ORQ_API_KEY\"])\n\npage = client.mcp_gateways.list_tools(\n    gateway_id=\"01JQ0M8W4T5YB2Q7N1F6K3PZRC\",\n    limit=100,\n)\n\n# exposed_name is what MCP clients call; upstream_tool_name is the original.\nfor tool in page.data:\n    print(tool.exposed_name, \"->\", tool.upstream_tool_name)\n"
+      - lang: typescript
+        label: Node.js - List the tools a gateway exposes
+        source: "import { Orq } from '@orq-ai/node';\n\nconst client = new Orq({\n  apiKey: process.env.ORQ_API_KEY,\n});\n\nconst page = await client.mcpGateways.listTools({\n  gatewayId: '01JQ0M8W4T5YB2Q7N1F6K3PZRC',\n  limit: 100,\n});\n\n// exposedName is what MCP clients call; upstreamToolName is the original.\nfor (const tool of page.data) {\n  console.log(tool.exposedName, '->', tool.upstreamToolName);\n}\n"
+  /v2/mcp-gateways/{id}:
+    get:
+      tags:
+      - MCP Gateway
+      summary: Retrieve an MCP gateway
+      description: Retrieves the details of an existing MCP gateway by its unique ID.
+      operationId: McpGatewayGet
+      parameters:
+      - name: id
+        in: path
+        description: Unique identifier of the MCP gateway.
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetMcpGatewayResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: The resource does not exist. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: mcpGateways
+      x-speakeasy-name-override: retrieve
+      x-cli-group: mcpGateways
+      x-cli-name: retrieve
+      x-code-samples:
+      - lang: curl
+        label: Core - Retrieve an MCP gateway
+        source: "curl --get 'https://my.orq.ai/v2/mcp-gateways/01JQ0M8W4T5YB2Q7N1F6K3PZRC' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\"\n"
+      - lang: python
+        label: Python - Retrieve an MCP gateway
+        source: 'import os
+
+          from orq_ai_sdk import Orq
+
+
+          client = Orq(api_key=os.environ["ORQ_API_KEY"])
+
+
+          result = client.mcp_gateways.retrieve(id="01JQ0M8W4T5YB2Q7N1F6K3PZRC")
+
+
+          # public_url is the endpoint MCP clients connect to.
+
+          print(result.mcp_gateway.public_url, result.mcp_gateway.status)
+
+          '
+      - lang: typescript
+        label: Node.js - Retrieve an MCP gateway
+        source: "import { Orq } from '@orq-ai/node';\n\nconst client = new Orq({\n  apiKey: process.env.ORQ_API_KEY,\n});\n\nconst result = await client.mcpGateways.retrieve({\n  id: '01JQ0M8W4T5YB2Q7N1F6K3PZRC',\n});\n\n// publicUrl is the endpoint MCP clients connect to.\nconsole.log(result.mcpGateway.publicUrl, result.mcpGateway.status);\n"
+    delete:
+      tags:
+      - MCP Gateway
+      summary: Delete an MCP gateway
+      description: Deletes an MCP gateway from the workspace. The response body is empty when the delete succeeds.
+      operationId: McpGatewayDelete
+      parameters:
+      - name: id
+        in: path
+        description: Unique identifier of the MCP gateway.
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteMcpGatewayResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: mcpGateways
+      x-speakeasy-name-override: delete
+      x-cli-group: mcpGateways
+      x-cli-name: delete
+      x-code-samples:
+      - lang: curl
+        label: Core - Delete an MCP gateway
+        source: "curl --request DELETE \\\n  --url 'https://my.orq.ai/v2/mcp-gateways/01JQ0M8W4T5YB2Q7N1F6K3PZRC' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\"\n"
+      - lang: python
+        label: Python - Delete an MCP gateway
+        source: 'import os
+
+          from orq_ai_sdk import Orq
+
+
+          client = Orq(api_key=os.environ["ORQ_API_KEY"])
+
+
+          # Connected MCP clients start receiving "gateway not found".
+
+          client.mcp_gateways.delete(id="01JQ0M8W4T5YB2Q7N1F6K3PZRC")
+
+          '
+      - lang: typescript
+        label: Node.js - Delete an MCP gateway
+        source: "import { Orq } from '@orq-ai/node';\n\nconst client = new Orq({\n  apiKey: process.env.ORQ_API_KEY,\n});\n\n// Connected MCP clients start receiving \"gateway not found\".\nawait client.mcpGateways.delete({ id: '01JQ0M8W4T5YB2Q7N1F6K3PZRC' });\n"
+    patch:
+      tags:
+      - MCP Gateway
+      summary: Update an MCP gateway
+      description: Updates mutable fields of an existing MCP gateway. Omitted optional fields keep their current values.
+      operationId: McpGatewayUpdate
+      parameters:
+      - name: id
+        in: path
+        description: Unique identifier of the MCP gateway.
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateMcpGatewayRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateMcpGatewayResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: mcpGateways
+      x-speakeasy-name-override: update
+      x-cli-group: mcpGateways
+      x-cli-name: update
+      x-code-samples:
+      - lang: curl
+        label: Core - Narrow the tools a gateway exposes
+        source: "curl --request PATCH \\\n  --url 'https://my.orq.ai/v2/mcp-gateways/01JQ0M8W4T5YB2Q7N1F6K3PZRC' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\" \\\n  --header 'Content-Type: application/json' \\\n  --data '{\n    \"server_links\": [\n      {\n        \"mcp_server_id\": \"01JQ0K5R8N2ZC7X4M9T3V6HWBD\",\n        \"alias\": \"github\",\n        \"enabled\": true,\n        \"tool_exposure\": {\n          \"mode\": \"MCP_TOOL_EXPOSURE_MODE_SELECTED\",\n          \"tool_ids\": [\n            \"01JQ0KA2M7VD9E4R6T8Y1U3XSB\",\n            \"01JQ0KB5P9WF2G7H4J6K8L1NQD\"\n          ]\n        }\n      }\n    ]\n  }'\n"
+      - lang: curl
+        label: Core - Disable a gateway
+        source: "curl --request PATCH \\\n  --url 'https://my.orq.ai/v2/mcp-gateways/01JQ0M8W4T5YB2Q7N1F6K3PZRC' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\" \\\n  --header 'Content-Type: application/json' \\\n  --data '{ \"status\": \"MCP_GATEWAY_STATUS_DISABLED\" }'\n"
+      - lang: python
+        label: Python - Narrow the tools a gateway exposes
+        source: "import os\nfrom orq_ai_sdk import Orq\n\nclient = Orq(api_key=os.environ[\"ORQ_API_KEY\"])\n\n# tool_ids come from McpTool.id. A tool renamed upstream gets a new id\n# on the next sync, which drops it from this allowlist.\nresult = client.mcp_gateways.update(\n    id=\"01JQ0M8W4T5YB2Q7N1F6K3PZRC\",\n    server_links=[\n        {\n            \"mcp_server_id\": \"01JQ0K5R8N2ZC7X4M9T3V6HWBD\",\n            \"alias\": \"github\",\n            \"enabled\": True,\n            \"tool_exposure\": {\n                \"mode\": \"MCP_TOOL_EXPOSURE_MODE_SELECTED\",\n                \"tool_ids\": [\n                    \"01JQ0KA2M7VD9E4R6T8Y1U3XSB\",\n                    \"01JQ0KB5P9WF2G7H4J6K8L1NQD\",\n                ],\n            },\n        },\n    ],\n)\n\nprint(result.mcp_gateway.exposed_tools_count)\n"
+      - lang: typescript
+        label: Node.js - Narrow the tools a gateway exposes
+        source: "import { Orq } from '@orq-ai/node';\n\nconst client = new Orq({\n  apiKey: process.env.ORQ_API_KEY,\n});\n\n// toolIds come from McpTool.id. A tool renamed upstream gets a new id\n// on the next sync, which drops it from this allowlist.\nconst result = await client.mcpGateways.update({\n  id: '01JQ0M8W4T5YB2Q7N1F6K3PZRC',\n  serverLinks: [\n    {\n      mcpServerId: '01JQ0K5R8N2ZC7X4M9T3V6HWBD',\n      alias: 'github',\n      enabled: true,\n      toolExposure: {\n        mode: 'MCP_TOOL_EXPOSURE_MODE_SELECTED',\n        toolIds: [\n          '01JQ0KA2M7VD9E4R6T8Y1U3XSB',\n          '01JQ0KB5P9WF2G7H4J6K8L1NQD',\n        ],\n      },\n    },\n  ],\n});\n\nconsole.log(result.mcpGateway.exposedToolsCount);\n"
+  /v2/mcp-servers:
+    get:
+      tags:
+      - MCP Gateway
+      summary: List MCP servers
+      description: Returns a paginated list of MCP servers in the workspace.
+      operationId: McpServerList
+      parameters:
+      - name: limit
+        in: query
+        description: Page size between 1 and 200. Defaults to 25.
+        schema:
+          type: integer
+          format: int32
+      - name: starting_after
+        in: query
+        description: Cursor for the page after the given item id. Mutually exclusive with `ending_before`.
+        schema:
+          type: string
+      - name: ending_before
+        in: query
+        description: Cursor for the page before the given item id. Mutually exclusive with `starting_after`.
+        schema:
+          type: string
+      - name: search
+        in: query
+        description: Case-insensitive match against the server key and display name.
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListMcpServersResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: mcpServers
+      x-speakeasy-name-override: list
+      x-cli-group: mcpServers
+      x-cli-name: list
+      x-code-samples:
+      - lang: curl
+        label: Core - List MCP servers
+        source: "curl --get 'https://my.orq.ai/v2/mcp-servers' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\" \\\n  --data-urlencode 'limit=25' \\\n  --data-urlencode 'search=github'\n"
+      - lang: python
+        label: Python - List MCP servers
+        source: "import os\nfrom orq_ai_sdk import Orq\n\nclient = Orq(api_key=os.environ[\"ORQ_API_KEY\"])\n\npage = client.mcp_servers.list(\n    limit=25,\n    search=\"github\",\n)\n\nfor server in page.data:\n    print(server.key, server.sync_state.tools_total)\n"
+      - lang: typescript
+        label: Node.js - List MCP servers
+        source: "import { Orq } from '@orq-ai/node';\n\nconst client = new Orq({\n  apiKey: process.env.ORQ_API_KEY,\n});\n\nconst page = await client.mcpServers.list({\n  limit: 25,\n  search: 'github',\n});\n\nfor (const server of page.data) {\n  console.log(server.key, server.syncState.toolsTotal);\n}\n"
+    post:
+      tags:
+      - MCP Gateway
+      summary: Create an MCP server
+      description: Creates a new upstream MCP server connection in the workspace.
+      operationId: McpServerCreate
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMcpServerRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateMcpServerResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: mcpServers
+      x-speakeasy-name-override: create
+      x-cli-group: mcpServers
+      x-cli-name: create
+      x-code-samples:
+      - lang: curl
+        label: Core - Create MCP server
+        source: "curl --request POST \\\n  --url 'https://my.orq.ai/v2/mcp-servers' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\" \\\n  --header 'Content-Type: application/json' \\\n  --data '{\n    \"key\": \"github\",\n    \"display_name\": \"GitHub\",\n    \"description\": \"Repository and issue tools for the platform team.\",\n    \"connection\": {\n      \"type\": \"MCP_CONNECTION_TYPE_HTTP\",\n      \"url\": \"https://api.githubcopilot.com/mcp/\"\n    },\n    \"auth\": {\n      \"type\": \"MCP_AUTH_TYPE_STATIC_HEADERS\",\n      \"static_headers\": [\n        { \"key\": \"Authorization\", \"value\": \"Bearer ghp_example_token\" }\n      ]\n    },\n    \"default_tool_exposure\": { \"mode\": \"MCP_TOOL_EXPOSURE_MODE_ALL\" }\n  }'\n"
+      - lang: python
+        label: Python - Create MCP server
+        source: "import os\nfrom orq_ai_sdk import Orq\n\nclient = Orq(api_key=os.environ[\"ORQ_API_KEY\"])\n\nresult = client.mcp_servers.create(\n    key=\"github\",\n    display_name=\"GitHub\",\n    description=\"Repository and issue tools for the platform team.\",\n    connection={\n        \"type\": \"MCP_CONNECTION_TYPE_HTTP\",\n        \"url\": \"https://api.githubcopilot.com/mcp/\",\n    },\n    auth={\n        \"type\": \"MCP_AUTH_TYPE_STATIC_HEADERS\",\n        \"static_headers\": [\n            {\"key\": \"Authorization\", \"value\": \"Bearer ghp_example_token\"},\n        ],\n    },\n    default_tool_exposure={\"mode\": \"MCP_TOOL_EXPOSURE_MODE_ALL\"},\n)\n\n# A new server has no tools until it is synced.\nprint(result.mcp_server.key)\n"
+      - lang: typescript
+        label: Node.js - Create MCP server
+        source: "import { Orq } from '@orq-ai/node';\n\nconst client = new Orq({\n  apiKey: process.env.ORQ_API_KEY,\n});\n\nconst result = await client.mcpServers.create({\n  key: 'github',\n  displayName: 'GitHub',\n  description: 'Repository and issue tools for the platform team.',\n  connection: {\n    type: 'MCP_CONNECTION_TYPE_HTTP',\n    url: 'https://api.githubcopilot.com/mcp/',\n  },\n  auth: {\n    type: 'MCP_AUTH_TYPE_STATIC_HEADERS',\n    staticHeaders: [\n      { key: 'Authorization', value: 'Bearer ghp_example_token' },\n    ],\n  },\n  defaultToolExposure: { mode: 'MCP_TOOL_EXPOSURE_MODE_ALL' },\n});\n\n// A new server has no tools until it is synced.\nconsole.log(result.mcpServer.key);\n"
+  /v2/mcp-servers/{id}:
+    get:
+      tags:
+      - MCP Gateway
+      summary: Retrieve an MCP server
+      description: Retrieves the details of an existing MCP server by its unique ID.
+      operationId: McpServerGet
+      parameters:
+      - name: id
+        in: path
+        description: Unique identifier of the MCP server.
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetMcpServerResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: The resource does not exist. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: mcpServers
+      x-speakeasy-name-override: retrieve
+      x-cli-group: mcpServers
+      x-cli-name: retrieve
+      x-code-samples:
+      - lang: curl
+        label: Core - Retrieve an MCP server
+        source: "curl --get 'https://my.orq.ai/v2/mcp-servers/01JQ0K5R8N2ZC7X4M9T3V6HWBD' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\"\n"
+      - lang: python
+        label: Python - Retrieve an MCP server
+        source: "import os\nfrom orq_ai_sdk import Orq\n\nclient = Orq(api_key=os.environ[\"ORQ_API_KEY\"])\n\nresult = client.mcp_servers.retrieve(id=\"01JQ0K5R8N2ZC7X4M9T3V6HWBD\")\n\nfor tool in result.mcp_server.tools:\n    print(tool.name, tool.status)\n"
+      - lang: typescript
+        label: Node.js - Retrieve an MCP server
+        source: "import { Orq } from '@orq-ai/node';\n\nconst client = new Orq({\n  apiKey: process.env.ORQ_API_KEY,\n});\n\nconst result = await client.mcpServers.retrieve({\n  id: '01JQ0K5R8N2ZC7X4M9T3V6HWBD',\n});\n\nfor (const tool of result.mcpServer.tools) {\n  console.log(tool.name, tool.status);\n}\n"
+    delete:
+      tags:
+      - MCP Gateway
+      summary: Delete an MCP server
+      description: Deletes an MCP server from the workspace. The response body is empty when the delete succeeds.
+      operationId: McpServerDelete
+      parameters:
+      - name: id
+        in: path
+        description: Unique identifier of the MCP server.
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteMcpServerResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: mcpServers
+      x-speakeasy-name-override: delete
+      x-cli-group: mcpServers
+      x-cli-name: delete
+      x-code-samples:
+      - lang: curl
+        label: Core - Delete an MCP server
+        source: "curl --request DELETE \\\n  --url 'https://my.orq.ai/v2/mcp-servers/01JQ0K5R8N2ZC7X4M9T3V6HWBD' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\"\n"
+      - lang: python
+        label: Python - Delete an MCP server
+        source: 'import os
+
+          from orq_ai_sdk import Orq
+
+
+          client = Orq(api_key=os.environ["ORQ_API_KEY"])
+
+
+          # Fails while any gateway still links this server.
+
+          client.mcp_servers.delete(id="01JQ0K5R8N2ZC7X4M9T3V6HWBD")
+
+          '
+      - lang: typescript
+        label: Node.js - Delete an MCP server
+        source: "import { Orq } from '@orq-ai/node';\n\nconst client = new Orq({\n  apiKey: process.env.ORQ_API_KEY,\n});\n\n// Fails while any gateway still links this server.\nawait client.mcpServers.delete({ id: '01JQ0K5R8N2ZC7X4M9T3V6HWBD' });\n"
+    patch:
+      tags:
+      - MCP Gateway
+      summary: Update an MCP server
+      description: Updates mutable fields of an existing MCP server. Omitted optional fields keep their current values.
+      operationId: McpServerUpdate
+      parameters:
+      - name: id
+        in: path
+        description: Unique identifier of the MCP server.
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateMcpServerRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateMcpServerResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: mcpServers
+      x-speakeasy-name-override: update
+      x-cli-group: mcpServers
+      x-cli-name: update
+      x-code-samples:
+      - lang: curl
+        label: Core - Update an MCP server
+        source: "curl --request PATCH \\\n  --url 'https://my.orq.ai/v2/mcp-servers/01JQ0K5R8N2ZC7X4M9T3V6HWBD' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\" \\\n  --header 'Content-Type: application/json' \\\n  --data '{\n    \"display_name\": \"GitHub (read only)\",\n    \"default_tool_exposure\": {\n      \"mode\": \"MCP_TOOL_EXPOSURE_MODE_ALL\",\n      \"read_only\": true\n    }\n  }'\n"
+      - lang: python
+        label: Python - Update an MCP server
+        source: "import os\nfrom orq_ai_sdk import Orq\n\nclient = Orq(api_key=os.environ[\"ORQ_API_KEY\"])\n\n# The key is immutable; sending a different one is rejected.\nresult = client.mcp_servers.update(\n    id=\"01JQ0K5R8N2ZC7X4M9T3V6HWBD\",\n    display_name=\"GitHub (read only)\",\n    default_tool_exposure={\n        \"mode\": \"MCP_TOOL_EXPOSURE_MODE_ALL\",\n        \"read_only\": True,\n    },\n)\n\nprint(result.mcp_server.display_name)\n"
+      - lang: typescript
+        label: Node.js - Update an MCP server
+        source: "import { Orq } from '@orq-ai/node';\n\nconst client = new Orq({\n  apiKey: process.env.ORQ_API_KEY,\n});\n\n// The key is immutable; sending a different one is rejected.\nconst result = await client.mcpServers.update({\n  id: '01JQ0K5R8N2ZC7X4M9T3V6HWBD',\n  displayName: 'GitHub (read only)',\n  defaultToolExposure: {\n    mode: 'MCP_TOOL_EXPOSURE_MODE_ALL',\n    readOnly: true,\n  },\n});\n\nconsole.log(result.mcpServer.displayName);\n"
+  /v2/mcp-servers/{id}/tools:test:
+    post:
+      tags:
+      - MCP Gateway
+      summary: Test an MCP server tool
+      description: Executes a single tool on an upstream MCP server for testing. Connects to the server, invokes the tool with the provided arguments, and returns the result.
+      operationId: McpServerTestTool
+      parameters:
+      - name: id
+        in: path
+        description: Unique identifier of the MCP server.
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TestMcpServerToolRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TestMcpServerToolResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: mcpServers
+      x-speakeasy-name-override: testTool
+      x-cli-group: mcpServers
+      x-cli-name: testTool
+      x-code-samples:
+      - lang: curl
+        label: Core - Test a single tool
+        source: "curl --request POST \\\n  --url 'https://my.orq.ai/v2/mcp-servers/01JQ0K5R8N2ZC7X4M9T3V6HWBD/tools:test' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\" \\\n  --header 'Content-Type: application/json' \\\n  --data '{\n    \"tool_name\": \"search_issues\",\n    \"arguments\": { \"query\": \"repo:orq-ai/orq-cli is:open label:bug\" }\n  }'\n"
+      - lang: python
+        label: Python - Test a single tool
+        source: "import os\nfrom orq_ai_sdk import Orq\n\nclient = Orq(api_key=os.environ[\"ORQ_API_KEY\"])\n\n# tool_name is the upstream name, not a gateway's namespaced exposed_name.\nresult = client.mcp_servers.test_tool(\n    id=\"01JQ0K5R8N2ZC7X4M9T3V6HWBD\",\n    tool_name=\"search_issues\",\n    arguments={\"query\": \"repo:orq-ai/orq-cli is:open label:bug\"},\n)\n\nprint(result.result.ok, result.result.latency_ms)\n"
+      - lang: typescript
+        label: Node.js - Test a single tool
+        source: "import { Orq } from '@orq-ai/node';\n\nconst client = new Orq({\n  apiKey: process.env.ORQ_API_KEY,\n});\n\n// toolName is the upstream name, not a gateway's namespaced exposedName.\nconst { result } = await client.mcpServers.testTool({\n  id: '01JQ0K5R8N2ZC7X4M9T3V6HWBD',\n  toolName: 'search_issues',\n  arguments: { query: 'repo:orq-ai/orq-cli is:open label:bug' },\n});\n\nconsole.log(result.ok, result.latencyMs);\n"
+  /v2/mcp-servers/{id}:sync:
+    post:
+      tags:
+      - MCP Gateway
+      summary: Sync an MCP server
+      description: Connects to an upstream MCP server, discovers tools, and persists the tool list and sync state on the server record.
+      operationId: McpServerSync
+      parameters:
+      - name: id
+        in: path
+        description: Unique identifier of the MCP server.
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SyncMcpServerRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SyncMcpServerResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: mcpServers
+      x-speakeasy-name-override: sync
+      x-cli-group: mcpServers
+      x-cli-name: sync
+      x-code-samples:
+      - lang: curl
+        label: Core - Sync the tool catalog
+        source: "curl --request POST \\\n  --url 'https://my.orq.ai/v2/mcp-servers/01JQ0K5R8N2ZC7X4M9T3V6HWBD:sync' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\" \\\n  --header 'Content-Type: application/json' \\\n  --data '{}'\n"
+      - lang: curl
+        label: Core - Sync a server that uses template variables
+        source: "curl --request POST \\\n  --url 'https://my.orq.ai/v2/mcp-servers/01JQ0K5R8N2ZC7X4M9T3V6HWBD:sync' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\" \\\n  --header 'Content-Type: application/json' \\\n  --data '{\n    \"discovery_variables\": { \"github_token\": \"ghp_example_token\" }\n  }'\n"
+      - lang: python
+        label: Python - Sync the tool catalog
+        source: 'import os
+
+          from orq_ai_sdk import Orq
+
+
+          client = Orq(api_key=os.environ["ORQ_API_KEY"])
+
+
+          result = client.mcp_servers.sync(id="01JQ0K5R8N2ZC7X4M9T3V6HWBD")
+
+
+          state = result.mcp_server.sync_state
+
+          # A sync that discovers nothing still reports SYNCED with tools_total 0.
+
+          print(state.status, state.tools_added, state.tools_removed)
+
+          '
+      - lang: typescript
+        label: Node.js - Sync the tool catalog
+        source: "import { Orq } from '@orq-ai/node';\n\nconst client = new Orq({\n  apiKey: process.env.ORQ_API_KEY,\n});\n\nconst result = await client.mcpServers.sync({\n  id: '01JQ0K5R8N2ZC7X4M9T3V6HWBD',\n});\n\nconst state = result.mcpServer.syncState;\n// A sync that discovers nothing still reports SYNCED with toolsTotal 0.\nconsole.log(state.status, state.toolsAdded, state.toolsRemoved);\n"
+components:
+  schemas:
+    GetMcpGatewayResponse:
+      type: object
+      properties:
+        mcp_gateway:
+          $ref: '#/components/schemas/McpGateway'
+    McpGatewayPlugin:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Plugin discriminator.
+        language:
+          type: string
+        entities:
+          type: array
+          items:
+            type: string
+        on_failure:
+          type: string
+        threshold:
+          type: number
+          format: double
+        mask:
+          type: array
+          items:
+            type: string
+    ListMcpServersResponse:
+      type: object
+      properties:
+        object:
+          type: string
+          description: Always "list".
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/McpServer'
+          description: MCP servers on the current page.
+        has_more:
+          type: boolean
+          description: Whether further items exist beyond this page.
+    McpAuthType:
+      type: string
+      enum:
+      - MCP_AUTH_TYPE_NONE
+      - MCP_AUTH_TYPE_STATIC_HEADERS
+      - MCP_AUTH_TYPE_OAUTH_CLIENT_CREDENTIALS
+      - MCP_AUTH_TYPE_PER_USER_OAUTH
+      - MCP_AUTH_TYPE_ENTERPRISE_MANAGED
+    SharingAllProjects:
+      type: object
+      properties: {}
+    McpGatewayServerLink:
+      required:
+      - mcp_server_id
+      - alias
+      - tool_exposure
+      type: object
+      properties:
+        mcp_server_id:
+          type: string
+          description: Upstream MCP server this gateway aggregates.
+        alias:
+          type: string
+          description: Prefix used instead of the server key when namespacing this server's tool names. Must be unique within the gateway.
+        enabled:
+          type: boolean
+          description: Whether this link contributes tools to the gateway.
+        tool_exposure:
+          allOf:
+          - $ref: '#/components/schemas/McpToolExposure'
+          description: Narrows which of the server's tools this gateway exposes.
+    SyncStatus:
+      type: string
+      enum:
+      - SYNC_STATUS_SYNCED
+      - SYNC_STATUS_FAILED
+      - SYNC_STATUS_PENDING
+    CreateMcpGatewayRequest:
+      required:
+      - key
+      - display_name
+      type: object
+      properties:
+        key:
+          type: string
+          description: Lowercase slug of letters, digits, hyphens and underscores, max 64 characters, unique per workspace; backs the gateway's public MCP URL.
+        display_name:
+          type: string
+          description: Human readable name shown in the workspace.
+        description:
+          type: string
+          description: Free-form note about what this gateway is for.
+        server_links:
+          type: array
+          items:
+            $ref: '#/components/schemas/McpGatewayServerLink'
+          description: Upstream servers this gateway aggregates.
+        tool_naming:
+          description: How upstream tool names are namespaced before they are exposed. Defaults to PREFIX_ON_COLLISION.
+          $ref: '#/components/schemas/McpToolNaming'
+        mode:
+          description: 'Shape of the tool surface presented to MCP clients: CODE or DIRECT. Defaults to CODE.'
+          $ref: '#/components/schemas/McpGatewayMode'
+        sharing:
+          allOf:
+          - $ref: '#/components/schemas/Sharing'
+          description: Which projects in the workspace may use this gateway. Defaults to every project.
+        plugins:
+          type: array
+          items:
+            $ref: '#/components/schemas/McpGatewayPlugin'
+          description: Plugins run on every tool call this gateway serves.
+    McpToolExposure:
+      required:
+      - mode
+      type: object
+      properties:
+        mode:
+          description: 'Selection strategy: ALL, SELECTED or NONE.'
+          $ref: '#/components/schemas/McpToolExposureMode'
+        read_only:
+          type: boolean
+          description: Keeps only the tools the upstream annotates as read-only.
+        tool_ids:
+          type: array
+          items:
+            type: string
+          description: '`McpTool.id` values to expose when mode is SELECTED; a tool renamed upstream gets a new id on the next sync.'
+    McpAuthConfig:
+      required:
+      - type
+      type: object
+      properties:
+        type:
+          description: 'Credential scheme: NONE, STATIC_HEADERS, OAUTH_CLIENT_CREDENTIALS or ENTERPRISE_MANAGED. Create, update and Test connection reject PER_USER_OAUTH.'
+          $ref: '#/components/schemas/McpAuthType'
+        static_headers:
+          type: array
+          items:
+            $ref: '#/components/schemas/McpHeaderSecret'
+          description: Headers sent upstream on every request; at least one entry when type is STATIC_HEADERS.
+        oauth:
+          allOf:
+          - $ref: '#/components/schemas/McpOAuthConfig'
+          description: OAuth client credentials the gateway presents to the upstream authorization server; set when type is OAUTH_CLIENT_CREDENTIALS.
+        enterprise:
+          allOf:
+          - $ref: '#/components/schemas/McpEnterpriseAuthConfig'
+          description: Client for the upstream authorization server; set when type is ENTERPRISE_MANAGED.
+    DeleteMcpGatewayResponse:
+      type: object
+      properties: {}
+      description: The response body is empty when the delete succeeds.
+    SharingSelectedProjects:
+      type: object
+      properties:
+        project_ids:
+          type: array
+          items:
+            type: string
+          description: Projects allowed to use the entity. An empty list shares it with no project.
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Human-readable error message.
+        code:
+          type: integer
+          description: gRPC status code, when the service reports one.
+        details:
+          type: array
+          items: {}
+          description: Additional error details, when the service reports any.
+      required:
+      - message
+    CreateMcpServerRequest:
+      required:
+      - key
+      - display_name
+      - connection
+      - auth
+      - default_tool_exposure
+      type: object
+      properties:
+        key:
+          type: string
+          description: Lowercase slug of letters, digits, hyphens and underscores, max 64 characters, unique per workspace; prefixes this server's tool names in gateways.
+        display_name:
+          type: string
+          description: Human readable name shown in the workspace.
+        description:
+          type: string
+          description: Free-form note about what this server is for.
+        connection:
+          allOf:
+          - $ref: '#/components/schemas/McpConnection'
+          description: How the gateway dials the upstream server.
+        auth:
+          allOf:
+          - $ref: '#/components/schemas/McpAuthConfig'
+          description: 'Credentials the gateway sends upstream; send `type: NONE` explicitly for public servers.'
+        default_tool_exposure:
+          allOf:
+          - $ref: '#/components/schemas/McpToolExposure'
+          description: Fallback exposure used by any gateway link that does not set its own.
+        sharing:
+          allOf:
+          - $ref: '#/components/schemas/Sharing'
+          description: Which projects in the workspace may use this server. Defaults to every project.
+    ListMcpGatewaysResponse:
+      type: object
+      properties:
+        object:
+          type: string
+          description: Always "list".
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/McpGateway'
+          description: MCP gateways on the current page.
+        has_more:
+          type: boolean
+          description: Whether further items exist beyond this page.
+    McpGatewayToolTestResult:
+      type: object
+      properties:
+        ok:
+          type: boolean
+          description: Whether the tool call completed successfully.
+        result:
+          type: object
+          description: Payload returned by the upstream tool.
+        latency_ms:
+          type: integer
+          description: Round trip time of the tool call in milliseconds.
+          format: int32
+        error_message:
+          type: string
+          description: Human-readable reason the call failed.
+        errors:
+          type: array
+          items:
+            type: string
+          description: Additional failure details collected during the call.
+    SyncMcpServerRequest:
+      required: []
+      type: object
+      properties:
+        discovery_variables:
+          type: object
+          additionalProperties:
+            type: string
+          description: Values for the server's `template_variables`; treated as sensitive and not persisted.
+    McpToolNaming:
+      type: string
+      enum:
+      - MCP_TOOL_NAMING_PREFIX_WITH_SERVER_KEY
+      - MCP_TOOL_NAMING_PREFIX_ON_COLLISION
+    McpHeaderSecret:
+      type: object
+      properties:
+        key:
+          type: string
+          description: Header name sent to the upstream server.
+        value:
+          writeOnly: true
+          type: string
+          description: Header value; accepted on write and never returned.
+        masked_value:
+          type: string
+          description: Redacted preview of `value`, returned in its place.
+    McpConnectionType:
+      type: string
+      enum:
+      - MCP_CONNECTION_TYPE_HTTP
+      - MCP_CONNECTION_TYPE_SSE
+      - MCP_CONNECTION_TYPE_STDIO
+    ListMcpGatewayToolsResponse:
+      type: object
+      properties:
+        object:
+          type: string
+          description: Always "list".
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/McpGatewayTool'
+          description: Exposed tools on the current page.
+        has_more:
+          type: boolean
+          description: Whether further items exist beyond this page.
+    CreateMcpServerResponse:
+      type: object
+      properties:
+        mcp_server:
+          $ref: '#/components/schemas/McpServer'
+    McpOAuthConfig:
+      type: object
+      properties:
+        client_id:
+          type: string
+          description: OAuth client identifier presented to the upstream authorization server.
+        client_secret:
+          writeOnly: true
+          type: string
+          description: OAuth client secret; accepted on write and never returned.
+        token_url:
+          type: string
+          description: Token endpoint the gateway calls to mint upstream access tokens.
+        scopes:
+          type: array
+          items:
+            type: string
+          description: Scopes requested when minting upstream access tokens.
+        masked_value:
+          type: string
+          description: Redacted preview of `client_secret`, returned in its place.
+    UpdateMcpGatewayRequest:
+      required: []
+      type: object
+      properties:
+        key:
+          type: string
+          description: "Rejected with INVALID_ARGUMENT: the key backs the gateway's public MCP URL\n and is immutable after creation. Retained so callers get an error rather\n than a silently ignored field."
+        display_name:
+          type: string
+          description: Human readable name shown in the workspace.
+        description:
+          type: string
+          description: Free-form note about what this gateway is for.
+        server_links:
+          type: array
+          items:
+            $ref: '#/components/schemas/McpGatewayServerLink'
+          description: Replaces the current links. An empty array is treated as no change; use `clear_server_links` to remove them all.
+        tool_naming:
+          description: How upstream tool names are namespaced before they are exposed.
+          $ref: '#/components/schemas/McpToolNaming'
+        status:
+          description: ACTIVE serves MCP traffic; DISABLED rejects it while keeping the configuration.
+          $ref: '#/components/schemas/McpGatewayStatus'
+        mode:
+          description: 'Shape of the tool surface presented to MCP clients: CODE or DIRECT.'
+          $ref: '#/components/schemas/McpGatewayMode'
+        sharing:
+          allOf:
+          - $ref: '#/components/schemas/Sharing'
+          description: Which projects in the workspace may use this gateway. Defaults to every project.
+        clear_server_links:
+          type: boolean
+          description: Set true to remove every link; cannot be combined with `server_links`.
+        plugins:
+          type: array
+          items:
+            $ref: '#/components/schemas/McpGatewayPlugin'
+          description: Plugins run on every tool call this gateway serves.
+    McpEnterpriseAuthConfig:
+      type: object
+      properties:
+        resource:
+          type: string
+          description: RFC 9728 resource identifier the tokens are bound to; defaults to the connection URL.
+        client_id:
+          type: string
+          description: OAuth client identifier registered at the upstream authorization server.
+        client_secret:
+          writeOnly: true
+          type: string
+          description: OAuth client secret; accepted on write and never returned.
+        masked_value:
+          type: string
+          description: Redacted preview of `client_secret`, returned in its place.
+        scopes:
+          type: array
+          items:
+            type: string
+          description: Scopes requested when redeeming the identity assertion grant.
+      description: "McpEnterpriseAuthConfig is the client orq registered at the upstream's authorization\n server for enterprise-managed authorization (ID-JAG). Access policy lives in the\n workspace's SSO identity provider; users must sign in through SSO to use the server."
+    McpGatewayMode:
+      type: string
+      enum:
+      - MCP_GATEWAY_MODE_CODE
+      - MCP_GATEWAY_MODE_DIRECT
+    McpGatewayTool:
+      type: object
+      properties:
+        server_key:
+          type: string
+          description: Key of the upstream server the tool comes from.
+        alias:
+          type: string
+          description: Alias configured on the gateway link the tool comes from.
+        exposed_name:
+          type: string
+          description: Name MCP clients call; namespaced per the gateway's `tool_naming` and capped at 64 characters.
+        description:
+          type: string
+          description: Tool description advertised upstream, passed through to MCP clients.
+        input_schema:
+          type: object
+          description: JSON Schema for the tool arguments, as advertised upstream.
+        mcp_server_id:
+          type: string
+          description: Upstream server the exposed tool resolves to.
+        upstream_tool_name:
+          type: string
+          description: Bare tool name on the upstream server, before namespacing.
+        title:
+          type: string
+          description: Human-readable label advertised upstream, when the server sends one.
+        annotations:
+          allOf:
+          - $ref: '#/components/schemas/McpToolAnnotations'
+          description: Behaviour hints claimed by the upstream server.
+    McpToolAnnotations:
+      type: object
+      properties:
+        read_only:
+          type: boolean
+          description: Upstream claims the tool does not modify state.
+        destructive:
+          type: boolean
+          description: Upstream claims the tool can perform destructive updates.
+        idempotent:
+          type: boolean
+          description: Upstream claims repeated calls with the same arguments have no extra effect.
+        open_world:
+          type: boolean
+          description: Upstream claims the tool reaches systems outside its own domain.
+      description: Hints claimed by the upstream server; the gateway does not enforce them.
+    McpTool:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Bare tool name as advertised by the upstream server.
+        description:
+          type: string
+          description: Tool description advertised upstream, passed through to MCP clients.
+        input_schema:
+          type: object
+          description: JSON Schema for the tool arguments, as advertised upstream.
+        status:
+          type: string
+          description: '`ACTIVE`, or `MISSING` when the last sync no longer found the tool upstream.'
+        id:
+          readOnly: true
+          type: string
+          description: Assigned once on first discovery and preserved across sync.
+        title:
+          type: string
+          description: Human-readable label advertised upstream, when the server sends one.
+        annotations:
+          allOf:
+          - $ref: '#/components/schemas/McpToolAnnotations'
+          description: Behaviour hints claimed by the upstream server.
+    SyncMcpServerResponse:
+      type: object
+      properties:
+        mcp_server:
+          $ref: '#/components/schemas/McpServer'
+    McpSyncState:
+      type: object
+      properties:
+        status:
+          description: Outcome of the last sync; a sync that discovers zero tools still reports SYNCED.
+          $ref: '#/components/schemas/SyncStatus'
+        tools_total:
+          type: integer
+          description: Tools in the catalog after the last sync.
+          format: int32
+        tools_added:
+          type: integer
+          description: Tools the last sync discovered for the first time.
+          format: int32
+        tools_removed:
+          type: integer
+          description: Tools the last sync no longer found upstream and marked MISSING.
+          format: int32
+        last_synced_at:
+          type: string
+          description: ISO 8601 timestamp of the last sync attempt.
+        errors:
+          type: array
+          items:
+            type: string
+          description: Failures reported by the last sync.
+    CreateMcpGatewayResponse:
+      type: object
+      properties:
+        mcp_gateway:
+          $ref: '#/components/schemas/McpGateway'
+    Sharing:
+      type: object
+      properties:
+        all_projects:
+          allOf:
+          - $ref: '#/components/schemas/SharingAllProjects'
+          description: Visible to every project in the workspace.
+        selected:
+          allOf:
+          - $ref: '#/components/schemas/SharingSelectedProjects'
+          description: Visible to the listed projects only.
+        allow_version_pin:
+          type: boolean
+          description: "Consuming projects may pin a specific version instead of tracking\n the latest version."
+        allow_fork:
+          type: boolean
+          description: "Projects may duplicate this entity into a detached project-owned\n copy."
+        auto_grant_new_projects:
+          type: boolean
+          description: "New projects created after this sharing config is applied should\n receive access automatically."
+      description: "Sharing controls which projects in the workspace may use this entity and\n what they may do with it."
+    McpGatewayStatus:
+      type: string
+      enum:
+      - MCP_GATEWAY_STATUS_ACTIVE
+      - MCP_GATEWAY_STATUS_DISABLED
+    UpdateMcpServerRequest:
+      required: []
+      type: object
+      properties:
+        key:
+          type: string
+          description: "Rejected with INVALID_ARGUMENT: the key prefixes this server's tools in\n every gateway that exposes it, so it is immutable after creation. Retained\n so callers get an error rather than a silently ignored field."
+        display_name:
+          type: string
+          description: Human readable name shown in the workspace.
+        description:
+          type: string
+          description: Free-form note about what this server is for.
+        connection:
+          allOf:
+          - $ref: '#/components/schemas/McpConnection'
+          description: How the gateway dials the upstream server.
+        auth:
+          allOf:
+          - $ref: '#/components/schemas/McpAuthConfig'
+          description: 'Credentials the gateway sends upstream; send `type: NONE` explicitly for public servers.'
+        default_tool_exposure:
+          allOf:
+          - $ref: '#/components/schemas/McpToolExposure'
+          description: Fallback exposure used by any gateway link that does not set its own.
+        sharing:
+          allOf:
+          - $ref: '#/components/schemas/Sharing'
+          description: Which projects in the workspace may use this server. Defaults to every project.
+    McpServer:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier of the MCP server.
+        key:
+          type: string
+          description: Lowercase slug of letters, digits, hyphens and underscores, max 64 characters, unique per workspace; prefixes this server's tool names in gateways.
+        display_name:
+          type: string
+          description: Human readable name shown in the workspace.
+        description:
+          type: string
+          description: Free-form note about what this server is for.
+        connection:
+          allOf:
+          - $ref: '#/components/schemas/McpConnection'
+          description: How the gateway dials the upstream server.
+        auth:
+          allOf:
+          - $ref: '#/components/schemas/McpAuthConfig'
+          description: 'Credentials the gateway sends upstream; send `type: NONE` explicitly for public servers.'
+        default_tool_exposure:
+          allOf:
+          - $ref: '#/components/schemas/McpToolExposure'
+          description: Fallback exposure used by any gateway link that does not set its own.
+        sync_state:
+          allOf:
+          - $ref: '#/components/schemas/McpSyncState'
+          description: Result of the last `:sync`; a new server has no tools until synced.
+        tools:
+          type: array
+          items:
+            $ref: '#/components/schemas/McpTool'
+          description: Tool catalog discovered by the last successful `:sync`.
+        created:
+          type: string
+          description: ISO 8601 timestamp of when the server was created.
+        updated:
+          type: string
+          description: ISO 8601 timestamp of the most recent change to the server.
+        sharing:
+          allOf:
+          - $ref: '#/components/schemas/Sharing'
+          description: Which projects in the workspace may use this server.
+        template_variables:
+          readOnly: true
+          type: array
+          items:
+            type: string
+          description: Names of `{{variable}}` placeholders found in the connection or auth config; supply values as `discovery_variables` on test, sync and tool calls.
+          x-speakeasy-ignore: true
+        created_by_id:
+          readOnly: true
+          type: string
+          description: Account that created the server.
+    McpGateway:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier of the MCP gateway.
+        key:
+          type: string
+          description: Lowercase slug of letters, digits, hyphens and underscores, max 64 characters, unique per workspace; backs the gateway's public MCP URL.
+        display_name:
+          type: string
+          description: Human readable name shown in the workspace.
+        description:
+          type: string
+          description: Free-form note about what this gateway is for.
+        server_links:
+          type: array
+          items:
+            $ref: '#/components/schemas/McpGatewayServerLink'
+          description: Upstream servers this gateway aggregates.
+        tool_naming:
+          description: How upstream tool names are namespaced before they are exposed.
+          $ref: '#/components/schemas/McpToolNaming'
+        status:
+          description: ACTIVE serves MCP traffic; DISABLED rejects it while keeping the configuration.
+          $ref: '#/components/schemas/McpGatewayStatus'
+        public_url:
+          type: string
+          description: Endpoint MCP clients connect to; relative when the deployment has no public base URL configured.
+        created:
+          type: string
+          description: ISO 8601 timestamp of when the gateway was created.
+        updated:
+          type: string
+          description: ISO 8601 timestamp of the most recent change to the gateway.
+        exposed_tools_count:
+          type: integer
+          description: Number of tools currently exposed across all enabled links.
+          format: int32
+        mode:
+          description: 'Shape of the tool surface presented to MCP clients: CODE or DIRECT.'
+          $ref: '#/components/schemas/McpGatewayMode'
+        sharing:
+          allOf:
+          - $ref: '#/components/schemas/Sharing'
+          description: Which projects in the workspace may use this gateway.
+        plugins:
+          type: array
+          items:
+            $ref: '#/components/schemas/McpGatewayPlugin'
+          description: Plugins run on every tool call this gateway serves.
+    TestMcpServerToolRequest:
+      required:
+      - tool_name
+      type: object
+      properties:
+        tool_name:
+          type: string
+          description: Bare upstream tool name, not a gateway's namespaced `exposed_name`.
+        arguments:
+          type: object
+          description: Arguments passed to the tool, matching its `input_schema`.
+        discovery_variables:
+          type: object
+          additionalProperties:
+            type: string
+          description: Values for the server's `template_variables`; treated as sensitive and not persisted.
+    McpConnection:
+      required:
+      - type
+      - url
+      type: object
+      properties:
+        type:
+          description: Transport the gateway uses to dial the upstream server.
+          $ref: '#/components/schemas/McpConnectionType'
+        url:
+          type: string
+          description: Upstream endpoint; must use the http or https scheme.
+    GetMcpServerResponse:
+      type: object
+      properties:
+        mcp_server:
+          $ref: '#/components/schemas/McpServer'
+    McpToolExposureMode:
+      type: string
+      enum:
+      - MCP_TOOL_EXPOSURE_MODE_ALL
+      - MCP_TOOL_EXPOSURE_MODE_SELECTED
+      - MCP_TOOL_EXPOSURE_MODE_NONE
+    UpdateMcpServerResponse:
+      type: object
+      properties:
+        mcp_server:
+          $ref: '#/components/schemas/McpServer'
+    TestMcpServerToolResponse:
+      type: object
+      properties:
+        result:
+          $ref: '#/components/schemas/McpGatewayToolTestResult'
+    DeleteMcpServerResponse:
+      type: object
+      properties: {}
+      description: The response body is empty when the delete succeeds.
+    UpdateMcpGatewayResponse:
+      type: object
+      properties:
+        mcp_gateway:
+          $ref: '#/components/schemas/McpGateway'
+  securitySchemes:
+    ApiKey:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+externalDocs:
+  url: https://docs.orq.ai
+  description: orq.ai Documentation
+x-speakeasy-timeout: 600000

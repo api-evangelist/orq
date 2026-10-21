@@ -1,0 +1,253 @@
+openapi: 3.2.0
+info:
+  title: orq.ai Feedback API
+  version: '2.0'
+  description: orq.ai API documentation
+servers:
+- url: https://my.orq.ai
+security:
+- ApiKey: []
+tags:
+- name: Feedback
+paths:
+  /v2/feedback/remove:
+    post:
+      tags:
+      - Feedback
+      x-cli-group: feedback
+      x-cli-name: delete
+      x-speakeasy-name-override: remove
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+                  format: ulid
+                trace_id:
+                  type: string
+                product:
+                  type: string
+                  enum:
+                  - remoteconfigs
+                  - deployments
+                  - experiments
+                  - playgrounds
+                  - spreadsheets
+                  - spreadsheet_run
+                  - llm_evaluator
+                  - knowledge
+                  - router
+                  - workflows
+                  - external_events
+                  - agents
+                  - memory-stores
+                  - generic
+                  - evaluators
+                  - otel
+                  - ai-chat
+                  - mcp_gateway
+              required:
+              - id
+              - trace_id
+              - product
+      responses:
+        '200':
+          description: Event has been dispatched to delete the feedback
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: ulid
+                  trace_id:
+                    type: string
+                  product:
+                    type: string
+                    enum:
+                    - remoteconfigs
+                    - deployments
+                    - experiments
+                    - playgrounds
+                    - spreadsheets
+                    - spreadsheet_run
+                    - llm_evaluator
+                    - knowledge
+                    - router
+                    - workflows
+                    - external_events
+                    - agents
+                    - memory-stores
+                    - generic
+                    - evaluators
+                    - otel
+                    - ai-chat
+                    - mcp_gateway
+                required:
+                - id
+                - trace_id
+                - product
+        '404':
+          description: Workspace ID is not found on the request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                required:
+                - message
+      summary: Create feedback remove
+      x-summary-source: derived
+      operationId: postV2FeedbackRemove
+      x-operation-id-source: derived
+  /v2/feedback:
+    post:
+      tags:
+      - Feedback
+      x-cli-group: feedback
+      x-cli-name: create
+      x-speakeasy-name-override: create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+                  format: ulid
+                  description: Unique identifier for the feedback
+                property:
+                  type: string
+                  description: A string describing the specific property or aspect rated.
+                value:
+                  anyOf:
+                  - type: string
+                  - type: number
+                  - type: array
+                    items:
+                      type: string
+                  description: The feedback value. For single selection of multiple choice, the value should be an array of strings. For `correction`, the value should be a string.
+                trace_id:
+                  type: string
+                  description: The id returned by the [`get_config`](https://docs.orq.ai/reference/deployments/get-config) or [`invoke`](https://docs.orq.ai/reference/deployments/invoke) endpoints
+                product:
+                  type: string
+                  enum:
+                  - remoteconfigs
+                  - deployments
+                  - experiments
+                  - playgrounds
+                  - spreadsheets
+                  - spreadsheet_run
+                  - llm_evaluator
+                  - knowledge
+                  - router
+                  - workflows
+                  - external_events
+                  - agents
+                  - memory-stores
+                  - generic
+                  - evaluators
+                  - otel
+                  - ai-chat
+                  - mcp_gateway
+                  default: deployments
+              required:
+              - property
+              - value
+              - trace_id
+      responses:
+        '200':
+          description: Feedback submitted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: ulid
+                    description: Unique identifier for the feedback
+                  property:
+                    type: string
+                    description: A string describing the specific property or aspect rated.
+                  value:
+                    anyOf:
+                    - type: string
+                    - type: number
+                    - type: array
+                      items:
+                        type: string
+                    description: The feedback value. For single selection of multiple choice, the value should be an array of strings. For `correction`, the value should be a string.
+                  trace_id:
+                    type: string
+                    description: The id returned by the [`get_config`](https://docs.orq.ai/reference/deployments/get-config) or [`invoke`](https://docs.orq.ai/reference/deployments/invoke) endpoints
+                  product:
+                    type: string
+                    enum:
+                    - remoteconfigs
+                    - deployments
+                    - experiments
+                    - playgrounds
+                    - spreadsheets
+                    - spreadsheet_run
+                    - llm_evaluator
+                    - knowledge
+                    - router
+                    - workflows
+                    - external_events
+                    - agents
+                    - memory-stores
+                    - generic
+                    - evaluators
+                    - otel
+                    - ai-chat
+                    - mcp_gateway
+                    default: deployments
+                required:
+                - property
+                - value
+                - trace_id
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                required:
+                - message
+        '404':
+          description: Workspace, trace, or feedback property was not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                required:
+                - message
+      summary: Create feedback
+      x-summary-source: derived
+      operationId: postV2Feedback
+      x-operation-id-source: derived
+components:
+  securitySchemes:
+    ApiKey:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+externalDocs:
+  url: https://docs.orq.ai
+  description: orq.ai Documentation
+x-speakeasy-timeout: 600000

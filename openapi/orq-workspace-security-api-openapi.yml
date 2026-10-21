@@ -1,0 +1,431 @@
+openapi: 3.2.0
+info:
+  title: orq.ai Workspace Security API
+  version: '2.0'
+  description: orq.ai API documentation
+servers:
+- url: https://my.orq.ai
+security:
+- ApiKey: []
+tags:
+- name: Workspace Security
+  description: Workspace-level domain verification and IP allowlist controls. These operations are restricted to workspace administrators.
+paths:
+  /v2/workspaces/{workspace_key}/domains:
+    get:
+      tags:
+      - Workspace Security
+      summary: List verified domains
+      description: Lists domain-verification records for the workspace.
+      operationId: WorkspaceSecurityListDomains
+      parameters:
+      - name: workspace_key
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListDomainsResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: The resource does not exist. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: workspaceSecurity
+      x-speakeasy-name-override: listDomains
+    post:
+      tags:
+      - Workspace Security
+      summary: Add a domain
+      description: Creates a domain-verification challenge and returns the TXT record to add to DNS.
+      operationId: WorkspaceSecurityCreateDomain
+      parameters:
+      - name: workspace_key
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateDomainRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateDomainResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: workspaceSecurity
+      x-speakeasy-name-override: createDomain
+  /v2/workspaces/{workspace_key}/domains/{domain_id}:
+    delete:
+      tags:
+      - Workspace Security
+      summary: Delete a domain
+      description: Permanently removes a domain-verification record.
+      operationId: WorkspaceSecurityDeleteDomain
+      parameters:
+      - name: workspace_key
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: domain_id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content: {}
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: workspaceSecurity
+      x-speakeasy-name-override: deleteDomain
+  /v2/workspaces/{workspace_key}/domains/{domain_id}/verify:
+    post:
+      tags:
+      - Workspace Security
+      summary: Verify a domain
+      description: Checks DNS for the expected TXT record and marks the domain as verified when it matches.
+      operationId: WorkspaceSecurityVerifyDomain
+      parameters:
+      - name: workspace_key
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: domain_id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerifyDomainResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: workspaceSecurity
+      x-speakeasy-name-override: verifyDomain
+  /v2/workspaces/{workspace_key}/ip-allowlist:
+    get:
+      tags:
+      - Workspace Security
+      summary: Retrieve the IP allowlist
+      description: Returns the workspace IP allowlist and the current caller IP when available.
+      operationId: WorkspaceSecurityGetIPAllowlist
+      parameters:
+      - name: workspace_key
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetIPAllowlistResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: The resource does not exist. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: workspaceSecurity
+      x-speakeasy-name-override: getIPAllowlist
+    patch:
+      tags:
+      - Workspace Security
+      summary: Enable or disable the IP allowlist
+      description: Updates the workspace-level allowlist switch. Every listed range applies while the allowlist is enabled.
+      operationId: WorkspaceSecurityUpdateIPAllowlist
+      parameters:
+      - name: workspace_key
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateIPAllowlistRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateIPAllowlistResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: workspaceSecurity
+      x-speakeasy-name-override: updateIPAllowlist
+  /v2/workspaces/{workspace_key}/ip-allowlist/entries:
+    post:
+      tags:
+      - Workspace Security
+      summary: Add an IP range
+      description: Adds an IPv4 or IPv6 CIDR range to the workspace allowlist.
+      operationId: WorkspaceSecurityAddIPRange
+      parameters:
+      - name: workspace_key
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddIPRangeRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddIPRangeResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: workspaceSecurity
+      x-speakeasy-name-override: addIPRange
+  /v2/workspaces/{workspace_key}/ip-allowlist/entries/{range_id}:
+    delete:
+      tags:
+      - Workspace Security
+      summary: Delete an IP range
+      description: Permanently removes a CIDR range from the workspace allowlist.
+      operationId: WorkspaceSecurityDeleteIPRange
+      parameters:
+      - name: workspace_key
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: range_id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content: {}
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: workspaceSecurity
+      x-speakeasy-name-override: deleteIPRange
+components:
+  schemas:
+    CreateDomainRequest:
+      type: object
+      properties:
+        domain:
+          type: string
+    GetIPAllowlistResponse:
+      required:
+      - ip_allowlist
+      - current_ip
+      type: object
+      properties:
+        ip_allowlist:
+          $ref: '#/components/schemas/IPAllowlist'
+        current_ip:
+          type: string
+    IPAllowlist:
+      required:
+      - enabled
+      - ranges
+      type: object
+      properties:
+        enabled:
+          type: boolean
+        ranges:
+          type: array
+          items:
+            $ref: '#/components/schemas/IPRange'
+    ListDomainsResponse:
+      required:
+      - domains
+      type: object
+      properties:
+        domains:
+          type: array
+          items:
+            $ref: '#/components/schemas/DomainVerification'
+    AddIPRangeResponse:
+      required:
+      - range
+      type: object
+      properties:
+        range:
+          $ref: '#/components/schemas/IPRange'
+    DomainVerificationStatus:
+      type: string
+      enum:
+      - DOMAIN_VERIFICATION_STATUS_PENDING
+      - DOMAIN_VERIFICATION_STATUS_VERIFIED
+    UpdateIPAllowlistResponse:
+      required:
+      - ip_allowlist
+      type: object
+      properties:
+        ip_allowlist:
+          $ref: '#/components/schemas/IPAllowlist'
+    VerifyDomainResponse:
+      required:
+      - domain
+      type: object
+      properties:
+        domain:
+          $ref: '#/components/schemas/DomainVerification'
+    UpdateIPAllowlistRequest:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+    CreateDomainResponse:
+      required:
+      - domain
+      type: object
+      properties:
+        domain:
+          $ref: '#/components/schemas/DomainVerification'
+    DomainVerification:
+      required:
+      - id
+      - domain
+      - status
+      - txt_name
+      - txt_value
+      - created_at
+      type: object
+      properties:
+        id:
+          type: string
+        domain:
+          type: string
+        status:
+          $ref: '#/components/schemas/DomainVerificationStatus'
+        txt_name:
+          type: string
+        txt_value:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        expires_at:
+          type: string
+          format: date-time
+        verified_at:
+          type: string
+          format: date-time
+        created_by_id:
+          type: string
+    AddIPRangeRequest:
+      type: object
+      properties:
+        cidr:
+          type: string
+        description:
+          type: string
+    IPRange:
+      required:
+      - id
+      - cidr
+      - description
+      - created_at
+      type: object
+      properties:
+        id:
+          type: string
+        cidr:
+          type: string
+        description:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        created_by_id:
+          type: string
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Human-readable error message.
+        code:
+          type: integer
+          description: gRPC status code, when the service reports one.
+        details:
+          type: array
+          items: {}
+          description: Additional error details, when the service reports any.
+      required:
+      - message
+  securitySchemes:
+    ApiKey:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+externalDocs:
+  url: https://docs.orq.ai
+  description: orq.ai Documentation
+x-speakeasy-timeout: 600000

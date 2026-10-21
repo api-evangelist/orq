@@ -1,0 +1,721 @@
+{
+  "@context": {
+    "@vocab": "https://orq.ai/schema#",
+    "schema": "https://schema.org/",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "dcterms": "http://purl.org/dc/terms/",
+    "orq": "https://orq.ai/schema#",
+    "HonoApiError": "orq:HonoApiError",
+    "code": {
+      "@id": "orq:code",
+      "@type": "xsd:string"
+    },
+    "message": {
+      "@id": "orq:message",
+      "@type": "xsd:string"
+    },
+    "InvokeDeploymentRequest": "orq:InvokeDeploymentRequest",
+    "key": {
+      "@id": "orq:key",
+      "@type": "xsd:string"
+    },
+    "stream": {
+      "@id": "orq:stream",
+      "@type": "xsd:boolean"
+    },
+    "inputs": {
+      "@id": "orq:inputs"
+    },
+    "context": {
+      "@id": "orq:context"
+    },
+    "prefix_messages": {
+      "@id": "orq:prefix_messages",
+      "@container": "@list"
+    },
+    "messages": {
+      "@id": "orq:messages",
+      "@container": "@list"
+    },
+    "identity": {
+      "@id": "orq:identity",
+      "@type": "@id"
+    },
+    "file_ids": {
+      "@id": "orq:file_ids",
+      "@container": "@list"
+    },
+    "metadata": {
+      "@id": "orq:metadata"
+    },
+    "extra_params": {
+      "@id": "orq:extra_params"
+    },
+    "documents": {
+      "@id": "orq:documents",
+      "@container": "@list"
+    },
+    "invoke_options": {
+      "@id": "orq:invoke_options"
+    },
+    "thread": {
+      "@id": "orq:thread"
+    },
+    "knowledge_filter": {
+      "@id": "orq:knowledge_filter"
+    },
+    "TextContentPartSchema": "orq:TextContentPartSchema",
+    "type": {
+      "@id": "orq:type",
+      "@type": "xsd:string"
+    },
+    "text": {
+      "@id": "orq:text",
+      "@type": "xsd:string"
+    },
+    "cache_control": {
+      "@id": "orq:cache_control"
+    },
+    "ImageContentPartSchema": "orq:ImageContentPartSchema",
+    "image_url": {
+      "@id": "orq:image_url"
+    },
+    "AudioContentPartSchema": "orq:AudioContentPartSchema",
+    "input_audio": {
+      "@id": "orq:input_audio"
+    },
+    "FileContentPartSchema": "orq:FileContentPartSchema",
+    "file_data": {
+      "@id": "orq:file_data",
+      "@type": "xsd:string"
+    },
+    "uri": {
+      "@id": "orq:uri",
+      "@type": "xsd:string"
+    },
+    "mimeType": {
+      "@id": "orq:mimeType",
+      "@type": "xsd:string"
+    },
+    "file_id": {
+      "@id": "orq:file_id",
+      "@type": "xsd:string"
+    },
+    "filename": {
+      "@id": "orq:filename",
+      "@type": "xsd:string"
+    },
+    "RefusalPartSchema": "orq:RefusalPartSchema",
+    "refusal": {
+      "@id": "orq:refusal",
+      "@type": "xsd:string"
+    },
+    "ReasoningPartSchema": "orq:ReasoningPartSchema",
+    "reasoning": {
+      "@id": "orq:reasoning",
+      "@type": "xsd:string"
+    },
+    "signature": {
+      "@id": "orq:signature",
+      "@type": "xsd:string"
+    },
+    "RedactedReasoningPartSchema": "orq:RedactedReasoningPartSchema",
+    "data": {
+      "@id": "orq:data",
+      "@type": "xsd:string"
+    },
+    "PublicIdentity": "orq:PublicIdentity",
+    "id": {
+      "@id": "orq:id",
+      "@type": "xsd:string"
+    },
+    "display_name": {
+      "@id": "orq:display_name",
+      "@type": "xsd:string"
+    },
+    "email": {
+      "@id": "orq:email",
+      "@type": "xsd:string"
+    },
+    "logo_url": {
+      "@id": "orq:logo_url",
+      "@type": "xsd:string"
+    },
+    "tags": {
+      "@id": "orq:tags",
+      "@container": "@list"
+    },
+    "ThinkingConfigDisabledSchema": "orq:ThinkingConfigDisabledSchema",
+    "ThinkingConfigEnabledSchema": "orq:ThinkingConfigEnabledSchema",
+    "budget_tokens": {
+      "@id": "orq:budget_tokens",
+      "@type": "xsd:decimal"
+    },
+    "thinking_level": {
+      "@id": "orq:thinking_level",
+      "@type": "xsd:string"
+    },
+    "ThinkingConfigAdaptiveSchema": "orq:ThinkingConfigAdaptiveSchema",
+    "PIIRedactionPlugin": "orq:PIIRedactionPlugin",
+    "language": {
+      "@id": "orq:language",
+      "@type": "xsd:string"
+    },
+    "regions": {
+      "@id": "orq:regions",
+      "@container": "@list"
+    },
+    "entities": {
+      "@id": "orq:entities",
+      "@container": "@list"
+    },
+    "entity_thresholds": {
+      "@id": "orq:entity_thresholds"
+    },
+    "threshold": {
+      "@id": "orq:threshold",
+      "@type": "xsd:decimal"
+    },
+    "on_failure": {
+      "@id": "orq:on_failure",
+      "@type": "xsd:string"
+    },
+    "ResponseHealingPlugin": "orq:ResponseHealingPlugin",
+    "TraceScrubbingPlugin": "orq:TraceScrubbingPlugin",
+    "mask": {
+      "@id": "orq:mask",
+      "@container": "@list"
+    },
+    "GoogleSearchToolInput": "orq:GoogleSearchToolInput",
+    "requires_approval": {
+      "@id": "orq:requires_approval",
+      "@type": "xsd:boolean"
+    },
+    "configuration": {
+      "@id": "orq:configuration"
+    },
+    "WebScraperToolInput": "orq:WebScraperToolInput",
+    "CallSubAgentToolInput": "orq:CallSubAgentToolInput",
+    "RetrieveAgentsToolInput": "orq:RetrieveAgentsToolInput",
+    "QueryMemoryStoreToolInput": "orq:QueryMemoryStoreToolInput",
+    "WriteMemoryStoreToolInput": "orq:WriteMemoryStoreToolInput",
+    "RetrieveMemoryStoresToolInput": "orq:RetrieveMemoryStoresToolInput",
+    "DeleteMemoryDocumentToolInput": "orq:DeleteMemoryDocumentToolInput",
+    "RetrieveKnowledgeBasesToolInput": "orq:RetrieveKnowledgeBasesToolInput",
+    "QueryKnowledgeBaseToolInput": "orq:QueryKnowledgeBaseToolInput",
+    "CurrentDateToolInput": "orq:CurrentDateToolInput",
+    "AdvisorToolInput": "orq:AdvisorToolInput",
+    "SidekickToolInput": "orq:SidekickToolInput",
+    "CodeInterpreterToolInput": "orq:CodeInterpreterToolInput",
+    "FileSystemToolInput": "orq:FileSystemToolInput",
+    "HttpToolInput": "orq:HttpToolInput",
+    "timeout": {
+      "@id": "orq:timeout",
+      "@type": "xsd:decimal"
+    },
+    "CodeToolInput": "orq:CodeToolInput",
+    "FunctionToolInput": "orq:FunctionToolInput",
+    "JsonSchemaToolInput": "orq:JsonSchemaToolInput",
+    "McpToolInput": "orq:McpToolInput",
+    "tool_id": {
+      "@id": "orq:tool_id",
+      "@type": "xsd:string"
+    },
+    "ProviderToolInput": "orq:ProviderToolInput",
+    "CreateAgentResponse": "orq:CreateAgentResponse",
+    "_id": {
+      "@id": "orq:_id",
+      "@type": "xsd:string"
+    },
+    "task_id": {
+      "@id": "orq:task_id",
+      "@type": "xsd:string"
+    },
+    "output": {
+      "@id": "orq:output",
+      "@container": "@list"
+    },
+    "created_at": {
+      "@id": "orq:created_at",
+      "@type": "xsd:string"
+    },
+    "model": {
+      "@id": "orq:model",
+      "@type": "xsd:string"
+    },
+    "usage": {
+      "@id": "orq:usage"
+    },
+    "finish_reason": {
+      "@id": "orq:finish_reason",
+      "@type": "xsd:string"
+    },
+    "pending_tool_calls": {
+      "@id": "orq:pending_tool_calls",
+      "@container": "@list"
+    },
+    "telemetry": {
+      "@id": "orq:telemetry",
+      "@type": "@id"
+    },
+    "AgentResponseMessage": "orq:AgentResponseMessage",
+    "messageId": {
+      "@id": "orq:messageId",
+      "@type": "xsd:string"
+    },
+    "role": {
+      "@id": "orq:role",
+      "@type": "xsd:string"
+    },
+    "parts": {
+      "@id": "orq:parts",
+      "@container": "@list"
+    },
+    "TextPart": "orq:TextPart",
+    "kind": {
+      "@id": "orq:kind",
+      "@type": "xsd:string"
+    },
+    "ErrorPart": "orq:ErrorPart",
+    "error": {
+      "@id": "orq:error",
+      "@type": "xsd:string"
+    },
+    "DataPart": "orq:DataPart",
+    "FilePart": "orq:FilePart",
+    "file": {
+      "@id": "orq:file"
+    },
+    "ToolCallPart": "orq:ToolCallPart",
+    "tool_name": {
+      "@id": "orq:tool_name",
+      "@type": "xsd:string"
+    },
+    "tool_call_id": {
+      "@id": "orq:tool_call_id",
+      "@type": "xsd:string"
+    },
+    "arguments": {
+      "@id": "orq:arguments"
+    },
+    "thought_signature": {
+      "@id": "orq:thought_signature",
+      "@type": "xsd:string"
+    },
+    "ToolResultPart": "orq:ToolResultPart",
+    "result": {
+      "@id": "orq:result"
+    },
+    "Telemetry": "orq:Telemetry",
+    "trace_id": {
+      "@id": "orq:trace_id",
+      "@type": "xsd:string"
+    },
+    "span_id": {
+      "@id": "orq:span_id",
+      "@type": "xsd:string"
+    },
+    "ResponseStartedEvent": "orq:ResponseStartedEvent",
+    "timestamp": {
+      "@id": "orq:timestamp",
+      "@type": "xsd:string"
+    },
+    "ResponseDoneEvent": "orq:ResponseDoneEvent",
+    "ResponseFailedEvent": "orq:ResponseFailedEvent",
+    "ToolStartedEvent": "orq:ToolStartedEvent",
+    "ToolDoneEvent": "orq:ToolDoneEvent",
+    "ToolFailedEvent": "orq:ToolFailedEvent",
+    "ToolReviewRequestedEvent": "orq:ToolReviewRequestedEvent",
+    "ToolReviewDoneEvent": "orq:ToolReviewDoneEvent",
+    "ReviewOutcome": "orq:ReviewOutcome",
+    "PartDeltaEvent": "orq:PartDeltaEvent",
+    "BasePart": "orq:BasePart",
+    "PartDoneEvent": "orq:PartDoneEvent",
+    "AgentResponseRequest": "orq:AgentResponseRequest",
+    "variables": {
+      "@id": "orq:variables"
+    },
+    "contact": {
+      "@id": "orq:contact"
+    },
+    "memory": {
+      "@id": "orq:memory"
+    },
+    "engine": {
+      "@id": "orq:engine",
+      "@type": "xsd:string"
+    },
+    "background": {
+      "@id": "orq:background",
+      "@type": "xsd:boolean"
+    },
+    "conversation": {
+      "@id": "orq:conversation"
+    },
+    "ExtendedMessage": "orq:ExtendedMessage",
+    "taskId": {
+      "@id": "orq:taskId",
+      "@type": "xsd:string"
+    },
+    "contextId": {
+      "@id": "orq:contextId",
+      "@type": "xsd:string"
+    },
+    "AgentExecutionStartedStreamingEvent": "orq:AgentExecutionStartedStreamingEvent",
+    "AgentStartedStreamingEvent": "orq:AgentStartedStreamingEvent",
+    "AgentThoughtStreamingEvent": "orq:AgentThoughtStreamingEvent",
+    "AgentInactiveStreamingEvent": "orq:AgentInactiveStreamingEvent",
+    "AgentErroredStreamingEvent": "orq:AgentErroredStreamingEvent",
+    "ActionReviewRequestedStreamingEvent": "orq:ActionReviewRequestedStreamingEvent",
+    "ActionReviewedStreamingEvent": "orq:ActionReviewedStreamingEvent",
+    "ExecutionReviewRequiredStreamingEvent": "orq:ExecutionReviewRequiredStreamingEvent",
+    "ExecutionReviewedStreamingEvent": "orq:ExecutionReviewedStreamingEvent",
+    "ExecutionNamedStreamingEvent": "orq:ExecutionNamedStreamingEvent",
+    "AgentHandedOffStreamingEvent": "orq:AgentHandedOffStreamingEvent",
+    "AgentMessageCreatedStreamingEvent": "orq:AgentMessageCreatedStreamingEvent",
+    "ToolExecutionStartedStreamingEvent": "orq:ToolExecutionStartedStreamingEvent",
+    "ToolExecutionFinishedStreamingEvent": "orq:ToolExecutionFinishedStreamingEvent",
+    "ToolExecutionFailedStreamingEvent": "orq:ToolExecutionFailedStreamingEvent",
+    "TimeoutStreamingEvent": "orq:TimeoutStreamingEvent",
+    "ErrorStreamingEvent": "orq:ErrorStreamingEvent",
+    "PublicContact": "orq:PublicContact",
+    "ParseResponse": "orq:ParseResponse",
+    "chunks": {
+      "@id": "orq:chunks",
+      "@container": "@list"
+    },
+    "Chunk": "orq:Chunk",
+    "index": {
+      "@id": "orq:index",
+      "@type": "xsd:integer"
+    },
+    "ChunkMetadata": "orq:ChunkMetadata",
+    "start_index": {
+      "@id": "orq:start_index",
+      "@type": "xsd:integer"
+    },
+    "end_index": {
+      "@id": "orq:end_index",
+      "@type": "xsd:integer"
+    },
+    "token_count": {
+      "@id": "orq:token_count",
+      "@type": "xsd:integer"
+    },
+    "ListFileSystemsResponse": "orq:ListFileSystemsResponse",
+    "object": {
+      "@id": "orq:object",
+      "@type": "xsd:string"
+    },
+    "has_more": {
+      "@id": "orq:has_more",
+      "@type": "xsd:boolean"
+    },
+    "CreateFileSystemRequest": "orq:CreateFileSystemRequest",
+    "path": {
+      "@id": "orq:path",
+      "@type": "xsd:string"
+    },
+    "description": {
+      "@id": "orq:description",
+      "@type": "xsd:string"
+    },
+    "external_access": {
+      "@id": "orq:external_access",
+      "@type": "xsd:string"
+    },
+    "sharing": {
+      "@id": "orq:sharing",
+      "@type": "@id"
+    },
+    "FileSystem": "orq:FileSystem",
+    "project_id": {
+      "@id": "orq:project_id",
+      "@type": "xsd:string"
+    },
+    "created_by_id": {
+      "@id": "orq:created_by_id",
+      "@type": "xsd:string"
+    },
+    "updated_by_id": {
+      "@id": "orq:updated_by_id",
+      "@type": "xsd:string"
+    },
+    "created": {
+      "@id": "orq:created",
+      "@type": "xsd:string"
+    },
+    "updated": {
+      "@id": "orq:updated",
+      "@type": "xsd:string"
+    },
+    "used_bytes": {
+      "@id": "orq:used_bytes",
+      "@type": "xsd:string"
+    },
+    "used_inodes": {
+      "@id": "orq:used_inodes",
+      "@type": "xsd:string"
+    },
+    "last_metered_at": {
+      "@id": "orq:last_metered_at",
+      "@type": "xsd:string"
+    },
+    "UpdateFileSystemRequest": "orq:UpdateFileSystemRequest",
+    "ListFileSystemFilesResponse": "orq:ListFileSystemFilesResponse",
+    "depth": {
+      "@id": "orq:depth",
+      "@type": "xsd:integer"
+    },
+    "entries": {
+      "@id": "orq:entries",
+      "@container": "@list"
+    },
+    "entry_count": {
+      "@id": "orq:entry_count",
+      "@type": "xsd:integer"
+    },
+    "truncated": {
+      "@id": "orq:truncated",
+      "@type": "xsd:boolean"
+    },
+    "DeleteFileSystemFileResponse": "orq:DeleteFileSystemFileResponse",
+    "MoveFileSystemFileRequest": "orq:MoveFileSystemFileRequest",
+    "from": {
+      "@id": "orq:from",
+      "@type": "xsd:string"
+    },
+    "to": {
+      "@id": "orq:to",
+      "@type": "xsd:string"
+    },
+    "MoveFileSystemFileResponse": "orq:MoveFileSystemFileResponse",
+    "StatFileSystemFileResponse": "orq:StatFileSystemFileResponse",
+    "size_bytes": {
+      "@id": "orq:size_bytes",
+      "@type": "xsd:string"
+    },
+    "mode": {
+      "@id": "orq:mode",
+      "@type": "xsd:string"
+    },
+    "modified": {
+      "@id": "orq:modified",
+      "@type": "xsd:string"
+    },
+    "CreateFileSystemFolderRequest": "orq:CreateFileSystemFolderRequest",
+    "CreateFileSystemFolderResponse": "orq:CreateFileSystemFolderResponse",
+    "Sharing": "orq:Sharing",
+    "all_projects": {
+      "@id": "orq:all_projects"
+    },
+    "selected": {
+      "@id": "orq:selected"
+    },
+    "allow_version_pin": {
+      "@id": "orq:allow_version_pin",
+      "@type": "xsd:boolean"
+    },
+    "allow_fork": {
+      "@id": "orq:allow_fork",
+      "@type": "xsd:boolean"
+    },
+    "auto_grant_new_projects": {
+      "@id": "orq:auto_grant_new_projects",
+      "@type": "xsd:boolean"
+    },
+    "FileSystemExternalAccess": "orq:FileSystemExternalAccess",
+    "FileEntry": "orq:FileEntry",
+    "name": {
+      "@id": "orq:name",
+      "@type": "xsd:string"
+    },
+    "SharingSelectedProjects": "orq:SharingSelectedProjects",
+    "project_ids": {
+      "@id": "orq:project_ids",
+      "@container": "@list"
+    },
+    "KnowledgeBasesServiceListResponse": "orq:KnowledgeBasesServiceListResponse",
+    "DatasourcesServiceListResponse": "orq:DatasourcesServiceListResponse",
+    "DatasourcesServiceCreateRequest": "orq:DatasourcesServiceCreateRequest",
+    "chunking_options": {
+      "@id": "orq:chunking_options",
+      "@type": "@id"
+    },
+    "attachment": {
+      "@id": "orq:attachment",
+      "@type": "@id"
+    },
+    "Datasource": "orq:Datasource",
+    "status": {
+      "@id": "orq:status",
+      "@type": "xsd:string"
+    },
+    "update_by_id": {
+      "@id": "orq:update_by_id",
+      "@type": "xsd:string"
+    },
+    "knowledge_id": {
+      "@id": "orq:knowledge_id",
+      "@type": "xsd:string"
+    },
+    "chunks_count": {
+      "@id": "orq:chunks_count",
+      "@type": "xsd:decimal"
+    },
+    "processing_attempts": {
+      "@id": "orq:processing_attempts",
+      "@container": "@list"
+    },
+    "DatasourcesServicePreviewChunksRequest": "orq:DatasourcesServicePreviewChunksRequest",
+    "DatasourcesServicePreviewChunksResponse": "orq:DatasourcesServicePreviewChunksResponse",
+    "DatasourcesServiceUpdateRequest": "orq:DatasourcesServiceUpdateRequest",
+    "ChunksServiceListResponse": "orq:ChunksServiceListResponse",
+    "ChunksServiceDeleteManyRequest": "orq:ChunksServiceDeleteManyRequest",
+    "chunk_ids": {
+      "@id": "orq:chunk_ids",
+      "@container": "@list"
+    },
+    "ChunksServiceDeleteManyResponse": "orq:ChunksServiceDeleteManyResponse",
+    "deleted_count": {
+      "@id": "orq:deleted_count",
+      "@type": "xsd:decimal"
+    },
+    "failed_ids": {
+      "@id": "orq:failed_ids",
+      "@container": "@list"
+    },
+    "ChunksServiceCountRequest": "orq:ChunksServiceCountRequest",
+    "q": {
+      "@id": "orq:q",
+      "@type": "xsd:string"
+    },
+    "enabled": {
+      "@id": "orq:enabled",
+      "@type": "xsd:boolean"
+    },
+    "ChunksServiceCountResponse": "orq:ChunksServiceCountResponse",
+    "count": {
+      "@id": "orq:count",
+      "@type": "xsd:decimal"
+    },
+    "ChunksServiceListPaginatedRequest": "orq:ChunksServiceListPaginatedRequest",
+    "limit": {
+      "@id": "orq:limit",
+      "@type": "xsd:integer"
+    },
+    "page": {
+      "@id": "orq:page",
+      "@type": "xsd:integer"
+    },
+    "ChunksServiceListPaginatedResponse": "orq:ChunksServiceListPaginatedResponse",
+    "KnowledgeChunk": "orq:KnowledgeChunk",
+    "count_metadata": {
+      "@id": "orq:count_metadata",
+      "@type": "@id"
+    },
+    "ChunksServiceUpdateRequest": "orq:ChunksServiceUpdateRequest",
+    "embedding": {
+      "@id": "orq:embedding",
+      "@container": "@list"
+    },
+    "ChunksServiceSetEnabledRequest": "orq:ChunksServiceSetEnabledRequest",
+    "DatasourcesServiceGetProcessingStatusResponse": "orq:DatasourcesServiceGetProcessingStatusResponse",
+    "total_queued": {
+      "@id": "orq:total_queued",
+      "@type": "xsd:decimal"
+    },
+    "total_completed": {
+      "@id": "orq:total_completed",
+      "@type": "xsd:decimal"
+    },
+    "total_passed": {
+      "@id": "orq:total_passed",
+      "@type": "xsd:decimal"
+    },
+    "total_failed": {
+      "@id": "orq:total_failed",
+      "@type": "xsd:decimal"
+    },
+    "overall_total_processing": {
+      "@id": "orq:overall_total_processing",
+      "@type": "xsd:decimal"
+    },
+    "chunks_processing_attempts": {
+      "@id": "orq:chunks_processing_attempts",
+      "@container": "@list"
+    },
+    "datasource_processing_attempts": {
+      "@id": "orq:datasource_processing_attempts",
+      "@container": "@list"
+    },
+    "SearchKnowledgeRequest": "orq:SearchKnowledgeRequest",
+    "query": {
+      "@id": "orq:query",
+      "@type": "xsd:string"
+    },
+    "top_k": {
+      "@id": "orq:top_k",
+      "@type": "xsd:integer"
+    },
+    "search_type": {
+      "@id": "orq:search_type",
+      "@type": "@id"
+    },
+    "filter_by": {
+      "@id": "orq:filter_by"
+    },
+    "search_options": {
+      "@id": "orq:search_options"
+    },
+    "rerank_config": {
+      "@id": "orq:rerank_config"
+    },
+    "agentic_rag_config": {
+      "@id": "orq:agentic_rag_config"
+    },
+    "retrieval_config": {
+      "@id": "orq:retrieval_config"
+    },
+    "SearchKnowledgeResponse": "orq:SearchKnowledgeResponse",
+    "matches": {
+      "@id": "orq:matches",
+      "@container": "@list"
+    },
+    "GetUploadFileUrlResponse": "orq:GetUploadFileUrlResponse",
+    "objectName": {
+      "@id": "orq:objectName",
+      "@type": "xsd:string"
+    },
+    "postPolicy": {
+      "@id": "orq:postPolicy",
+      "@type": "@id"
+    },
+    "fileId": {
+      "@id": "orq:fileId",
+      "@type": "xsd:string"
+    },
+    "RetrievalSettings": "orq:RetrievalSettings",
+    "retrieval_type": {
+      "@id": "orq:retrieval_type",
+      "@type": "xsd:string"
+    },
+    "ExternalKnowledgeConfigWrite": "orq:ExternalKnowledgeConfigWrite",
+    "api_url": {
+      "@id": "orq:api_url",
+      "@type": "xsd:string"
+    },
+    "api_key": {
+      "@id": "orq:api_key",
+      "@type": "xsd:string"
+    },
+    "ExternalKnowledgeConfig": "orq:ExternalKnowledgeConfig"
+  },
+  "@type": "schema:Dataset",
+  "schema:name": "Orq.ai API JSON-LD context",
+  "schema:description": "A JSON-LD @context for the objects Orq.ai's own API contract declares: one class per component schema, one property per declared field, typed from the contract. Derived by script (derive-json-ld.py, 2026-10-21) from openapi/orq-openapi.json.",
+  "dcterms:created": "2026-10-21",
+  "dcterms:source": [
+    "openapi/orq-openapi.json"
+  ]
+}

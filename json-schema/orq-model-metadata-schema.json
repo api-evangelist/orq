@@ -1,0 +1,777 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/orq/main/json-schema/orq-model-metadata-schema.json",
+  "title": "ModelMetadata",
+  "x-generated": "2026-10-21",
+  "x-method": "derived",
+  "x-generator": "derive-json-schema.py",
+  "x-source": "openapi/orq-openapi.json#/components/schemas/ModelMetadata",
+  "additionalProperties": false,
+  "properties": {
+    "allowed_passthrough_parameters": {
+      "items": {
+        "type": "string"
+      },
+      "type": [
+        "array",
+        "null"
+      ]
+    },
+    "autorouter": {
+      "$ref": "#/$defs/AutoRouterConfig"
+    },
+    "batch_endpoints": {
+      "items": {
+        "type": "string"
+      },
+      "type": [
+        "array",
+        "null"
+      ]
+    },
+    "cached_image_input_cost": {
+      "format": "double",
+      "type": "number"
+    },
+    "cached_input_cost": {
+      "format": "double",
+      "type": "number"
+    },
+    "chain_of_thought": {
+      "type": "boolean"
+    },
+    "context_length": {
+      "format": "int64",
+      "type": "integer"
+    },
+    "context_window": {
+      "format": "int64",
+      "type": "integer"
+    },
+    "cost_efficiency_rating": {
+      "format": "int64",
+      "type": "integer"
+    },
+    "cost_per_image": {
+      "format": "double",
+      "type": "number"
+    },
+    "deprecation_date": {
+      "type": "string"
+    },
+    "embedding_dimensions": {
+      "format": "int64",
+      "type": "integer"
+    },
+    "extended_context_pricing_mode": {
+      "type": "string"
+    },
+    "extended_context_threshold": {
+      "format": "int64",
+      "type": "integer"
+    },
+    "function_tools_require_effort_none": {
+      "type": "boolean"
+    },
+    "generate_audio": {
+      "type": "boolean"
+    },
+    "image_input_cost": {
+      "format": "double",
+      "type": "number"
+    },
+    "image_output_cost": {
+      "format": "double",
+      "type": "number"
+    },
+    "image_token_cost": {
+      "format": "double",
+      "type": "number"
+    },
+    "intelligence_rating": {
+      "format": "int64",
+      "type": "integer"
+    },
+    "is_private": {
+      "type": "boolean"
+    },
+    "is_realtime": {
+      "type": "boolean"
+    },
+    "knowledge_cutoff": {
+      "type": "string"
+    },
+    "max_images_per_request": {
+      "format": "int64",
+      "type": "integer"
+    },
+    "max_input_tokens": {
+      "format": "int64",
+      "type": "integer"
+    },
+    "max_output_tokens": {
+      "format": "int64",
+      "type": "integer"
+    },
+    "max_temperature": {
+      "format": "double",
+      "type": "number"
+    },
+    "million_searches_cost": {
+      "format": "double",
+      "type": "number"
+    },
+    "million_tokens_above_128k_cache_read_cost": {
+      "format": "double",
+      "type": "number"
+    },
+    "million_tokens_above_128k_cache_write_cost": {
+      "format": "double",
+      "type": "number"
+    },
+    "million_tokens_above_128k_input_cost": {
+      "format": "double",
+      "type": "number"
+    },
+    "million_tokens_above_128k_output_cost": {
+      "format": "double",
+      "type": "number"
+    },
+    "million_tokens_above_200k_cache_read_cost": {
+      "format": "double",
+      "type": "number"
+    },
+    "million_tokens_above_200k_cache_write_cost": {
+      "format": "double",
+      "type": "number"
+    },
+    "million_tokens_above_200k_input_cost": {
+      "format": "double",
+      "type": "number"
+    },
+    "million_tokens_above_200k_output_cost": {
+      "format": "double",
+      "type": "number"
+    },
+    "million_tokens_audio_input_cost": {
+      "format": "double",
+      "type": "number"
+    },
+    "million_tokens_audio_output_cost": {
+      "format": "double",
+      "type": "number"
+    },
+    "million_tokens_batches_input_cost": {
+      "format": "double",
+      "type": "number"
+    },
+    "million_tokens_batches_output_cost": {
+      "format": "double",
+      "type": "number"
+    },
+    "million_tokens_cache_read_cost": {
+      "format": "double",
+      "type": "number"
+    },
+    "million_tokens_cache_write_1h_cost": {
+      "format": "double",
+      "type": "number"
+    },
+    "million_tokens_cache_write_5m_cost": {
+      "format": "double",
+      "type": "number"
+    },
+    "million_tokens_cache_write_cost": {
+      "format": "double",
+      "type": "number"
+    },
+    "million_tokens_input_cost": {
+      "format": "double",
+      "type": "number"
+    },
+    "million_tokens_output_cost": {
+      "format": "double",
+      "type": "number"
+    },
+    "million_tokens_reasoning_cost": {
+      "format": "double",
+      "type": "number"
+    },
+    "multilingual": {
+      "type": "boolean"
+    },
+    "offline": {
+      "type": "boolean"
+    },
+    "per_video_second_cost": {
+      "format": "double",
+      "type": "number"
+    },
+    "per_video_second_cost_1080p": {
+      "format": "double",
+      "type": "number"
+    },
+    "pricing": {
+      "$ref": "#/$defs/Pricing"
+    },
+    "reasoning_cost": {
+      "format": "double",
+      "type": "number"
+    },
+    "reasoning_tokens": {
+      "format": "int64",
+      "type": "integer"
+    },
+    "region": {
+      "type": "string"
+    },
+    "speed_rating": {
+      "format": "int64",
+      "type": "integer"
+    },
+    "supported_embedding_dimensions": {
+      "$ref": "#/$defs/EmbeddingDimensionSupport"
+    },
+    "supported_video_aspect_ratios": {
+      "items": {
+        "type": "string"
+      },
+      "type": [
+        "array",
+        "null"
+      ]
+    },
+    "supported_video_durations": {
+      "items": {
+        "format": "int64",
+        "type": "integer"
+      },
+      "type": [
+        "array",
+        "null"
+      ]
+    },
+    "supported_video_frame_images": {
+      "items": {
+        "type": "string"
+      },
+      "type": [
+        "array",
+        "null"
+      ]
+    },
+    "supported_video_resolutions": {
+      "items": {
+        "type": "string"
+      },
+      "type": [
+        "array",
+        "null"
+      ]
+    },
+    "supported_video_sizes": {
+      "items": {
+        "type": "string"
+      },
+      "type": [
+        "array",
+        "null"
+      ]
+    },
+    "supports_adaptive_reasoning": {
+      "type": "boolean"
+    },
+    "supports_audio_input": {
+      "type": "boolean"
+    },
+    "supports_audio_output": {
+      "type": "boolean"
+    },
+    "supports_b64_json_response_format": {
+      "type": "boolean"
+    },
+    "supports_batch_api": {
+      "type": "boolean"
+    },
+    "supports_cache_control": {
+      "type": "boolean"
+    },
+    "supports_citations": {
+      "type": "boolean"
+    },
+    "supports_code_execution": {
+      "type": "boolean"
+    },
+    "supports_commercial_use": {
+      "type": "boolean"
+    },
+    "supports_computer_use": {
+      "type": "boolean"
+    },
+    "supports_developer_message": {
+      "type": "boolean"
+    },
+    "supports_direct_cost": {
+      "type": "boolean"
+    },
+    "supports_distillation": {
+      "type": "boolean"
+    },
+    "supports_extended_thinking": {
+      "type": "boolean"
+    },
+    "supports_fine_tuning": {
+      "type": "boolean"
+    },
+    "supports_google_realtime_api": {
+      "type": "boolean"
+    },
+    "supports_image_edit": {
+      "type": "boolean"
+    },
+    "supports_image_input": {
+      "type": "boolean"
+    },
+    "supports_image_output": {
+      "type": "boolean"
+    },
+    "supports_images": {
+      "type": "boolean"
+    },
+    "supports_json_mode_response_format": {
+      "type": "boolean"
+    },
+    "supports_json_schema_response_format": {
+      "type": "boolean"
+    },
+    "supports_max_completion_tokens": {
+      "type": "boolean"
+    },
+    "supports_openai_realtime_api": {
+      "type": "boolean"
+    },
+    "supports_openai_sdk": {
+      "type": "boolean"
+    },
+    "supports_parallel_tool_calls": {
+      "type": "boolean"
+    },
+    "supports_pdf_input": {
+      "type": "boolean"
+    },
+    "supports_prompt_caching": {
+      "type": "boolean"
+    },
+    "supports_reasoning": {
+      "type": "boolean"
+    },
+    "supports_reasoning_effort_default": {
+      "type": "boolean"
+    },
+    "supports_reasoning_effort_high": {
+      "type": "boolean"
+    },
+    "supports_reasoning_effort_low": {
+      "type": "boolean"
+    },
+    "supports_reasoning_effort_max": {
+      "type": "boolean"
+    },
+    "supports_reasoning_effort_medium": {
+      "type": "boolean"
+    },
+    "supports_reasoning_effort_minimal": {
+      "type": "boolean"
+    },
+    "supports_reasoning_effort_none": {
+      "type": "boolean"
+    },
+    "supports_reasoning_effort_xhigh": {
+      "type": "boolean"
+    },
+    "supports_responses_api": {
+      "type": "boolean"
+    },
+    "supports_sampling_params": {
+      "type": "boolean"
+    },
+    "supports_service_tier": {
+      "type": "boolean"
+    },
+    "supports_streaming": {
+      "type": "boolean"
+    },
+    "supports_strict_tool": {
+      "type": "boolean"
+    },
+    "supports_structured_outputs": {
+      "type": "boolean"
+    },
+    "supports_system_message": {
+      "type": "boolean"
+    },
+    "supports_text": {
+      "type": "boolean"
+    },
+    "supports_text_input": {
+      "type": "boolean"
+    },
+    "supports_text_output": {
+      "type": "boolean"
+    },
+    "supports_thinking_level": {
+      "type": "boolean"
+    },
+    "supports_thinking_level_low": {
+      "type": "boolean"
+    },
+    "supports_thinking_level_medium": {
+      "type": "boolean"
+    },
+    "supports_thinking_level_minimal": {
+      "type": "boolean"
+    },
+    "supports_tool_calling": {
+      "type": "boolean"
+    },
+    "supports_tool_choice": {
+      "type": "boolean"
+    },
+    "supports_url_context": {
+      "type": "boolean"
+    },
+    "supports_url_response_format": {
+      "type": "boolean"
+    },
+    "supports_video_input": {
+      "type": "boolean"
+    },
+    "supports_video_output": {
+      "type": "boolean"
+    },
+    "supports_video_seed": {
+      "type": "boolean"
+    },
+    "supports_vision": {
+      "type": "boolean"
+    },
+    "supports_web_search": {
+      "type": "boolean"
+    },
+    "supports_zdr": {
+      "type": "boolean"
+    },
+    "thinking_enforced": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "is_private"
+  ],
+  "type": "object",
+  "$defs": {
+    "AutoRouterConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "economical_model": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "models": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "profile": {
+          "type": "string"
+        },
+        "session_affinity": {
+          "$ref": "#/$defs/SessionAffinityConfig"
+        },
+        "strong_model": {
+          "type": "string"
+        },
+        "v2": {
+          "$ref": "#/$defs/AutoRouterV2Config"
+        },
+        "version": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "AutoRouterV2Config": {
+      "additionalProperties": false,
+      "properties": {
+        "aa_creator": {
+          "$ref": "#/$defs/AutoRouterV2CreatorConfig"
+        },
+        "aa_evaluations": {
+          "additionalProperties": {
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "type": "object"
+        },
+        "aa_median_output_tokens_per_second": {
+          "format": "double",
+          "type": "number"
+        },
+        "aa_median_time_to_first_answer_token": {
+          "format": "double",
+          "type": "number"
+        },
+        "aa_median_time_to_first_token_seconds": {
+          "format": "double",
+          "type": "number"
+        },
+        "aa_model_id": {
+          "type": "string"
+        },
+        "aa_name": {
+          "type": "string"
+        },
+        "aa_pricing": {
+          "additionalProperties": {
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "type": "object"
+        },
+        "aa_release_date": {
+          "type": "string"
+        },
+        "aa_slug": {
+          "type": "string"
+        },
+        "default_effort": {
+          "type": "string"
+        },
+        "intelligence_index": {
+          "format": "double",
+          "type": "number"
+        },
+        "price": {
+          "format": "double",
+          "type": "number"
+        },
+        "reasoning_efforts": {
+          "additionalProperties": {
+            "$ref": "#/$defs/AutoRouterV2EffortConfig"
+          },
+          "type": "object"
+        }
+      },
+      "required": [
+        "intelligence_index",
+        "price"
+      ],
+      "type": "object"
+    },
+    "AutoRouterV2CreatorConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "slug": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "slug"
+      ],
+      "type": "object"
+    },
+    "AutoRouterV2EffortConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "aa_slug": {
+          "type": "string"
+        },
+        "intelligence_index": {
+          "format": "double",
+          "type": "number"
+        }
+      },
+      "required": [
+        "intelligence_index"
+      ],
+      "type": "object"
+    },
+    "EmbeddingDimensionSupport": {
+      "additionalProperties": false,
+      "properties": {
+        "max": {
+          "format": "int64",
+          "type": "integer"
+        },
+        "min": {
+          "format": "int64",
+          "type": "integer"
+        },
+        "options": {
+          "items": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        }
+      },
+      "type": "object"
+    },
+    "Price": {
+      "additionalProperties": false,
+      "properties": {
+        "cost": {
+          "format": "double",
+          "type": "number"
+        },
+        "currency": {
+          "type": "string"
+        },
+        "per": {
+          "format": "int64",
+          "type": "integer"
+        },
+        "unit": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "cost",
+        "currency",
+        "unit",
+        "per"
+      ],
+      "type": "object"
+    },
+    "Pricing": {
+      "additionalProperties": false,
+      "properties": {
+        "audio_input": {
+          "$ref": "#/$defs/Price"
+        },
+        "audio_output": {
+          "$ref": "#/$defs/Price"
+        },
+        "cache_read": {
+          "$ref": "#/$defs/Price"
+        },
+        "cache_write_1h": {
+          "$ref": "#/$defs/Price"
+        },
+        "cache_write_5m": {
+          "$ref": "#/$defs/Price"
+        },
+        "input": {
+          "$ref": "#/$defs/Price"
+        },
+        "output": {
+          "$ref": "#/$defs/Price"
+        },
+        "reasoning": {
+          "$ref": "#/$defs/Price"
+        },
+        "variants": {
+          "items": {
+            "$ref": "#/$defs/PricingVariant"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "cache_write_30m": {
+          "$ref": "#/$defs/Price"
+        },
+        "cache_write_12h": {
+          "$ref": "#/$defs/Price"
+        }
+      },
+      "type": "object"
+    },
+    "PricingVariant": {
+      "additionalProperties": false,
+      "properties": {
+        "audio_input": {
+          "$ref": "#/$defs/Price"
+        },
+        "audio_output": {
+          "$ref": "#/$defs/Price"
+        },
+        "cache_read": {
+          "$ref": "#/$defs/Price"
+        },
+        "cache_write_1h": {
+          "$ref": "#/$defs/Price"
+        },
+        "cache_write_5m": {
+          "$ref": "#/$defs/Price"
+        },
+        "input": {
+          "$ref": "#/$defs/Price"
+        },
+        "output": {
+          "$ref": "#/$defs/Price"
+        },
+        "reasoning": {
+          "$ref": "#/$defs/Price"
+        },
+        "when": {
+          "type": "string"
+        },
+        "cache_write_30m": {
+          "$ref": "#/$defs/Price"
+        },
+        "cache_write_12h": {
+          "$ref": "#/$defs/Price"
+        }
+      },
+      "required": [
+        "when"
+      ],
+      "type": "object"
+    },
+    "SessionAffinityConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "description": "Whether later turns of a thread stay on the model chosen for its first turn. Only requests that carry a thread id take part. Off by default.",
+          "type": "boolean"
+        },
+        "ttl_seconds": {
+          "description": "Sliding idle window in seconds. A thread that stays quiet longer than this is routed afresh on its next turn. Between 60 and 3600. Defaults to 600 when omitted.",
+          "format": "int64",
+          "maximum": 3600,
+          "minimum": 60,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "enabled"
+      ],
+      "type": "object"
+    }
+  }
+}

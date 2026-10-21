@@ -1,0 +1,301 @@
+openapi: 3.2.0
+info:
+  title: orq.ai Pii API
+  version: '2.0'
+  description: orq.ai API documentation
+servers:
+- url: https://my.orq.ai
+security:
+- ApiKey: []
+tags:
+- name: pii
+paths:
+  /v2/pii/capabilities:
+    get:
+      tags:
+      - pii
+      summary: Get PII capabilities
+      description: Reports the entity catalog, supported regions, and default thresholds the PII detection service currently exposes, including per-entity default thresholds.
+      operationId: PIICapabilities
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CapabilitiesResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: pii
+      x-speakeasy-name-override: capabilities
+  /v2/pii/detect:
+    post:
+      tags:
+      - pii
+      summary: Detect PII
+      description: Reports whether the supplied text contains personally identifiable information, optionally with a per-type entity breakdown.
+      operationId: PIIDetect
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DetectRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DetectResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: pii
+      x-speakeasy-name-override: detect
+      x-code-samples:
+      - lang: typescript
+        label: Node.js
+        source: 'await orq.pii.detect({ text: "Jane Doe, BSN 123456782", entities: ["PERSON", "BSN"] });
+
+          '
+  /v2/pii/redact:
+    post:
+      tags:
+      - pii
+      summary: Redact PII
+      description: Replaces detected PII with placeholders and returns the reverse mapping needed to restore the original text.
+      operationId: PIIRedact
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RedactRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RedactResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: pii
+      x-speakeasy-name-override: redact
+      x-code-samples:
+      - lang: typescript
+        label: Node.js
+        source: 'await orq.pii.redact({ text: "Jane Doe, BSN 123456782", entities: ["PERSON", "BSN"] });
+
+          '
+  /v2/pii/restore:
+    post:
+      tags:
+      - pii
+      summary: Restore redacted text
+      description: Reverses a redaction, substituting placeholders back to their original values using the mapping returned by Redact.
+      operationId: PIIRestore
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RestoreRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestoreResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: pii
+      x-speakeasy-name-override: restore
+components:
+  schemas:
+    RedactRequest:
+      type: object
+      properties:
+        text:
+          type: string
+        language:
+          type: string
+        threshold:
+          type: number
+          format: double
+        regions:
+          type: array
+          items:
+            type: string
+          description: "Region codes selecting whole regions of coverage, e.g. \"nl\", \"gb\". Every\n entity type those regions cover is included, alongside the base catalog.\n [\"all\"] is exclusive. Leaving this and `entities` both empty also runs every\n region, so selecting nothing is the widest request rather than the narrowest.\n Empty alongside a non-empty `entities` stays strict. See the capabilities\n endpoint for the region list.\n\n Combines with `entities`: the detector unions the two selections, so a\n request carrying both covers the regions plus the named types. Note that\n `entities` only narrows coverage when it travels alone."
+        entities:
+          type: array
+          items:
+            type: string
+          description: "The entity types to cover. A named type fires even when it belongs to a\n region, so a region's types can be selected individually without naming\n the region. Alone this is a strict allowlist; alongside `regions` it adds\n to the region coverage instead of narrowing it."
+        entity_thresholds:
+          type: object
+          additionalProperties:
+            type: number
+            format: double
+          description: "Per-entity confidence cutoff overrides. An override REPLACES the global\n `threshold` for that type and may sit above or below it: the gateway\n lowers the first-pass floor it sends the detector to the smallest value\n in the map, and every selected type carries its own cutoff, so a\n sub-global override detects MORE of that type without widening the rest.\n\n This only tunes confidence; it never changes which types are covered.\n Coverage is decided by `entities` alone, so every key here must also\n appear in `entities` — a key that does not is rejected, as is any key at\n all when `entities` is empty.\n\n Declarative [0,1] bound mirrors existing constraint on `threshold`."
+    DetectRequest:
+      type: object
+      properties:
+        text:
+          type: string
+          description: Text to analyse.
+        language:
+          type: string
+          description: BCP-47 language code. Unset means auto-detect.
+        threshold:
+          type: number
+          description: Global minimum recognizer score (0.0-1.0). Unset uses the provider default.
+          format: double
+        include_entities:
+          type: boolean
+          description: When true, the response includes a per-type entity breakdown.
+        regions:
+          type: array
+          items:
+            type: string
+          description: "Region codes selecting whole regions of coverage, e.g. \"nl\", \"gb\". Every\n entity type those regions cover is included, alongside the base catalog.\n [\"all\"] is exclusive. Leaving this and `entities` both empty also runs every\n region, so selecting nothing is the widest request rather than the narrowest.\n Empty alongside a non-empty `entities` stays strict. See the capabilities\n endpoint for the region list.\n\n Combines with `entities`: the detector unions the two selections, so a\n request carrying both covers the regions plus the named types. Note that\n `entities` only narrows coverage when it travels alone."
+        entities:
+          type: array
+          items:
+            type: string
+          description: "The entity types to cover. A named type fires even when it belongs to a\n region, so a region's types can be selected individually without naming\n the region. Alone this is a strict allowlist; alongside `regions` it adds\n to the region coverage instead of narrowing it."
+        entity_thresholds:
+          type: object
+          additionalProperties:
+            type: number
+            format: double
+          description: "Per-entity confidence cutoff overrides. An override REPLACES the global\n `threshold` for that type and may sit above or below it: the gateway\n lowers the first-pass floor it sends the detector to the smallest value\n in the map, and every selected type carries its own cutoff, so a\n sub-global override detects MORE of that type without widening the rest.\n\n This only tunes confidence; it never changes which types are covered.\n Coverage is decided by `entities` alone, so every key here must also\n appear in `entities` — a key that does not is rejected, as is any key at\n all when `entities` is empty.\n\n Declarative [0,1] bound mirrors existing constraint on `threshold`."
+      description: The workspace is resolved from the API key, never sent in the body.
+    EntityList:
+      type: object
+      properties:
+        entities:
+          type: array
+          items:
+            type: string
+      description: "EntityList wraps a repeated string because proto3 maps cannot hold\n repeated values directly."
+    RedactResponse:
+      type: object
+      properties:
+        redacted_text:
+          type: string
+        mappings:
+          type: object
+          additionalProperties:
+            type: string
+          description: Maps each placeholder (e.g. `<PERSON_1>`) to the original value it replaced.
+    DetectResponse:
+      type: object
+      properties:
+        has_pii:
+          type: boolean
+        entities:
+          type: object
+          additionalProperties:
+            type: integer
+            format: int32
+          description: Per-entity-type counts. Populated only when include_entities was set.
+    CapabilitiesResponse:
+      type: object
+      properties:
+        languages:
+          type: array
+          items:
+            type: string
+          description: Supported detector languages, e.g. "en", "nl". There is no "auto" value.
+        base_entities:
+          type: array
+          items:
+            type: string
+          description: "Universal entity types available regardless of region, e.g. PASSPORT,\n LICENSE_PLATE, UUID, JWT, BIC."
+        all_entities:
+          type: array
+          items:
+            type: string
+          description: "Every entity type the service can detect across all regions and the\n base catalog."
+        regions:
+          type: array
+          items:
+            type: string
+          description: Region codes the service recognizes, e.g. "nl", "gb", "all".
+        region_entities:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/EntityList'
+          description: "Maps each region code to the entity types it gates. Use this to find the\n type to name in `entities` when you need a per-entity threshold on a type\n a region gates."
+        entity_thresholds:
+          type: object
+          additionalProperties:
+            type: number
+            format: double
+          description: "Sparse per-entity default thresholds; entities absent here fall back to\n default_threshold."
+        default_threshold:
+          type: number
+          description: "Confidence cutoff applied when neither `threshold` nor an entity-specific\n override is supplied."
+          format: double
+        max_text_chars:
+          type: integer
+          description: Maximum number of characters accepted per request.
+          format: int32
+    RestoreResponse:
+      type: object
+      properties:
+        original_text:
+          type: string
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Human-readable error message.
+        code:
+          type: integer
+          description: gRPC status code, when the service reports one.
+        details:
+          type: array
+          items: {}
+          description: Additional error details, when the service reports any.
+      required:
+      - message
+    RestoreRequest:
+      type: object
+      properties:
+        redacted_text:
+          type: string
+        mappings:
+          type: object
+          additionalProperties:
+            type: string
+          description: Placeholder-to-original mapping produced by Redact.
+  securitySchemes:
+    ApiKey:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+externalDocs:
+  url: https://docs.orq.ai
+  description: orq.ai Documentation
+x-speakeasy-timeout: 600000

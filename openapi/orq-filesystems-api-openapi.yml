@@ -1,0 +1,697 @@
+openapi: 3.2.0
+info:
+  title: orq.ai File Systems API
+  version: '2.0'
+  description: orq.ai API documentation
+servers:
+- url: https://my.orq.ai
+security:
+- ApiKey: []
+tags:
+- name: Filesystems
+  description: Create and manage persistent file systems that agents and MCP clients read from and write to.
+paths:
+  /v2/file-systems:
+    get:
+      tags:
+      - Filesystems
+      summary: List file systems
+      description: Retrieves a paginated list of file systems in the workspace. Use cursor-based pagination parameters to navigate through the results.
+      operationId: ListFileSystems
+      parameters:
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          format: int32
+      - name: starting_after
+        in: query
+        schema:
+          type: string
+      - name: ending_before
+        in: query
+        schema:
+          type: string
+      - name: search
+        in: query
+        schema:
+          type: string
+      - name: project_id
+        in: query
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Successfully retrieved the list of file systems.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListFileSystemsResponse'
+        '401':
+          description: Unauthorized - Bearer token is missing or invalid.
+      x-speakeasy-group: fileSystems
+      x-speakeasy-name-override: list
+      x-cli-group: file-systems
+      x-cli-name: list
+    post:
+      tags:
+      - Filesystems
+      summary: Create file system
+      description: Creates a file system. Storage is provisioned lazily on first use by an agent run or MCP client.
+      operationId: CreateFileSystem
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateFileSystemRequest'
+        required: true
+      responses:
+        '201':
+          description: File system successfully created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileSystem'
+        '402':
+          description: Payment Required - File system limit reached for this workspace.
+        '409':
+          description: Conflict - A file system with this key already exists in the workspace.
+      x-speakeasy-group: fileSystems
+      x-speakeasy-name-override: create
+      x-cli-group: file-systems
+      x-cli-name: create
+  /v2/file-systems/{file_system_key}:
+    get:
+      tags:
+      - Filesystems
+      summary: Retrieve file system
+      description: Retrieves detailed information about a specific file system, including its quota and external access configuration.
+      operationId: RetrieveFileSystem
+      parameters:
+      - name: file_system_key
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: File system details successfully retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileSystem'
+        '403':
+          description: Not permitted for this key, project or workspace. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: File system not found.
+      x-speakeasy-group: fileSystems
+      x-speakeasy-name-override: retrieve
+      x-cli-group: file-systems
+      x-cli-name: retrieve
+    delete:
+      tags:
+      - Filesystems
+      summary: Delete file system
+      description: Permanently deletes a file system and every file stored in it. This cannot be undone.
+      operationId: DeleteFileSystem
+      parameters:
+      - name: file_system_key
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteFileSystemResponse'
+        '204':
+          description: File system successfully deleted.
+        '404':
+          description: File system not found.
+      x-speakeasy-group: fileSystems
+      x-speakeasy-name-override: delete
+      x-cli-group: file-systems
+      x-cli-name: delete
+    patch:
+      tags:
+      - Filesystems
+      summary: Update file system
+      description: Updates the mutable file system configuration. The key is immutable.
+      operationId: UpdateFileSystem
+      parameters:
+      - name: file_system_key
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateFileSystemRequest'
+        required: true
+      responses:
+        '200':
+          description: File system successfully updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileSystem'
+        '404':
+          description: File system not found.
+      x-speakeasy-group: fileSystems
+      x-speakeasy-name-override: update
+      x-cli-group: file-systems
+      x-cli-name: update
+  /v2/file-systems/{file_system_key}/files:
+    get:
+      tags:
+      - Filesystems
+      summary: List files
+      description: Lists the files and folders stored in a file system. An empty path lists the file system root.
+      operationId: ListFiles
+      parameters:
+      - name: file_system_key
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: path
+        in: query
+        schema:
+          type: string
+      - name: depth
+        in: query
+        schema:
+          type: integer
+          format: int32
+      - name: max_entries
+        in: query
+        schema:
+          type: integer
+          format: int32
+      responses:
+        '200':
+          description: Successfully retrieved the directory listing.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListFileSystemFilesResponse'
+        '403':
+          description: Not permitted for this key, project or workspace. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: File system or path not found.
+      x-speakeasy-group: fileSystems
+      x-speakeasy-name-override: listFiles
+      x-cli-group: file-systems
+      x-cli-name: listFiles
+    delete:
+      tags:
+      - Filesystems
+      summary: Delete file
+      description: Deletes one file or folder. A folder that still has content is refused unless recursive is set.
+      operationId: DeleteFile
+      parameters:
+      - name: file_system_key
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: path
+        in: query
+        schema:
+          type: string
+      - name: recursive
+        in: query
+        schema:
+          type: boolean
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteFileSystemFileResponse'
+        '204':
+          description: File successfully deleted.
+        '409':
+          description: Conflict - The folder is not empty and recursive was not set.
+      x-speakeasy-group: fileSystems
+      x-speakeasy-name-override: deleteFile
+      x-cli-group: file-systems
+      x-cli-name: deleteFile
+  /v2/file-systems/{file_system_key}/files/move:
+    post:
+      tags:
+      - Filesystems
+      summary: Move file
+      description: Moves or renames one file or folder within the same file system. Missing destination folders are created.
+      operationId: MoveFile
+      parameters:
+      - name: file_system_key
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MoveFileSystemFileRequest'
+        required: true
+      responses:
+        '201':
+          description: File successfully moved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MoveFileSystemFileResponse'
+        '409':
+          description: Conflict - The destination already exists.
+      x-speakeasy-group: fileSystems
+      x-speakeasy-name-override: moveFile
+      x-cli-group: file-systems
+      x-cli-name: moveFile
+  /v2/file-systems/{file_system_key}/files/stat:
+    get:
+      tags:
+      - Filesystems
+      summary: Stat file
+      description: Retrieves the metadata of one file or folder without transferring its content.
+      operationId: StatFile
+      parameters:
+      - name: file_system_key
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: path
+        in: query
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Successfully retrieved the file metadata.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatFileSystemFileResponse'
+        '400':
+          description: The request is invalid. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: File system or path not found.
+      x-speakeasy-group: fileSystems
+      x-speakeasy-name-override: statFile
+      x-cli-group: file-systems
+      x-cli-name: statFile
+  /v2/file-systems/{file_system_key}/folders:
+    post:
+      tags:
+      - Filesystems
+      summary: Create folder
+      description: Creates a folder and every missing parent. Succeeds on a folder that already exists.
+      operationId: CreateFolder
+      parameters:
+      - name: file_system_key
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateFileSystemFolderRequest'
+        required: true
+      responses:
+        '201':
+          description: Folder successfully created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateFileSystemFolderResponse'
+        '404':
+          description: File system not found.
+      x-speakeasy-group: fileSystems
+      x-speakeasy-name-override: createFolder
+      x-cli-group: file-systems
+      x-cli-name: createFolder
+components:
+  schemas:
+    MoveFileSystemFileResponse:
+      required:
+      - from
+      - to
+      type: object
+      properties:
+        from:
+          type: string
+        to:
+          type: string
+    ListFileSystemFilesResponse:
+      required:
+      - path
+      - depth
+      - entries
+      - entry_count
+      - truncated
+      type: object
+      properties:
+        path:
+          type: string
+          description: Folder that was listed, relative to the file system root
+        depth:
+          type: integer
+          description: Number of folder levels that were walked
+          format: int32
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/FileEntry'
+        entry_count:
+          type: integer
+          description: Number of entries returned
+          format: int32
+        truncated:
+          type: boolean
+          description: Whether the listing stopped at max_entries
+    CreateFileSystemRequest:
+      required:
+      - key
+      - path
+      type: object
+      properties:
+        key:
+          maxLength: 255
+          minLength: 1
+          pattern: ^[A-Za-z]([A-Za-z0-9]*([._][A-Za-z0-9]+)*)?$
+          type: string
+          description: The unique key of the file system. The key is unique and immutable and cannot be repeated within the same workspace.
+        path:
+          minLength: 1
+          type: string
+          description: Entity storage path. With workspace-level API keys, the first element identifies the project. With project-level API keys, the path is relative to that project.
+        display_name:
+          maxLength: 255
+          type: string
+          description: Human readable name shown in the UI. Defaults to the key.
+        description:
+          maxLength: 4096
+          type: string
+        external_access:
+          enum:
+          - disabled
+          - read_only
+          - read_write
+          type: string
+          description: Whether external MCP clients may reach this file system. Defaults to disabled.
+        sharing:
+          $ref: '#/components/schemas/Sharing'
+    DeleteFileSystemFileResponse:
+      required:
+      - path
+      - type
+      type: object
+      properties:
+        path:
+          type: string
+        type:
+          enum:
+          - file
+          - dir
+          - symlink
+          - other
+          type: string
+    SharingSelectedProjects:
+      type: object
+      properties:
+        project_ids:
+          type: array
+          items:
+            type: string
+          description: Projects allowed to use the entity. An empty list shares it with no project.
+    SharingAllProjects:
+      type: object
+      properties: {}
+    CreateFileSystemFolderRequest:
+      required:
+      - path
+      type: object
+      properties:
+        path:
+          maxLength: 4096
+          minLength: 1
+          type: string
+          description: Folder to create, relative to the file system root
+    MoveFileSystemFileRequest:
+      required:
+      - from
+      - to
+      type: object
+      properties:
+        from:
+          maxLength: 4096
+          minLength: 1
+          type: string
+          description: Current path of the file or folder, relative to the file system root
+        to:
+          maxLength: 4096
+          minLength: 1
+          type: string
+          description: New path of the file or folder, relative to the file system root
+    DeleteFileSystemResponse:
+      type: object
+      properties: {}
+    StatFileSystemFileResponse:
+      required:
+      - path
+      - type
+      - size_bytes
+      - mode
+      - modified
+      type: object
+      properties:
+        path:
+          type: string
+        type:
+          enum:
+          - file
+          - dir
+          - symlink
+          - other
+          type: string
+        size_bytes:
+          type: string
+        mode:
+          type: string
+          description: Permission bits in octal, for example 0644
+        modified:
+          type: string
+    UpdateFileSystemRequest:
+      required: []
+      type: object
+      properties:
+        display_name:
+          maxLength: 255
+          minLength: 1
+          type: string
+          description: "Update has no key to fall back on, so an explicitly supplied display_name\n may not be empty; Create defaults an omitted one to the key."
+        description:
+          maxLength: 4096
+          type: string
+        path:
+          type: string
+        external_access:
+          enum:
+          - disabled
+          - read_only
+          - read_write
+          type: string
+        sharing:
+          $ref: '#/components/schemas/Sharing'
+    FileSystemExternalAccess:
+      type: string
+      enum:
+      - disabled
+      - read_only
+      - read_write
+    FileEntry:
+      required:
+      - path
+      - name
+      - type
+      - size_bytes
+      - modified
+      type: object
+      properties:
+        path:
+          type: string
+          description: Path of the entry relative to the file system root
+        name:
+          type: string
+          description: Final path component
+        type:
+          enum:
+          - file
+          - dir
+          - symlink
+          - other
+          type: string
+          description: Kind of entry
+        size_bytes:
+          type: string
+          description: Size of the entry in bytes
+        modified:
+          type: string
+          description: Last modification time of the entry
+      description: "The file content messages below mirror the tools-pod JSON contract one for\n one. `path` is always relative to the file system root; an absolute path or a\n `..` segment is refused rather than clamped."
+    ListFileSystemsResponse:
+      required:
+      - object
+      - data
+      - has_more
+      type: object
+      properties:
+        object:
+          enum:
+          - list
+          type: string
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/FileSystem'
+        has_more:
+          type: boolean
+    FileSystem:
+      required:
+      - _id
+      - key
+      - display_name
+      - description
+      - project_id
+      - external_access
+      - created
+      - updated
+      type: object
+      properties:
+        key:
+          maxLength: 255
+          minLength: 1
+          pattern: ^[A-Za-z]([A-Za-z0-9]*([._][A-Za-z0-9]+)*)?$
+          type: string
+          description: The unique key of the file system. The key is unique and immutable and cannot be repeated within the same workspace.
+        display_name:
+          type: string
+          description: Human readable name shown in the UI
+        description:
+          type: string
+          description: The description of the file system. Be as precise as possible to help the AI understand what the file system is for.
+        project_id:
+          type: string
+          description: Identifier of the project the file system belongs to
+        external_access:
+          description: Whether external MCP clients may reach this file system, and with which access
+          $ref: '#/components/schemas/FileSystemExternalAccess'
+        created_by_id:
+          type:
+          - string
+          - 'null'
+          description: The user ID of the creator
+        updated_by_id:
+          type:
+          - string
+          - 'null'
+          description: The user ID of the last updater
+        created:
+          type: string
+          description: The creation date of the file system
+        updated:
+          type: string
+          description: The last update date of the file system
+        sharing:
+          $ref: '#/components/schemas/Sharing'
+        used_bytes:
+          type:
+          - string
+          - 'null'
+          description: Apparent size of the file system in bytes at the last metering. Absent until first metered.
+        used_inodes:
+          type:
+          - string
+          - 'null'
+          description: Number of files and directories in the file system at the last metering. Absent until first metered.
+        last_metered_at:
+          type:
+          - string
+          - 'null'
+          description: When usage was last measured. Absent until first metered.
+        _id:
+          type: string
+          description: The unique identifier of the file system
+    CreateFileSystemFolderResponse:
+      required:
+      - path
+      type: object
+      properties:
+        path:
+          type: string
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Human-readable error message.
+        code:
+          type: integer
+          description: gRPC status code, when the service reports one.
+        details:
+          type: array
+          items: {}
+          description: Additional error details, when the service reports any.
+      required:
+      - message
+    Sharing:
+      type: object
+      properties:
+        all_projects:
+          allOf:
+          - $ref: '#/components/schemas/SharingAllProjects'
+          description: Visible to every project in the workspace.
+        selected:
+          allOf:
+          - $ref: '#/components/schemas/SharingSelectedProjects'
+          description: Visible to the listed projects only.
+        allow_version_pin:
+          type: boolean
+          description: "Consuming projects may pin a specific version instead of tracking\n the latest version."
+        allow_fork:
+          type: boolean
+          description: "Projects may duplicate this entity into a detached project-owned\n copy."
+        auto_grant_new_projects:
+          type: boolean
+          description: "New projects created after this sharing config is applied should\n receive access automatically."
+      description: "Sharing controls which projects in the workspace may use this entity and\n what they may do with it."
+  securitySchemes:
+    ApiKey:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+externalDocs:
+  url: https://docs.orq.ai
+  description: orq.ai Documentation
+x-speakeasy-timeout: 600000

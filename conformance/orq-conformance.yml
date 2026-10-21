@@ -1,0 +1,42 @@
+generated: '2026-10-21'
+method: searched
+generator: extract-docs-artifacts.py (local)
+source: https://docs.orq.ai/enterprise/trust.md
+sources:
+- https://docs.orq.ai/enterprise/trust.md
+- https://docs.orq.ai/ai-gateway/features/security.md
+- https://docs.orq.ai/ai-studio/observability/data-privacy.md
+- https://docs.orq.ai/ai-studio/organization/workspace-security.md
+standards:
+- id: soc2
+  conforms: true
+  evidence: 'Orq.ai Trust Center: request the SOC 2 Type II report, ISO 27001 status, penetration test reports, HIPAA BAA, DPA, and sub-processor
+    list.'
+- id: iso-27001
+  conforms: true
+  evidence: 'Orq.ai Trust Center: request the SOC 2 Type II report, ISO 27001 status, penetration test reports, HIPAA BAA, DPA, and sub-processor
+    list.'
+- id: hipaa
+  conforms: true
+  evidence: 'Orq.ai Trust Center: request the SOC 2 Type II report, ISO 27001 status, penetration test reports, HIPAA BAA, DPA, and sub-processor
+    list.'
+- id: gdpr
+  conforms: true
+  evidence: 'Orq.ai Trust Center: request the SOC 2 Type II report, ISO 27001 status, penetration test reports, HIPAA BAA, DPA, and sub-processor
+    list.'
+- id: openapi-3.1
+  conforms: true
+  evidence: the document declares 3.1.0
+- id: oauth2
+  conforms: false
+  evidence: 'securitySchemes: ApiKey (http)'
+- id: rfc9457
+  conforms: false
+  evidence: no response declares application/problem+json
+- id: idempotency
+  conforms: false
+  evidence: no idempotency key parameter on mutating operations
+- id: pagination
+  conforms: true
+  evidence: list operations take limit, page, page_token, starting_after
+docs: https://docs.orq.ai/enterprise/trust.md

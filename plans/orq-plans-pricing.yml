@@ -1,0 +1,16 @@
+generated: '2026-10-21'
+method: searched
+generator: extract-docs-artifacts.py (local)
+source: https://orq.ai/pricing
+sources:
+- https://orq.ai/pricing
+- https://docs.orq.ai/ai-studio/organization/billing-usage.md
+name: Orq.ai pricing
+audience: developer-api
+pricing_basis: usage-other
+plans:
+- name: Pay-as-you-go
+  price_text: 4.5% Fee
+  description: Pay-as-you-go plan with 1M free requests/month, then 4% fee on usage. Includes unlimited seats and spans.
+docs: https://orq.ai/pricing
+note: 1 extracted row(s) were dropped because their quote was not on the page.

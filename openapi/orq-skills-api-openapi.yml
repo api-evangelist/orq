@@ -1,0 +1,413 @@
+openapi: 3.2.0
+info:
+  title: orq.ai Skills API
+  version: '2.0'
+  description: orq.ai API documentation
+servers:
+- url: https://my.orq.ai
+security:
+- ApiKey: []
+tags:
+- name: Skills
+  description: Skills are modular instructions you can use to codify processes and conventions
+paths:
+  /v2/skills:
+    get:
+      tags:
+      - Skills
+      summary: List all skills
+      description: Returns the skills visible to the current workspace, ordered by creation time with the newest skill first. Use `starting_after` or `ending_before` to page through large collections.
+      operationId: SkillList
+      parameters:
+      - name: limit
+        in: query
+        description: "Page size, 1–200. Unset uses the server default (25). Values outside\n the range, including 0, are rejected."
+        schema:
+          type: integer
+          format: int32
+      - name: starting_after
+        in: query
+        description: "Cursor for forward pagination. Set to the `skill_id` of the last\n item from the previous page."
+        schema:
+          type: string
+      - name: ending_before
+        in: query
+        description: "Cursor for backward pagination. Set to the `skill_id` of the first\n item from the previous page."
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListSkillsResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: skills
+      x-speakeasy-name-override: list
+      x-code-samples:
+      - lang: curl
+        label: Core - List skills
+        source: "curl --get 'https://my.orq.ai/v2/skills' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\" \\\n  --data-urlencode 'limit=25'\n"
+      - lang: python
+        label: Python - List skills
+        source: "import os\nfrom orq_ai_sdk import Orq\n\nclient = Orq(api_key=os.environ[\"ORQ_API_KEY\"])\n\npage = client.skills.list(\n    limit=25,\n)\n\nfor skill in page.data:\n    print(skill.skill_id, skill.display_name)\n"
+      - lang: typescript
+        label: Node.js - List skills
+        source: "import { Orq } from '@orq-ai/node';\n\nconst client = new Orq({\n  apiKey: process.env.ORQ_API_KEY,\n});\n\nconst page = await client.skills.list({\n  limit: 25,\n});\n\nfor (const skill of page.data) {\n  console.log(skill.skillId, skill.displayName);\n}\n"
+    post:
+      tags:
+      - Skills
+      summary: Create a new skill
+      description: Creates a reusable skill in the workspace. Skills store instructions, metadata, and an optional project location so teams can standardize repeatable AI workflows.
+      operationId: SkillCreate
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSkillRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateSkillResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: skills
+      x-speakeasy-name-override: create
+      x-code-samples:
+      - lang: curl
+        label: Core - Create project skill
+        source: "curl --request POST \\\n  --url 'https://my.orq.ai/v2/skills' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\" \\\n  --header 'Content-Type: application/json' \\\n  --data '{\n    \"display_name\": \"summarize_support_ticket\",\n    \"description\": \"Summarize support tickets into concise resolution notes.\",\n    \"project_id\": \"proj_01HZXW2K7Y8Q9M0N1P2R3S4T5V\",\n    \"path\": \"/customer-success/skills/summarize-support-ticket\",\n    \"tags\": [\"support\", \"summarization\"],\n    \"instructions\": \"Read the ticket conversation and return the problem, customer sentiment, and proposed next step.\"\n  }'\n"
+      - lang: python
+        label: Python - Create project skill
+        source: "import os\nfrom orq_ai_sdk import Orq\n\nclient = Orq(api_key=os.environ[\"ORQ_API_KEY\"])\n\nresult = client.skills.create(\n    display_name=\"summarize_support_ticket\",\n    description=\"Summarize support tickets into concise resolution notes.\",\n    project_id=\"proj_01HZXW2K7Y8Q9M0N1P2R3S4T5V\",\n    path=\"/customer-success/skills/summarize-support-ticket\",\n    tags=[\"support\", \"summarization\"],\n    instructions=(\n        \"Read the ticket conversation and return the problem, \"\n        \"customer sentiment, and proposed next step.\"\n    ),\n)\n\nprint(result.skill.skill_id)\n"
+      - lang: typescript
+        label: Node.js - Create project skill
+        source: "import { Orq } from '@orq-ai/node';\n\nconst client = new Orq({\n  apiKey: process.env.ORQ_API_KEY,\n});\n\nconst result = await client.skills.create({\n  displayName: 'summarize_support_ticket',\n  description: 'Summarize support tickets into concise resolution notes.',\n  projectId: 'proj_01HZXW2K7Y8Q9M0N1P2R3S4T5V',\n  path: '/customer-success/skills/summarize-support-ticket',\n  tags: ['support', 'summarization'],\n  instructions:\n    'Read the ticket conversation and return the problem, customer sentiment, and proposed next step.',\n});\n\nconsole.log(result.skill.skillId);\n"
+  /v2/skills/{skill_id}:
+    get:
+      tags:
+      - Skills
+      summary: Retrieve a skill
+      description: Retrieves an existing skill by skill ID. Display names are also accepted for compatibility because they are unique within a workspace.
+      operationId: SkillGet
+      parameters:
+      - name: skill_id
+        in: path
+        description: "Accepts either the skill's ID (e.g. \"skill_01H...\") or its display\n name. Display names are unique within a workspace."
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetSkillResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: The resource does not exist. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: skills
+      x-speakeasy-name-override: get
+      x-code-samples:
+      - lang: curl
+        label: Core - Retrieve skill
+        source: "curl --request GET \\\n  --url 'https://my.orq.ai/v2/skills/skill_01HZXW2K7Y8Q9M0N1P2R3S4T5V' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\"\n"
+      - lang: python
+        label: Python - Retrieve skill
+        source: "import os\nfrom orq_ai_sdk import Orq\n\nclient = Orq(api_key=os.environ[\"ORQ_API_KEY\"])\n\nresult = client.skills.get(\n    skill_id=\"skill_01HZXW2K7Y8Q9M0N1P2R3S4T5V\",\n)\n\nprint(result.skill.display_name)\n"
+      - lang: typescript
+        label: Node.js - Retrieve skill
+        source: "import { Orq } from '@orq-ai/node';\n\nconst client = new Orq({\n  apiKey: process.env.ORQ_API_KEY,\n});\n\nconst result = await client.skills.get({\n  skillId: 'skill_01HZXW2K7Y8Q9M0N1P2R3S4T5V',\n});\n\nconsole.log(result.skill.displayName);\n"
+    delete:
+      tags:
+      - Skills
+      summary: Delete a skill
+      description: Deletes a skill from the workspace. The response body is empty when the delete succeeds.
+      operationId: SkillDelete
+      parameters:
+      - name: skill_id
+        in: path
+        description: Skill ID to delete.
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteSkillResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: skills
+      x-speakeasy-name-override: delete
+      x-code-samples:
+      - lang: curl
+        label: Core - Delete skill
+        source: "curl --request DELETE \\\n  --url 'https://my.orq.ai/v2/skills/skill_01HZXW2K7Y8Q9M0N1P2R3S4T5V' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\"\n"
+      - lang: python
+        label: Python - Delete skill
+        source: "import os\nfrom orq_ai_sdk import Orq\n\nclient = Orq(api_key=os.environ[\"ORQ_API_KEY\"])\n\nclient.skills.delete(\n    skill_id=\"skill_01HZXW2K7Y8Q9M0N1P2R3S4T5V\",\n)\n"
+      - lang: typescript
+        label: Node.js - Delete skill
+        source: "import { Orq } from '@orq-ai/node';\n\nconst client = new Orq({\n  apiKey: process.env.ORQ_API_KEY,\n});\n\nawait client.skills.delete({\n  skillId: 'skill_01HZXW2K7Y8Q9M0N1P2R3S4T5V',\n});\n"
+    patch:
+      tags:
+      - Skills
+      summary: Update a skill
+      description: Updates mutable skill fields. Omitted fields keep their current values. When `tags` is provided it replaces the existing tags; send an empty array to clear them.
+      operationId: SkillUpdate
+      parameters:
+      - name: skill_id
+        in: path
+        description: Skill ID to update.
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSkillRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateSkillResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: skills
+      x-speakeasy-name-override: update
+      x-code-samples:
+      - lang: curl
+        label: Core - Update skill instructions
+        source: "curl --request PATCH \\\n  --url 'https://my.orq.ai/v2/skills/skill_01HZXW2K7Y8Q9M0N1P2R3S4T5V' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\" \\\n  --header 'Content-Type: application/json' \\\n  --data '{\n    \"description\": \"Summarize support tickets for escalation handoff.\",\n    \"tags\": [\"support\", \"handoff\"],\n    \"instructions\": \"Return the issue summary, urgency, attempted fixes, and recommended owner.\"\n  }'\n"
+      - lang: python
+        label: Python - Update skill instructions
+        source: "import os\nfrom orq_ai_sdk import Orq\n\nclient = Orq(api_key=os.environ[\"ORQ_API_KEY\"])\n\nresult = client.skills.update(\n    skill_id=\"skill_01HZXW2K7Y8Q9M0N1P2R3S4T5V\",\n    description=\"Summarize support tickets for escalation handoff.\",\n    tags=[\"support\", \"handoff\"],\n    instructions=(\n        \"Return the issue summary, urgency, attempted fixes, \"\n        \"and recommended owner.\"\n    ),\n)\n\nprint(result.skill.version)\n"
+      - lang: typescript
+        label: Node.js - Update skill instructions
+        source: "import { Orq } from '@orq-ai/node';\n\nconst client = new Orq({\n  apiKey: process.env.ORQ_API_KEY,\n});\n\nconst result = await client.skills.update({\n  skillId: 'skill_01HZXW2K7Y8Q9M0N1P2R3S4T5V',\n  description: 'Summarize support tickets for escalation handoff.',\n  tags: ['support', 'handoff'],\n  instructions:\n    'Return the issue summary, urgency, attempted fixes, and recommended owner.',\n});\n\nconsole.log(result.skill.version);\n"
+components:
+  schemas:
+    DeleteSkillResponse:
+      type: object
+      properties: {}
+    ListSkillsResponse:
+      required:
+      - object
+      - data
+      - has_more
+      type: object
+      properties:
+        object:
+          type: string
+          description: Object discriminator for list responses; always `list`.
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Skill'
+          description: Page of skills, ordered newest first.
+        has_more:
+          type: boolean
+          description: "Whether more skills are available in the selected pagination\n direction."
+    CreateSkillRequest:
+      required:
+      - display_name
+      type: object
+      anyOf:
+      - required:
+        - path
+      - required:
+        - project_id
+      properties:
+        display_name:
+          pattern: ^[A-Za-z][A-Za-z0-9]*(?:[_-][A-Za-z0-9]+)*$
+          type: string
+          description: Workspace-unique display name. Must start with a letter and may contain letters, numbers, dashes, and underscores. Dots are not allowed.
+        description:
+          type: string
+          description: Short human-readable summary of what the skill is for.
+        tags:
+          type: array
+          items:
+            type: string
+          description: Free-form labels for organizing the skill.
+        path:
+          type: string
+          description: Project path where the skill should be stored.
+        project_id:
+          type: string
+          description: Project that should contain the skill.
+        instructions:
+          type: string
+          description: Instruction body for the skill. Omit to create metadata first and fill instructions later.
+    UpdateSkillRequest:
+      required: []
+      type: object
+      properties:
+        display_name:
+          pattern: ^[A-Za-z][A-Za-z0-9]*(?:[_-][A-Za-z0-9]+)*$
+          type: string
+          description: New workspace-unique display name. Must start with a letter and may contain letters, numbers, dashes, and underscores. Dots are not allowed.
+        description:
+          type: string
+          description: New description. Omit to keep the current description.
+        tags:
+          type: array
+          items:
+            type: string
+          description: Replacement tag list. When provided, replaces the current tags; send an empty array to clear them.
+        path:
+          type: string
+          description: New project path. Omit to keep the current path.
+        instructions:
+          type: string
+          description: New instruction body. Omit to keep the current instructions.
+        project_id:
+          type: string
+          description: New containing project. Omit to keep the current project.
+    CreateSkillResponse:
+      required:
+      - skill
+      type: object
+      properties:
+        skill:
+          allOf:
+          - $ref: '#/components/schemas/Skill'
+          description: Newly created skill.
+    UpdateSkillResponse:
+      required:
+      - skill
+      type: object
+      properties:
+        skill:
+          allOf:
+          - $ref: '#/components/schemas/Skill'
+          description: Updated skill.
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Human-readable error message.
+        code:
+          type: integer
+          description: gRPC status code, when the service reports one.
+        details:
+          type: array
+          items: {}
+          description: Additional error details, when the service reports any.
+      required:
+      - message
+    GetSkillResponse:
+      required:
+      - skill
+      type: object
+      properties:
+        skill:
+          allOf:
+          - $ref: '#/components/schemas/Skill'
+          description: Requested skill.
+    Skill:
+      required:
+      - skill_id
+      - display_name
+      - description
+      - tags
+      - project_id
+      - path
+      - created_at
+      - updated_at
+      - created_by_id
+      - updated_by_id
+      - instructions
+      - version
+      type: object
+      properties:
+        skill_id:
+          type: string
+          description: "Unique skill identifier assigned by ORQ, for example\n `skill_01H...`. Use this value in retrieve, update, and delete\n requests."
+        display_name:
+          pattern: ^[A-Za-z][A-Za-z0-9]*(?:[_-][A-Za-z0-9]+)*$
+          type: string
+          description: Workspace-unique display name. Must start with a letter and may contain letters, numbers, dashes, and underscores. Dots are not allowed.
+        description:
+          type: string
+          description: Short human-readable summary of what the skill is for.
+        tags:
+          type: array
+          items:
+            type: string
+          description: Free-form labels used for organization and filtering in clients.
+        project_id:
+          type: string
+          description: Project that owns or contains the skill.
+        path:
+          type: string
+          description: Project path where the skill is stored in the workspace.
+        created_at:
+          type: string
+          description: Time when the skill was created.
+          format: date-time
+        updated_at:
+          type: string
+          description: Time when the skill was last updated.
+          format: date-time
+        created_by_id:
+          type: string
+          description: User ID that created the skill.
+        updated_by_id:
+          type: string
+          description: User ID that last updated the skill.
+        instructions:
+          type: string
+          description: Instruction body executed or reused by clients that load this skill.
+        version:
+          type: string
+          description: "Latest semver for the skill. It advances when the skill's definition\n changes and is returned on every read."
+  securitySchemes:
+    ApiKey:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+externalDocs:
+  url: https://docs.orq.ai
+  description: orq.ai Documentation
+x-speakeasy-timeout: 600000

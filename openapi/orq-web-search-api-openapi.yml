@@ -1,0 +1,445 @@
+openapi: 3.2.0
+info:
+  title: orq.ai Web Search API
+  version: '2.0'
+  description: orq.ai API documentation
+servers:
+- url: https://my.orq.ai
+security:
+- ApiKey: []
+tags:
+- description: Search Gateway with managed credits or BYOK.
+  name: Web Search
+paths:
+  /v3/websearch:
+    post:
+      description: 'Search with Exa, Ceramic, Linkup, Tavily, or Serper and return page URLs, titles, and descriptions in one response format. Authenticate with an API key that grants **websearch.execute** and send **Content-Type: application/json**.
+
+
+        ### Provider and credentials
+
+
+        Each request uses the selected provider. Exa uses **auto** search, Linkup uses **standard** depth, and Tavily uses **basic** depth.
+
+
+        Credentials are selected from the authenticated workspace. A configured provider integration takes precedence over ORQ-managed credentials: the default integration is used, or the first configured integration if no default is set. Configure BYOK in the workspace integrations settings. Invalid integration credentials cause an error.
+
+
+        ### Billing
+
+
+        Managed searches use the same credits as the **AI Gateway** and charge the provider cost plus **US$0.001 per search** (US$1 per 1,000 searches). BYOK searches consume no ORQ credits and add no ORQ markup; the provider bills the integration owner directly.
+
+
+        Exa''s published auto rate is **US$7 per 1,000 requests** for up to 10 results, or **US$8 per 1,000** including the ORQ markup. Exa charges use the actual cost reported by the provider.
+
+
+        A successful managed search is billable even if an output guardrail or output redaction failure prevents the results from being returned.
+
+
+        ### Policies and observability
+
+
+        PII Redaction is the only supported request plugin. Workspace PII settings and matching guardrail rules also apply. Query redaction runs before input guardrails and the provider call; result redaction runs before output guardrails and the response.
+
+
+        Search spans and metrics record the provider, latency, result count, and cost. Use the **x-orq-trace-id** response header to find the trace.'
+      operationId: search-web
+      requestBody:
+        content:
+          application/json:
+            examples:
+              basic:
+                summary: Search with Exa auto
+                value:
+                  provider: exa
+                  query: Things to do in Salt Lake City in fall
+              customer_search:
+                summary: Limit results and attribute usage to a customer
+                value:
+                  identity:
+                    id: customer-123
+                  limit: 10
+                  provider: exa
+                  query: Things to do in Salt Lake City in fall
+              pii_redaction:
+                summary: Apply PII Redaction to the query and results
+                value:
+                  limit: 5
+                  plugins:
+                  - id: pii_redaction
+                  provider: exa
+                  query: Travel advice for john.smith@example.com
+            schema:
+              additionalProperties: false
+              properties:
+                identity:
+                  additionalProperties: false
+                  description: Customer or end-user identity for attributing this search and its usage.
+                  properties:
+                    id:
+                      description: Customer or end-user identifier used consistently across API requests.
+                      minLength: 1
+                      type: string
+                  required:
+                  - id
+                  type: object
+                limit:
+                  default: 10
+                  description: Maximum number of results to return, from 1 to 10. Defaults to 10. The provider may return fewer results.
+                  maximum: 10
+                  minimum: 1
+                  type: integer
+                plugins:
+                  description: Optional PII Redaction configuration. At most one plugin is accepted, with id pii_redaction. Workspace and matching rule requirements still apply when this field is omitted.
+                  items:
+                    additionalProperties: false
+                    description: Redact detected personal information from the search query and result fields.
+                    properties:
+                      entities:
+                        description: Entity types to redact, using names supported by the PII detector. Used alone, this is an allowlist; combined with regions, both sets of detectors apply.
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      entity_thresholds:
+                        additionalProperties:
+                          format: double
+                          type: number
+                        description: Per-entity confidence cutoffs from 0 to 1, applied in addition to threshold. Each key must also appear in entities.
+                        type: object
+                      id:
+                        description: Plugin identifier. Must be pii_redaction.
+                        enum:
+                        - pii_redaction
+                        type: string
+                      language:
+                        description: Language used by the PII detector. Omitting the field defaults to auto, which detects the language per request; supported languages depend on the detector capabilities.
+                        type: string
+                      on_failure:
+                        description: 'Behavior when the PII detector fails: block rejects the request (default); passthrough continues with the original text. Workspace and rule requirements can enforce blocking.'
+                        type: string
+                      regions:
+                        description: Country codes that select regional PII detectors. Use ["all"] on its own for all regions. Omitting both regions and entities enables all regions.
+                        items:
+                          type: string
+                        type:
+                        - array
+                        - 'null'
+                      threshold:
+                        description: Minimum detection confidence from 0 to 1. Omit to use the detector's default threshold.
+                        format: double
+                        maximum: 1
+                        minimum: 0
+                        type: number
+                    required:
+                    - id
+                    type: object
+                  maxItems: 1
+                  type: array
+                provider:
+                  description: Provider to run this search. Exa uses auto, Linkup uses standard depth, and Tavily uses basic depth. Workspace credentials are selected automatically for this provider.
+                  enum:
+                  - exa
+                  - ceramic
+                  - linkup
+                  - tavily
+                  - serper
+                  type: string
+                query:
+                  description: Search text. Must not be blank or exceed 10,000 characters. Ceramic accepts at most 50 words.
+                  maxLength: 10000
+                  minLength: 1
+                  type: string
+              required:
+              - query
+              - provider
+              type: object
+        description: Search query and provider, with optional result limit, customer identity, and PII settings.
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                no_results:
+                  summary: Search completed with no results
+                  value:
+                    items: []
+                    metadata:
+                      latencyMs: 612
+                      provider: exa
+                      query: Things to do in Salt Lake City in fall
+                      requestId: 01ARZ3NDEKTSV4RRFFQ69G5FAV
+                results:
+                  summary: Search results
+                  value:
+                    items:
+                    - description: Scenic drives through Big Cottonwood Canyon and local pumpkin patches.
+                      title: 'Fall in Salt Lake City: A Local''s Guide'
+                      url: https://example.com/salt-lake-city-fall-guide
+                    metadata:
+                      latencyMs: 612
+                      provider: exa
+                      query: Things to do in Salt Lake City in fall
+                      requestId: 01ARZ3NDEKTSV4RRFFQ69G5FAV
+              schema:
+                properties:
+                  items:
+                    description: Results in the provider's order, after any required PII redaction. Empty when no results are found.
+                    items:
+                      properties:
+                        description:
+                          description: Provider-supplied excerpt or description. May be empty.
+                          type: string
+                        title:
+                          description: Page title. May be empty if the provider supplies no title.
+                          type: string
+                        url:
+                          description: Page URL returned by the provider. PII redaction can replace sensitive parts of the URL.
+                          type: string
+                      required:
+                      - url
+                      - title
+                      - description
+                      type: object
+                    type: array
+                  metadata:
+                    description: Details about this search request.
+                    properties:
+                      latencyMs:
+                        description: Elapsed search processing time in milliseconds, including applied policies.
+                        format: int32
+                        minimum: 0
+                        type: integer
+                      provider:
+                        description: Provider that executed the search.
+                        enum:
+                        - exa
+                        - ceramic
+                        - linkup
+                        - tavily
+                        - serper
+                        type: string
+                      query:
+                        description: Query sent to the provider after any required PII redaction.
+                        type: string
+                      requestId:
+                        description: ORQ-generated identifier for this search request. Distinct from the trace ID in the response headers.
+                        type: string
+                    required:
+                    - query
+                    - requestId
+                    - latencyMs
+                    - provider
+                    type: object
+                required:
+                - items
+                - metadata
+                type: object
+          description: Search completed. Results may be empty or fewer than the requested limit.
+          headers:
+            x-orq-trace-id:
+              description: Trace identifier for inspecting this request and its search span.
+              schema:
+                type: string
+            x-orq-trace-span-id:
+              description: Span identifier for the HTTP request within the trace.
+              schema:
+                type: string
+        '400':
+          content:
+            application/json:
+              examples:
+                invalid_request:
+                  summary: Invalid query, provider, limit, or plugin
+                  value:
+                    error:
+                      message: invalid web search request
+                      type: web_search_error
+                      param: null
+                      code: null
+              schema:
+                additionalProperties: false
+                properties:
+                  error:
+                    $ref: '#/components/schemas/APIError'
+                required:
+                - error
+                type: object
+          description: Invalid request, unusable workspace integration, or a blocking guardrail. Check the request fields and workspace integration settings.
+        '401':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  error:
+                    $ref: '#/components/schemas/APIError'
+                required:
+                - error
+                type: object
+          description: Missing or invalid API key. Send a valid API key in the Authorization header.
+        '402':
+          content:
+            application/json:
+              examples:
+                insufficient_credits:
+                  summary: Managed search has no available ORQ credits
+                  value:
+                    error:
+                      message: insufficient credits for managed web search
+                      type: web_search_error
+                      param: null
+                      code: null
+              schema:
+                additionalProperties: false
+                properties:
+                  error:
+                    $ref: '#/components/schemas/APIError'
+                required:
+                - error
+                type: object
+          description: Managed search requires a positive ORQ credit balance. Add credits before retrying. BYOK does not require ORQ credits.
+        '403':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  error:
+                    $ref: '#/components/schemas/APIError'
+                required:
+                - error
+                type: object
+          description: The API key lacks websearch.execute permission.
+        '415':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  error:
+                    $ref: '#/components/schemas/APIError'
+                required:
+                - error
+                type: object
+          description: Unsupported or missing Content-Type. Send application/json; an optional charset parameter is accepted.
+        '422':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  error:
+                    $ref: '#/components/schemas/APIError'
+                required:
+                - error
+                type: object
+          description: A configured guardrail evaluator could not complete its evaluation.
+        '429':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  error:
+                    $ref: '#/components/schemas/APIError'
+                required:
+                - error
+                type: object
+          description: A workspace or provider rate limit, or a matching budget, was reached. Wait before retrying or raise the budget.
+        '500':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  error:
+                    $ref: '#/components/schemas/APIError'
+                required:
+                - error
+                type: object
+          description: Unexpected gateway error. Include the trace ID, if available, when reporting the failure.
+        '502':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  error:
+                    $ref: '#/components/schemas/APIError'
+                required:
+                - error
+                type: object
+          description: The search provider, PII detector, or guardrail service failed. Invalid upstream credentials can also produce this response.
+        '503':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  error:
+                    $ref: '#/components/schemas/APIError'
+                required:
+                - error
+                type: object
+          description: The gateway could not load workspace integrations. Retry when the credential store is available.
+        '504':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  error:
+                    $ref: '#/components/schemas/APIError'
+                required:
+                - error
+                type: object
+          description: The provider request timed out or was cancelled.
+      summary: Search the web with a selected provider
+      tags:
+      - Web Search
+      x-cli-group: websearch
+      x-cli-name: search
+      x-code-samples:
+      - label: Node.js
+        lang: typescript
+        source: "import { Orq } from \"@orq-ai/node\";\n\nconst orq = new Orq({ apiKey: process.env.ORQ_API_KEY });\nconst result = await orq.websearch.search({\n  query: \"Things to do in Salt Lake City in fall\",\n  provider: \"exa\",\n  limit: 10,\n  identity: { id: \"customer-123\" },\n});"
+      x-orq-gateway-group: true
+      x-speakeasy-group: websearch
+      x-speakeasy-name-override: search
+components:
+  schemas:
+    APIError:
+      additionalProperties: false
+      properties:
+        code:
+          type:
+          - string
+          - 'null'
+        failures: {}
+        message:
+          type: string
+        param:
+          type:
+          - string
+          - 'null'
+        type:
+          type: string
+      required:
+      - message
+      - type
+      - param
+      - code
+      type: object
+  securitySchemes:
+    ApiKey:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+externalDocs:
+  url: https://docs.orq.ai
+  description: orq.ai Documentation
+x-speakeasy-timeout: 600000

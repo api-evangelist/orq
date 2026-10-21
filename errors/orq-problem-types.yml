@@ -1,0 +1,112 @@
+generated: '2026-10-21'
+method: derived
+generator: derive-problem-types.py
+source:
+- openapi/orq-openapi.json
+format: custom
+envelope:
+  media_type: application/json
+  schema: ErrorResponse
+coverage:
+  operations: 330
+  statuses_declared: 14
+problems:
+- status: 400
+  title: Bad Request
+  description: The request is invalid. See https://docs.orq.ai/reference/errors for the error codes.
+  operations: 38
+  media_types:
+  - application/json
+  schema: ErrorResponse
+- status: 401
+  title: Unauthorized
+  description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+  operations: 284
+  media_types:
+  - application/json
+  schema: ErrorResponse
+- status: 402
+  title: Payment Required
+  description: Payment Required - File system limit reached for this workspace.
+  operations: 2
+  media_types:
+  - application/json
+  schema: null
+- status: 403
+  title: Forbidden
+  description: Not permitted for this key, project or workspace. See https://docs.orq.ai/reference/errors for the
+    error codes.
+  operations: 33
+  media_types:
+  - application/json
+  schema: ErrorResponse
+- status: 404
+  title: Not Found
+  description: The resource does not exist. See https://docs.orq.ai/reference/errors for the error codes.
+  operations: 106
+  media_types:
+  - application/json
+  schema: ErrorResponse
+- status: 408
+  title: Request Timeout
+  description: The final model call exceeded its timeout after available retries and fallbacks were exhausted.
+  operations: 2
+  media_types:
+  - application/json
+  schema: null
+- status: 409
+  title: Conflict
+  description: Slug conflict
+  operations: 8
+  media_types:
+  - application/json
+  schema: null
+- status: 415
+  title: Unsupported Media Type
+  description: Image models not supported
+  operations: 2
+  media_types:
+  - application/json
+  schema: null
+- status: 422
+  title: Unprocessable Content
+  description: The state or a question violates the classification contract.
+  operations: 5
+  media_types:
+  - application/json
+  schema: null
+- status: 429
+  title: Too Many Requests
+  description: A plan rate limit, budget or provider rate limit was exceeded.
+  operations: 3
+  media_types:
+  - application/json
+  schema: null
+- status: 500
+  title: Internal Server Error
+  description: An internal model-resolution error occurred.
+  operations: 10
+  media_types:
+  - application/json
+  schema: HonoApiError
+- status: 502
+  title: Bad Gateway
+  description: The upstream provider failed or returned an invalid classification response.
+  operations: 3
+  media_types:
+  - application/json
+  schema: null
+- status: 503
+  title: Service Unavailable
+  description: The gateway could not load workspace integrations. Retry when the credential store is available.
+  operations: 1
+  media_types:
+  - application/json
+  schema: null
+- status: 504
+  title: Gateway Timeout
+  description: The provider request timed out or was cancelled.
+  operations: 1
+  media_types:
+  - application/json
+  schema: null

@@ -1,0 +1,428 @@
+openapi: 3.2.0
+info:
+  title: orq.ai Files API
+  version: '2.0'
+  description: orq.ai API documentation
+servers:
+- url: https://my.orq.ai
+security:
+- ApiKey: []
+tags:
+- name: Files
+  description: File upload and retrieval operations.
+paths:
+  /v2/files:
+    get:
+      tags:
+      - Files
+      summary: List all files
+      description: Returns a list of the files that your account has access to. orq.ai sorts and returns the files by their creation dates, placing the most recently created files at the top.
+      operationId: FileList
+      parameters:
+      - name: limit
+        in: query
+        description: Page size. Unset uses the server default.
+        schema:
+          type: integer
+          format: int32
+      - name: starting_after
+        in: query
+        description: "Cursor for forward pagination. Set to the `file_id` of the last item\n from the previous page."
+        schema:
+          type: string
+      - name: ending_before
+        in: query
+        description: "Cursor for backward pagination. Set to the `file_id` of the first item\n from the previous page."
+        schema:
+          type: string
+      - name: project_id
+        in: query
+        schema:
+          type: string
+      - name: purpose
+        in: query
+        description: "Restrict results to files declared with this purpose. Accepts a purpose\n alias (`retrieval`, `knowledge_datasource`, `batch`, `code_interpreter`)\n or canonical `FILE_PURPOSE_*` name case-insensitively. Omit to list files\n of every purpose."
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListFilesResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: files
+      x-speakeasy-name-override: list
+      x-code-samples:
+      - lang: curl
+        label: Core - List project files
+        source: "curl --get 'https://my.orq.ai/v2/files' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\" \\\n  --data-urlencode 'limit=25' \\\n  --data-urlencode 'project_id=proj_01HZXW2K7Y8Q9M0N1P2R3S4T5V'\n"
+      - lang: python
+        label: Python - List project files
+        source: "import os\nfrom orq_ai_sdk import Orq\n\nclient = Orq(api_key=os.environ[\"ORQ_API_KEY\"])\n\npage = client.files.list(\n    limit=25,\n    project_id=\"proj_01HZXW2K7Y8Q9M0N1P2R3S4T5V\",\n)\n\nfor file in page.data:\n    print(file.file_id, file.file_name)\n"
+      - lang: typescript
+        label: Node.js - List project files
+        source: "import { Orq } from '@orq-ai/node';\n\nconst client = new Orq({\n  apiKey: process.env.ORQ_API_KEY,\n});\n\nconst page = await client.files.list({\n  limit: 25,\n  projectId: 'proj_01HZXW2K7Y8Q9M0N1P2R3S4T5V',\n});\n\nfor (const file of page.data) {\n  console.log(file.fileId, file.fileName);\n}\n"
+    post:
+      tags:
+      - Files
+      summary: Upload a file
+      description: Files are used to upload documents that can be used with features like Deployments.
+      operationId: FileUpload
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateFileRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateFileResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: files
+      x-speakeasy-name-override: create
+      x-code-samples:
+      - lang: curl
+        label: Core - Upload retrieval file
+        source: "curl --request POST \\\n  --url 'https://my.orq.ai/v2/files' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\" \\\n  --header 'Content-Type: application/json' \\\n  --data '{\n    \"filename\": \"support-faq.md\",\n    \"content\": \"IyBTdXBwb3J0IEZBUQoKQ29tbW9uIHJlc29sdXRpb25zIGFuZCBlc2NhbGF0aW9uIHBhdGhzLg==\",\n    \"content_type\": \"text/markdown\",\n    \"purpose\": \"FILE_PURPOSE_RETRIEVAL\",\n    \"project_id\": \"proj_01HZXW2K7Y8Q9M0N1P2R3S4T5V\"\n  }'\n"
+      - lang: python
+        label: Python - Upload retrieval file
+        source: "import base64\nimport os\nfrom orq_ai_sdk import Orq\n\nclient = Orq(api_key=os.environ[\"ORQ_API_KEY\"])\n\ncontent = base64.b64encode(\n    b\"# Support FAQ\\n\\nCommon resolutions and escalation paths.\"\n).decode(\"utf-8\")\n\nresult = client.files.create(\n    filename=\"support-faq.md\",\n    content=content,\n    content_type=\"text/markdown\",\n    purpose=\"FILE_PURPOSE_RETRIEVAL\",\n    project_id=\"proj_01HZXW2K7Y8Q9M0N1P2R3S4T5V\",\n)\n\nprint(result.file.file_id)\n"
+      - lang: typescript
+        label: Node.js - Upload retrieval file
+        source: "import { Orq } from '@orq-ai/node';\n\nconst client = new Orq({\n  apiKey: process.env.ORQ_API_KEY,\n});\n\nconst content = Buffer.from(\n  '# Support FAQ\\n\\nCommon resolutions and escalation paths.',\n).toString('base64');\n\nconst result = await client.files.create({\n  filename: 'support-faq.md',\n  content,\n  contentType: 'text/markdown',\n  purpose: 'FILE_PURPOSE_RETRIEVAL',\n  projectId: 'proj_01HZXW2K7Y8Q9M0N1P2R3S4T5V',\n});\n\nconsole.log(result.file.fileId);\n"
+  /v2/files/{file_id_or_path}/content:
+    get:
+      tags:
+      - Files
+      summary: Download file content
+      description: Returns a presigned URL for downloading the file content by file ID.
+      operationId: FileContent
+      parameters:
+      - name: file_id_or_path
+        in: path
+        description: File ID or path used to locate the file content.
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetFileContentResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: The resource does not exist. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: files
+      x-speakeasy-name-override: getContent
+      x-code-samples:
+      - lang: curl
+        label: Core - Get download URL
+        source: "curl --request GET \\\n  --url 'https://my.orq.ai/v2/files/file_01HZXW2K7Y8Q9M0N1P2R3S4T5V/content' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\"\n"
+      - lang: python
+        label: Python - Get download URL
+        source: "import os\nfrom orq_ai_sdk import Orq\n\nclient = Orq(api_key=os.environ[\"ORQ_API_KEY\"])\n\nresult = client.files.get_content(\n    file_id_or_path=\"file_01HZXW2K7Y8Q9M0N1P2R3S4T5V\",\n)\n\nprint(result.download_url)\n"
+      - lang: typescript
+        label: Node.js - Get download URL
+        source: "import { Orq } from '@orq-ai/node';\n\nconst client = new Orq({\n  apiKey: process.env.ORQ_API_KEY,\n});\n\nconst result = await client.files.getContent({\n  fileIdOrPath: 'file_01HZXW2K7Y8Q9M0N1P2R3S4T5V',\n});\n\nconsole.log(result.downloadUrl);\n"
+  /v2/files/{file_id}:
+    get:
+      tags:
+      - Files
+      summary: Retrieve a file
+      description: Retrieves the details of an existing file object. After you supply a unique file ID, orq.ai returns the corresponding file object.
+      operationId: FileGet
+      parameters:
+      - name: file_id
+        in: path
+        description: File ID to retrieve.
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetFileResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: The resource does not exist. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: files
+      x-speakeasy-name-override: get
+      x-code-samples:
+      - lang: curl
+        label: Core - Retrieve file metadata
+        source: "curl --request GET \\\n  --url 'https://my.orq.ai/v2/files/file_01HZXW2K7Y8Q9M0N1P2R3S4T5V' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\"\n"
+      - lang: python
+        label: Python - Retrieve file metadata
+        source: "import os\nfrom orq_ai_sdk import Orq\n\nclient = Orq(api_key=os.environ[\"ORQ_API_KEY\"])\n\nresult = client.files.get(\n    file_id=\"file_01HZXW2K7Y8Q9M0N1P2R3S4T5V\",\n)\n\nprint(result.file.file_name)\n"
+      - lang: typescript
+        label: Node.js - Retrieve file metadata
+        source: "import { Orq } from '@orq-ai/node';\n\nconst client = new Orq({\n  apiKey: process.env.ORQ_API_KEY,\n});\n\nconst result = await client.files.get({\n  fileId: 'file_01HZXW2K7Y8Q9M0N1P2R3S4T5V',\n});\n\nconsole.log(result.file.fileName);\n"
+    delete:
+      tags:
+      - Files
+      summary: Delete a file
+      description: Permanently deletes a file and its stored content from the project.
+      operationId: FileDelete
+      parameters:
+      - name: file_id
+        in: path
+        description: File ID to delete.
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteFileResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: files
+      x-speakeasy-name-override: delete
+      x-code-samples:
+      - lang: curl
+        label: Core - Delete file
+        source: "curl --request DELETE \\\n  --url 'https://my.orq.ai/v2/files/file_01HZXW2K7Y8Q9M0N1P2R3S4T5V' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\"\n"
+      - lang: python
+        label: Python - Delete file
+        source: "import os\nfrom orq_ai_sdk import Orq\n\nclient = Orq(api_key=os.environ[\"ORQ_API_KEY\"])\n\nclient.files.delete(\n    file_id=\"file_01HZXW2K7Y8Q9M0N1P2R3S4T5V\",\n)\n"
+      - lang: typescript
+        label: Node.js - Delete file
+        source: "import { Orq } from '@orq-ai/node';\n\nconst client = new Orq({\n  apiKey: process.env.ORQ_API_KEY,\n});\n\nawait client.files.delete({\n  fileId: 'file_01HZXW2K7Y8Q9M0N1P2R3S4T5V',\n});\n"
+    patch:
+      tags:
+      - Files
+      summary: Update a file
+      description: Updates the metadata of an existing file object.
+      operationId: FileUpdate
+      parameters:
+      - name: file_id
+        in: path
+        description: File ID to update.
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateFileRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateFileResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: files
+      x-speakeasy-name-override: update
+      x-code-samples:
+      - lang: curl
+        label: Core - Rename file
+        source: "curl --request PATCH \\\n  --url 'https://my.orq.ai/v2/files/file_01HZXW2K7Y8Q9M0N1P2R3S4T5V' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\" \\\n  --header 'Content-Type: application/json' \\\n  --data '{\n    \"file_name\": \"support-faq-v2.md\"\n  }'\n"
+      - lang: python
+        label: Python - Rename file
+        source: "import os\nfrom orq_ai_sdk import Orq\n\nclient = Orq(api_key=os.environ[\"ORQ_API_KEY\"])\n\nresult = client.files.update(\n    file_id=\"file_01HZXW2K7Y8Q9M0N1P2R3S4T5V\",\n    file_name=\"support-faq-v2.md\",\n)\n\nprint(result.file.file_name)\n"
+      - lang: typescript
+        label: Node.js - Rename file
+        source: "import { Orq } from '@orq-ai/node';\n\nconst client = new Orq({\n  apiKey: process.env.ORQ_API_KEY,\n});\n\nconst result = await client.files.update({\n  fileId: 'file_01HZXW2K7Y8Q9M0N1P2R3S4T5V',\n  fileName: 'support-faq-v2.md',\n});\n\nconsole.log(result.file.fileName);\n"
+components:
+  schemas:
+    UpdateFileResponse:
+      required:
+      - file
+      type: object
+      properties:
+        file:
+          allOf:
+          - $ref: '#/components/schemas/File'
+          description: Updated file metadata.
+    UpdateFileRequest:
+      required:
+      - file_name
+      type: object
+      properties:
+        file_name:
+          type: string
+          description: New display file name, including extension when available.
+    File:
+      required:
+      - file_id
+      - purpose
+      - file_name
+      - bytes
+      - created_at
+      - project_id
+      type: object
+      properties:
+        file_id:
+          type: string
+          description: Unique file identifier assigned by ORQ.
+        purpose:
+          description: Declared usage category for the file.
+          $ref: '#/components/schemas/FilePurpose'
+        file_name:
+          type: string
+          description: Display file name, including extension when available.
+        bytes:
+          type: string
+          description: Size of the uploaded file in bytes.
+        created_at:
+          type: string
+          description: Time when the file was created.
+          format: date-time
+        project_id:
+          type: string
+          description: Identifier of the project the file belongs to. Files are project-scoped; an API key may only access files in projects it is authorized for.
+    ListFilesResponse:
+      required:
+      - object
+      - data
+      - has_more
+      type: object
+      properties:
+        object:
+          type: string
+          description: Object discriminator for list responses; always `list`.
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/File'
+          description: Page of files.
+        has_more:
+          type: boolean
+          description: Whether more files are available in the selected pagination direction.
+    FilePurpose:
+      type: string
+      enum:
+      - FILE_PURPOSE_RETRIEVAL
+      - FILE_PURPOSE_KNOWLEDGE_DATASOURCE
+      - FILE_PURPOSE_BATCH
+      - FILE_PURPOSE_CODE_INTERPRETER
+    CreateFileResponse:
+      required:
+      - file
+      type: object
+      properties:
+        file:
+          allOf:
+          - $ref: '#/components/schemas/File'
+          description: Newly created file.
+    GetFileContentResponse:
+      required:
+      - download_url
+      type: object
+      properties:
+        download_url:
+          type: string
+          description: Presigned URL that can be used to download the file content.
+    DeleteFileResponse:
+      type: object
+      properties: {}
+    CreateFileRequest:
+      required:
+      - filename
+      - content
+      type: object
+      properties:
+        filename:
+          type: string
+          description: Name to store for the uploaded file, including extension when available.
+        content:
+          type: string
+          description: Base64-encoded file contents.
+          format: bytes
+        purpose:
+          description: "Intended usage category for the uploaded file. Defaults to retrieval\n when omitted."
+          $ref: '#/components/schemas/FilePurpose'
+        content_type:
+          type: string
+          description: MIME type of the uploaded content, for example `application/pdf`.
+        project_id:
+          type: string
+          description: 'Project the file is created in. Optional: project-scoped API keys default to the key''s bound project; workspace-scoped callers default to the workspace''s default project.'
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Human-readable error message.
+        code:
+          type: integer
+          description: gRPC status code, when the service reports one.
+        details:
+          type: array
+          items: {}
+          description: Additional error details, when the service reports any.
+      required:
+      - message
+    GetFileResponse:
+      required:
+      - file
+      type: object
+      properties:
+        file:
+          allOf:
+          - $ref: '#/components/schemas/File'
+          description: Requested file metadata.
+  securitySchemes:
+    ApiKey:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+externalDocs:
+  url: https://docs.orq.ai
+  description: orq.ai Documentation
+x-speakeasy-timeout: 600000

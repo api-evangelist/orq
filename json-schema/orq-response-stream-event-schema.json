@@ -1,0 +1,2620 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/orq/main/json-schema/orq-response-stream-event-schema.json",
+  "title": "Response Stream Event",
+  "description": "A single server-sent event emitted on the response stream. The `type` field discriminates the payload.",
+  "x-generated": "2026-10-21",
+  "x-method": "derived",
+  "x-generator": "derive-json-schema.py",
+  "x-source": "openapi/orq-openapi.json#/components/schemas/ResponseStreamEvent",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/ResponseCreatedStreamEvent"
+    },
+    {
+      "$ref": "#/$defs/ResponseQueuedStreamEvent"
+    },
+    {
+      "$ref": "#/$defs/ResponseInProgressStreamEvent"
+    },
+    {
+      "$ref": "#/$defs/ResponseCompletedStreamEvent"
+    },
+    {
+      "$ref": "#/$defs/ResponseFailedStreamEvent"
+    },
+    {
+      "$ref": "#/$defs/ResponseIncompleteStreamEvent"
+    },
+    {
+      "$ref": "#/$defs/ResponseOutputItemAddedStreamEvent"
+    },
+    {
+      "$ref": "#/$defs/ResponseOutputItemDoneStreamEvent"
+    },
+    {
+      "$ref": "#/$defs/ResponseContentPartAddedStreamEvent"
+    },
+    {
+      "$ref": "#/$defs/ResponseContentPartDoneStreamEvent"
+    },
+    {
+      "$ref": "#/$defs/ResponseOutputTextDeltaStreamEvent"
+    },
+    {
+      "$ref": "#/$defs/ResponseOutputTextDoneStreamEvent"
+    },
+    {
+      "$ref": "#/$defs/ResponseOutputTextAnnotationAddedStreamEvent"
+    },
+    {
+      "$ref": "#/$defs/ResponseRefusalDeltaStreamEvent"
+    },
+    {
+      "$ref": "#/$defs/ResponseRefusalDoneStreamEvent"
+    },
+    {
+      "$ref": "#/$defs/ResponseFunctionCallArgumentsDeltaStreamEvent"
+    },
+    {
+      "$ref": "#/$defs/ResponseFunctionCallArgumentsDoneStreamEvent"
+    },
+    {
+      "$ref": "#/$defs/ResponseReasoningDeltaStreamEvent"
+    },
+    {
+      "$ref": "#/$defs/ResponseReasoningTextDeltaStreamEvent"
+    },
+    {
+      "$ref": "#/$defs/ResponseReasoningDoneStreamEvent"
+    },
+    {
+      "$ref": "#/$defs/ResponseReasoningTextDoneStreamEvent"
+    },
+    {
+      "$ref": "#/$defs/ResponseReasoningSummaryTextDeltaStreamEvent"
+    },
+    {
+      "$ref": "#/$defs/ResponseReasoningSummaryTextDoneStreamEvent"
+    },
+    {
+      "$ref": "#/$defs/ResponseReasoningSummaryPartAddedStreamEvent"
+    },
+    {
+      "$ref": "#/$defs/ResponseReasoningSummaryPartDoneStreamEvent"
+    },
+    {
+      "$ref": "#/$defs/ResponseWebSearchCallInProgressStreamEvent"
+    },
+    {
+      "$ref": "#/$defs/ResponseWebSearchCallSearchingStreamEvent"
+    },
+    {
+      "$ref": "#/$defs/ResponseWebSearchCallCompletedStreamEvent"
+    },
+    {
+      "$ref": "#/$defs/ResponseFileSearchCallInProgressStreamEvent"
+    },
+    {
+      "$ref": "#/$defs/ResponseFileSearchCallSearchingStreamEvent"
+    },
+    {
+      "$ref": "#/$defs/ResponseFileSearchCallCompletedStreamEvent"
+    },
+    {
+      "$ref": "#/$defs/ResponseCodeInterpreterCallInProgressStreamEvent"
+    },
+    {
+      "$ref": "#/$defs/ResponseCodeInterpreterCallInterpretingStreamEvent"
+    },
+    {
+      "$ref": "#/$defs/ResponseCodeInterpreterCallCompletedStreamEvent"
+    },
+    {
+      "$ref": "#/$defs/ResponseImageGenerationCallInProgressStreamEvent"
+    },
+    {
+      "$ref": "#/$defs/ResponseImageGenerationCallGeneratingStreamEvent"
+    },
+    {
+      "$ref": "#/$defs/ResponseImageGenerationCallCompletedStreamEvent"
+    },
+    {
+      "$ref": "#/$defs/ResponseMCPCallInProgressStreamEvent"
+    },
+    {
+      "$ref": "#/$defs/ResponseMCPCallCompletedStreamEvent"
+    },
+    {
+      "$ref": "#/$defs/ResponseMCPCallFailedStreamEvent"
+    },
+    {
+      "$ref": "#/$defs/ResponseMCPListToolsInProgressStreamEvent"
+    },
+    {
+      "$ref": "#/$defs/ResponseMCPListToolsCompletedStreamEvent"
+    },
+    {
+      "$ref": "#/$defs/ResponseMCPListToolsFailedStreamEvent"
+    },
+    {
+      "$ref": "#/$defs/ResponseCodeInterpreterCallCodeDeltaStreamEvent"
+    },
+    {
+      "$ref": "#/$defs/ResponseCodeInterpreterCallCodeDoneStreamEvent"
+    },
+    {
+      "$ref": "#/$defs/ResponseMCPCallArgumentsDeltaStreamEvent"
+    },
+    {
+      "$ref": "#/$defs/ResponseMCPCallArgumentsDoneStreamEvent"
+    },
+    {
+      "$ref": "#/$defs/ResponseCustomToolCallInputDeltaStreamEvent"
+    },
+    {
+      "$ref": "#/$defs/ResponseCustomToolCallInputDoneStreamEvent"
+    },
+    {
+      "$ref": "#/$defs/ResponseImageGenerationCallPartialImageStreamEvent"
+    },
+    {
+      "$ref": "#/$defs/ResponseErrorStreamEvent"
+    }
+  ],
+  "$defs": {
+    "CacheWriteTokensDetails": {
+      "additionalProperties": false,
+      "properties": {
+        "ttl_12h_tokens": {
+          "format": "int64",
+          "type": "integer"
+        },
+        "ttl_30m_tokens": {
+          "format": "int64",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "ttl_30m_tokens",
+        "ttl_12h_tokens"
+      ],
+      "type": "object"
+    },
+    "ConversationParam": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    },
+    "IncompleteDetails": {
+      "additionalProperties": false,
+      "properties": {
+        "reason": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "reason"
+      ],
+      "type": "object"
+    },
+    "InputTokensDetails": {
+      "additionalProperties": false,
+      "properties": {
+        "cache_creation_1h_tokens": {
+          "format": "int64",
+          "type": "integer"
+        },
+        "cache_creation_5m_tokens": {
+          "format": "int64",
+          "type": "integer"
+        },
+        "cache_creation_tokens": {
+          "format": "int64",
+          "type": "integer"
+        },
+        "cache_write_tokens": {
+          "format": "int64",
+          "type": "integer"
+        },
+        "cached_tokens": {
+          "format": "int64",
+          "type": "integer"
+        },
+        "cache_write_tokens_details": {
+          "$ref": "#/$defs/CacheWriteTokensDetails"
+        }
+      },
+      "required": [
+        "cached_tokens",
+        "cache_write_tokens",
+        "cache_creation_tokens"
+      ],
+      "type": "object"
+    },
+    "MemoryParam": {
+      "additionalProperties": false,
+      "properties": {
+        "entity_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "entity_id"
+      ],
+      "type": "object"
+    },
+    "OpenAIPromptCacheOptions": {
+      "additionalProperties": false,
+      "properties": {
+        "mode": {
+          "enum": [
+            "implicit",
+            "explicit"
+          ],
+          "type": "string"
+        },
+        "ttl": {
+          "enum": [
+            "30m",
+            "12h"
+          ],
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "OutputTokensDetails": {
+      "additionalProperties": false,
+      "properties": {
+        "reasoning_tokens": {
+          "format": "int64",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "reasoning_tokens"
+      ],
+      "type": "object"
+    },
+    "PublicResponseResource": {
+      "additionalProperties": false,
+      "properties": {
+        "background": {
+          "type": "boolean"
+        },
+        "completed_at": {
+          "format": "int64",
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "conversation": {
+          "$ref": "#/$defs/ConversationParam"
+        },
+        "created_at": {
+          "format": "int64",
+          "type": "integer"
+        },
+        "error": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ResponseError"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "frequency_penalty": {
+          "format": "double",
+          "type": "number"
+        },
+        "id": {
+          "type": "string"
+        },
+        "incomplete_details": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/IncompleteDetails"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "input": {
+          "description": "Array of input items (messages, function call outputs, etc.)",
+          "items": {},
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "instructions": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "max_output_tokens": {
+          "format": "int64",
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "max_tool_calls": {
+          "format": "int64",
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "memory": {
+          "$ref": "#/$defs/MemoryParam"
+        },
+        "metadata": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Developer-defined key-value pairs attached to the response (OpenAI spec: `Map<string, string>`).",
+          "type": "object"
+        },
+        "model": {
+          "type": "string"
+        },
+        "object": {
+          "description": "Always \"response\"",
+          "type": "string"
+        },
+        "output": {
+          "description": "Array of output items (messages, function calls, reasoning, etc.)",
+          "items": {},
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "parallel_tool_calls": {
+          "type": "boolean"
+        },
+        "presence_penalty": {
+          "format": "double",
+          "type": "number"
+        },
+        "previous_response_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "prompt_cache_key": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "prompt_cache_options": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/OpenAIPromptCacheOptions"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "prompt_cache_retention": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "reasoning": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Reasoning"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "safety_identifier": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "service_tier": {
+          "enum": [
+            "auto",
+            "default",
+            "flex",
+            "fast",
+            "scale",
+            "priority"
+          ],
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "queued",
+            "in_progress",
+            "completed",
+            "failed",
+            "incomplete"
+          ],
+          "type": "string"
+        },
+        "store": {
+          "type": "boolean"
+        },
+        "telemetry": {
+          "$ref": "#/$defs/ResponseTelemetry",
+          "description": "OpenTelemetry trace and span identifiers for this response."
+        },
+        "temperature": {
+          "format": "double",
+          "type": "number"
+        },
+        "text": {
+          "description": "Text output configuration including format and verbosity"
+        },
+        "tool_choice": {
+          "description": "Tool choice setting: \"auto\", \"none\", \"required\", or a specific function"
+        },
+        "tools": {
+          "description": "Array of tool configurations used in this response",
+          "items": {},
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "top_k": {
+          "description": "Only sample from the top K options for each subsequent token. Present only when set on the request.",
+          "format": "int64",
+          "type": "integer"
+        },
+        "top_logprobs": {
+          "format": "int64",
+          "type": "integer"
+        },
+        "top_p": {
+          "format": "double",
+          "type": "number"
+        },
+        "truncation": {
+          "enum": [
+            "disabled",
+            "auto"
+          ],
+          "type": "string"
+        },
+        "usage": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PublicUsage"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "user": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "variables": {
+          "additionalProperties": {},
+          "type": "object"
+        }
+      },
+      "required": [
+        "id",
+        "object",
+        "created_at",
+        "completed_at",
+        "status",
+        "incomplete_details",
+        "model",
+        "previous_response_id",
+        "instructions",
+        "input",
+        "output",
+        "error",
+        "tools",
+        "tool_choice",
+        "temperature",
+        "top_p",
+        "presence_penalty",
+        "frequency_penalty",
+        "top_logprobs",
+        "max_output_tokens",
+        "max_tool_calls",
+        "reasoning",
+        "text",
+        "user",
+        "usage",
+        "truncation",
+        "parallel_tool_calls",
+        "store",
+        "background",
+        "metadata",
+        "service_tier",
+        "safety_identifier",
+        "prompt_cache_key",
+        "prompt_cache_retention",
+        "prompt_cache_options"
+      ],
+      "type": "object"
+    },
+    "PublicUsage": {
+      "additionalProperties": false,
+      "properties": {
+        "input_cost": {
+          "description": "Cost (USD) of input tokens. Present when billing was computed for this response.",
+          "format": "double",
+          "type": "number"
+        },
+        "input_tokens": {
+          "format": "int64",
+          "type": "integer"
+        },
+        "input_tokens_details": {
+          "$ref": "#/$defs/InputTokensDetails"
+        },
+        "output_cost": {
+          "description": "Cost (USD) of output tokens. Present when billing was computed for this response.",
+          "format": "double",
+          "type": "number"
+        },
+        "output_tokens": {
+          "format": "int64",
+          "type": "integer"
+        },
+        "output_tokens_details": {
+          "$ref": "#/$defs/OutputTokensDetails"
+        },
+        "server_tool_use": {
+          "$ref": "#/$defs/ServerToolUseDetails",
+          "description": "Per-tool breakdown of server tool calls (provider-native and orq-executed) made during this response."
+        },
+        "total_cost": {
+          "description": "Total cost (USD) of the response. Present when billing was computed for this response.",
+          "format": "double",
+          "type": "number"
+        },
+        "total_tokens": {
+          "format": "int64",
+          "type": "integer"
+        },
+        "web_search_requests": {
+          "format": "int64",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "input_tokens",
+        "output_tokens",
+        "total_tokens",
+        "input_tokens_details",
+        "output_tokens_details"
+      ],
+      "type": "object"
+    },
+    "Reasoning": {
+      "additionalProperties": false,
+      "properties": {
+        "effort": {
+          "description": "Constrains effort on reasoning for reasoning models. Reducing reasoning effort can result in faster responses and fewer tokens used on reasoning in a response.",
+          "enum": [
+            "none",
+            "minimal",
+            "low",
+            "medium",
+            "high",
+            "xhigh",
+            "max"
+          ],
+          "type": "string"
+        },
+        "summary": {
+          "description": "The format of the reasoning summary returned by the model.",
+          "enum": [
+            "concise",
+            "detailed",
+            "auto",
+            null
+          ],
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "type": "object"
+    },
+    "ResponseCodeInterpreterCallCodeDeltaStreamEvent": {
+      "additionalProperties": true,
+      "description": "A `response.code_interpreter_call_code.delta` server-sent event.",
+      "properties": {
+        "delta": {
+          "description": "Incremental text or argument chunk.",
+          "type": "string"
+        },
+        "item_id": {
+          "description": "ID of the output item this event refers to.",
+          "type": "string"
+        },
+        "output_index": {
+          "description": "Index of the output item in the response output array.",
+          "type": "integer"
+        },
+        "sequence_number": {
+          "description": "Monotonically increasing sequence number for ordering events.",
+          "type": "integer"
+        },
+        "type": {
+          "description": "The event type. Discriminates the payload.",
+          "enum": [
+            "response.code_interpreter_call_code.delta"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "sequence_number",
+        "item_id",
+        "output_index",
+        "delta"
+      ],
+      "title": "Code Interpreter Call Code Delta",
+      "type": "object"
+    },
+    "ResponseCodeInterpreterCallCodeDoneStreamEvent": {
+      "additionalProperties": true,
+      "description": "A `response.code_interpreter_call_code.done` server-sent event.",
+      "properties": {
+        "code": {
+          "description": "The completed code interpreter code.",
+          "type": "string"
+        },
+        "item_id": {
+          "description": "ID of the output item this event refers to.",
+          "type": "string"
+        },
+        "output_index": {
+          "description": "Index of the output item in the response output array.",
+          "type": "integer"
+        },
+        "sequence_number": {
+          "description": "Monotonically increasing sequence number for ordering events.",
+          "type": "integer"
+        },
+        "type": {
+          "description": "The event type. Discriminates the payload.",
+          "enum": [
+            "response.code_interpreter_call_code.done"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "sequence_number",
+        "item_id",
+        "output_index",
+        "code"
+      ],
+      "title": "Code Interpreter Call Code Done",
+      "type": "object"
+    },
+    "ResponseCodeInterpreterCallCompletedStreamEvent": {
+      "additionalProperties": true,
+      "description": "A `response.code_interpreter_call.completed` server-sent event.",
+      "properties": {
+        "item_id": {
+          "description": "ID of the output item this event refers to.",
+          "type": "string"
+        },
+        "output_index": {
+          "description": "Index of the output item in the response output array.",
+          "type": "integer"
+        },
+        "sequence_number": {
+          "description": "Monotonically increasing sequence number for ordering events.",
+          "type": "integer"
+        },
+        "type": {
+          "description": "The event type. Discriminates the payload.",
+          "enum": [
+            "response.code_interpreter_call.completed"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "sequence_number",
+        "item_id",
+        "output_index"
+      ],
+      "title": "Code Interpreter Call Completed",
+      "type": "object"
+    },
+    "ResponseCodeInterpreterCallInProgressStreamEvent": {
+      "additionalProperties": true,
+      "description": "A `response.code_interpreter_call.in_progress` server-sent event.",
+      "properties": {
+        "item_id": {
+          "description": "ID of the output item this event refers to.",
+          "type": "string"
+        },
+        "output_index": {
+          "description": "Index of the output item in the response output array.",
+          "type": "integer"
+        },
+        "sequence_number": {
+          "description": "Monotonically increasing sequence number for ordering events.",
+          "type": "integer"
+        },
+        "type": {
+          "description": "The event type. Discriminates the payload.",
+          "enum": [
+            "response.code_interpreter_call.in_progress"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "sequence_number",
+        "item_id",
+        "output_index"
+      ],
+      "title": "Code Interpreter Call In Progress",
+      "type": "object"
+    },
+    "ResponseCodeInterpreterCallInterpretingStreamEvent": {
+      "additionalProperties": true,
+      "description": "A `response.code_interpreter_call.interpreting` server-sent event.",
+      "properties": {
+        "item_id": {
+          "description": "ID of the output item this event refers to.",
+          "type": "string"
+        },
+        "output_index": {
+          "description": "Index of the output item in the response output array.",
+          "type": "integer"
+        },
+        "sequence_number": {
+          "description": "Monotonically increasing sequence number for ordering events.",
+          "type": "integer"
+        },
+        "type": {
+          "description": "The event type. Discriminates the payload.",
+          "enum": [
+            "response.code_interpreter_call.interpreting"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "sequence_number",
+        "item_id",
+        "output_index"
+      ],
+      "title": "Code Interpreter Call Interpreting",
+      "type": "object"
+    },
+    "ResponseCompletedStreamEvent": {
+      "additionalProperties": true,
+      "description": "A `response.completed` server-sent event.",
+      "properties": {
+        "response": {
+          "$ref": "#/$defs/PublicResponseResource"
+        },
+        "sequence_number": {
+          "description": "Monotonically increasing sequence number for ordering events.",
+          "type": "integer"
+        },
+        "type": {
+          "description": "The event type. Discriminates the payload.",
+          "enum": [
+            "response.completed"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "sequence_number",
+        "response"
+      ],
+      "title": "Completed",
+      "type": "object"
+    },
+    "ResponseContentPartAddedStreamEvent": {
+      "additionalProperties": true,
+      "description": "A `response.content_part.added` server-sent event.",
+      "properties": {
+        "content_index": {
+          "description": "Index of the content part within the output item.",
+          "type": "integer"
+        },
+        "item_id": {
+          "description": "ID of the output item this event refers to.",
+          "type": "string"
+        },
+        "output_index": {
+          "description": "Index of the output item in the response output array.",
+          "type": "integer"
+        },
+        "part": {
+          "additionalProperties": true,
+          "description": "The content part.",
+          "type": "object"
+        },
+        "sequence_number": {
+          "description": "Monotonically increasing sequence number for ordering events.",
+          "type": "integer"
+        },
+        "type": {
+          "description": "The event type. Discriminates the payload.",
+          "enum": [
+            "response.content_part.added"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "sequence_number",
+        "item_id",
+        "output_index",
+        "content_index",
+        "part"
+      ],
+      "title": "Content Part Added",
+      "type": "object"
+    },
+    "ResponseContentPartDoneStreamEvent": {
+      "additionalProperties": true,
+      "description": "A `response.content_part.done` server-sent event.",
+      "properties": {
+        "content_index": {
+          "description": "Index of the content part within the output item.",
+          "type": "integer"
+        },
+        "item_id": {
+          "description": "ID of the output item this event refers to.",
+          "type": "string"
+        },
+        "output_index": {
+          "description": "Index of the output item in the response output array.",
+          "type": "integer"
+        },
+        "part": {
+          "additionalProperties": true,
+          "description": "The content part.",
+          "type": "object"
+        },
+        "sequence_number": {
+          "description": "Monotonically increasing sequence number for ordering events.",
+          "type": "integer"
+        },
+        "type": {
+          "description": "The event type. Discriminates the payload.",
+          "enum": [
+            "response.content_part.done"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "sequence_number",
+        "item_id",
+        "output_index",
+        "content_index",
+        "part"
+      ],
+      "title": "Content Part Done",
+      "type": "object"
+    },
+    "ResponseCreatedStreamEvent": {
+      "additionalProperties": true,
+      "description": "A `response.created` server-sent event.",
+      "properties": {
+        "response": {
+          "$ref": "#/$defs/PublicResponseResource"
+        },
+        "sequence_number": {
+          "description": "Monotonically increasing sequence number for ordering events.",
+          "type": "integer"
+        },
+        "type": {
+          "description": "The event type. Discriminates the payload.",
+          "enum": [
+            "response.created"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "sequence_number",
+        "response"
+      ],
+      "title": "Created",
+      "type": "object"
+    },
+    "ResponseCustomToolCallInputDeltaStreamEvent": {
+      "additionalProperties": true,
+      "description": "A `response.custom_tool_call_input.delta` server-sent event.",
+      "properties": {
+        "delta": {
+          "description": "Incremental text or argument chunk.",
+          "type": "string"
+        },
+        "item_id": {
+          "description": "ID of the output item this event refers to.",
+          "type": "string"
+        },
+        "output_index": {
+          "description": "Index of the output item in the response output array.",
+          "type": "integer"
+        },
+        "sequence_number": {
+          "description": "Monotonically increasing sequence number for ordering events.",
+          "type": "integer"
+        },
+        "type": {
+          "description": "The event type. Discriminates the payload.",
+          "enum": [
+            "response.custom_tool_call_input.delta"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "sequence_number",
+        "item_id",
+        "output_index",
+        "delta"
+      ],
+      "title": "Custom Tool Call Input Delta",
+      "type": "object"
+    },
+    "ResponseCustomToolCallInputDoneStreamEvent": {
+      "additionalProperties": true,
+      "description": "A `response.custom_tool_call_input.done` server-sent event.",
+      "properties": {
+        "input": {
+          "description": "The completed custom tool call input.",
+          "type": "string"
+        },
+        "item_id": {
+          "description": "ID of the output item this event refers to.",
+          "type": "string"
+        },
+        "output_index": {
+          "description": "Index of the output item in the response output array.",
+          "type": "integer"
+        },
+        "sequence_number": {
+          "description": "Monotonically increasing sequence number for ordering events.",
+          "type": "integer"
+        },
+        "type": {
+          "description": "The event type. Discriminates the payload.",
+          "enum": [
+            "response.custom_tool_call_input.done"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "sequence_number",
+        "item_id",
+        "output_index",
+        "input"
+      ],
+      "title": "Custom Tool Call Input Done",
+      "type": "object"
+    },
+    "ResponseError": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "message"
+      ],
+      "type": "object"
+    },
+    "ResponseErrorStreamEvent": {
+      "additionalProperties": true,
+      "description": "A `error` server-sent event.",
+      "properties": {
+        "error": {
+          "$ref": "#/$defs/ResponseError"
+        },
+        "sequence_number": {
+          "description": "Monotonically increasing sequence number for ordering events.",
+          "type": "integer"
+        },
+        "type": {
+          "description": "The event type. Discriminates the payload.",
+          "enum": [
+            "error"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "sequence_number",
+        "error"
+      ],
+      "title": "Error",
+      "type": "object"
+    },
+    "ResponseFailedStreamEvent": {
+      "additionalProperties": true,
+      "description": "A `response.failed` server-sent event.",
+      "properties": {
+        "response": {
+          "$ref": "#/$defs/PublicResponseResource"
+        },
+        "sequence_number": {
+          "description": "Monotonically increasing sequence number for ordering events.",
+          "type": "integer"
+        },
+        "type": {
+          "description": "The event type. Discriminates the payload.",
+          "enum": [
+            "response.failed"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "sequence_number",
+        "response"
+      ],
+      "title": "Failed",
+      "type": "object"
+    },
+    "ResponseFileSearchCallCompletedStreamEvent": {
+      "additionalProperties": true,
+      "description": "A `response.file_search_call.completed` server-sent event.",
+      "properties": {
+        "item_id": {
+          "description": "ID of the output item this event refers to.",
+          "type": "string"
+        },
+        "output_index": {
+          "description": "Index of the output item in the response output array.",
+          "type": "integer"
+        },
+        "sequence_number": {
+          "description": "Monotonically increasing sequence number for ordering events.",
+          "type": "integer"
+        },
+        "type": {
+          "description": "The event type. Discriminates the payload.",
+          "enum": [
+            "response.file_search_call.completed"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "sequence_number",
+        "item_id",
+        "output_index"
+      ],
+      "title": "File Search Call Completed",
+      "type": "object"
+    },
+    "ResponseFileSearchCallInProgressStreamEvent": {
+      "additionalProperties": true,
+      "description": "A `response.file_search_call.in_progress` server-sent event.",
+      "properties": {
+        "item_id": {
+          "description": "ID of the output item this event refers to.",
+          "type": "string"
+        },
+        "output_index": {
+          "description": "Index of the output item in the response output array.",
+          "type": "integer"
+        },
+        "sequence_number": {
+          "description": "Monotonically increasing sequence number for ordering events.",
+          "type": "integer"
+        },
+        "type": {
+          "description": "The event type. Discriminates the payload.",
+          "enum": [
+            "response.file_search_call.in_progress"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "sequence_number",
+        "item_id",
+        "output_index"
+      ],
+      "title": "File Search Call In Progress",
+      "type": "object"
+    },
+    "ResponseFileSearchCallSearchingStreamEvent": {
+      "additionalProperties": true,
+      "description": "A `response.file_search_call.searching` server-sent event.",
+      "properties": {
+        "item_id": {
+          "description": "ID of the output item this event refers to.",
+          "type": "string"
+        },
+        "output_index": {
+          "description": "Index of the output item in the response output array.",
+          "type": "integer"
+        },
+        "sequence_number": {
+          "description": "Monotonically increasing sequence number for ordering events.",
+          "type": "integer"
+        },
+        "type": {
+          "description": "The event type. Discriminates the payload.",
+          "enum": [
+            "response.file_search_call.searching"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "sequence_number",
+        "item_id",
+        "output_index"
+      ],
+      "title": "File Search Call Searching",
+      "type": "object"
+    },
+    "ResponseFunctionCallArgumentsDeltaStreamEvent": {
+      "additionalProperties": true,
+      "description": "A `response.function_call_arguments.delta` server-sent event.",
+      "properties": {
+        "delta": {
+          "description": "Incremental text or argument chunk.",
+          "type": "string"
+        },
+        "item_id": {
+          "description": "ID of the output item this event refers to.",
+          "type": "string"
+        },
+        "obfuscation": {
+          "description": "Obfuscation padding accompanying the delta, when present.",
+          "type": "string"
+        },
+        "output_index": {
+          "description": "Index of the output item in the response output array.",
+          "type": "integer"
+        },
+        "sequence_number": {
+          "description": "Monotonically increasing sequence number for ordering events.",
+          "type": "integer"
+        },
+        "type": {
+          "description": "The event type. Discriminates the payload.",
+          "enum": [
+            "response.function_call_arguments.delta"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "sequence_number",
+        "item_id",
+        "output_index",
+        "delta"
+      ],
+      "title": "Function Call Arguments Delta",
+      "type": "object"
+    },
+    "ResponseFunctionCallArgumentsDoneStreamEvent": {
+      "additionalProperties": true,
+      "description": "A `response.function_call_arguments.done` server-sent event.",
+      "properties": {
+        "arguments": {
+          "description": "The completed function-call arguments JSON.",
+          "type": "string"
+        },
+        "item_id": {
+          "description": "ID of the output item this event refers to.",
+          "type": "string"
+        },
+        "output_index": {
+          "description": "Index of the output item in the response output array.",
+          "type": "integer"
+        },
+        "sequence_number": {
+          "description": "Monotonically increasing sequence number for ordering events.",
+          "type": "integer"
+        },
+        "type": {
+          "description": "The event type. Discriminates the payload.",
+          "enum": [
+            "response.function_call_arguments.done"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "sequence_number",
+        "item_id",
+        "output_index",
+        "arguments"
+      ],
+      "title": "Function Call Arguments Done",
+      "type": "object"
+    },
+    "ResponseImageGenerationCallCompletedStreamEvent": {
+      "additionalProperties": true,
+      "description": "A `response.image_generation_call.completed` server-sent event.",
+      "properties": {
+        "item_id": {
+          "description": "ID of the output item this event refers to.",
+          "type": "string"
+        },
+        "output_index": {
+          "description": "Index of the output item in the response output array.",
+          "type": "integer"
+        },
+        "sequence_number": {
+          "description": "Monotonically increasing sequence number for ordering events.",
+          "type": "integer"
+        },
+        "type": {
+          "description": "The event type. Discriminates the payload.",
+          "enum": [
+            "response.image_generation_call.completed"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "sequence_number",
+        "item_id",
+        "output_index"
+      ],
+      "title": "Image Generation Call Completed",
+      "type": "object"
+    },
+    "ResponseImageGenerationCallGeneratingStreamEvent": {
+      "additionalProperties": true,
+      "description": "A `response.image_generation_call.generating` server-sent event.",
+      "properties": {
+        "item_id": {
+          "description": "ID of the output item this event refers to.",
+          "type": "string"
+        },
+        "output_index": {
+          "description": "Index of the output item in the response output array.",
+          "type": "integer"
+        },
+        "sequence_number": {
+          "description": "Monotonically increasing sequence number for ordering events.",
+          "type": "integer"
+        },
+        "type": {
+          "description": "The event type. Discriminates the payload.",
+          "enum": [
+            "response.image_generation_call.generating"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "sequence_number",
+        "item_id",
+        "output_index"
+      ],
+      "title": "Image Generation Call Generating",
+      "type": "object"
+    },
+    "ResponseImageGenerationCallInProgressStreamEvent": {
+      "additionalProperties": true,
+      "description": "A `response.image_generation_call.in_progress` server-sent event.",
+      "properties": {
+        "item_id": {
+          "description": "ID of the output item this event refers to.",
+          "type": "string"
+        },
+        "output_index": {
+          "description": "Index of the output item in the response output array.",
+          "type": "integer"
+        },
+        "sequence_number": {
+          "description": "Monotonically increasing sequence number for ordering events.",
+          "type": "integer"
+        },
+        "type": {
+          "description": "The event type. Discriminates the payload.",
+          "enum": [
+            "response.image_generation_call.in_progress"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "sequence_number",
+        "item_id",
+        "output_index"
+      ],
+      "title": "Image Generation Call In Progress",
+      "type": "object"
+    },
+    "ResponseImageGenerationCallPartialImageStreamEvent": {
+      "additionalProperties": true,
+      "description": "A `response.image_generation_call.partial_image` server-sent event.",
+      "properties": {
+        "item_id": {
+          "description": "ID of the output item this event refers to.",
+          "type": "string"
+        },
+        "output_index": {
+          "description": "Index of the output item in the response output array.",
+          "type": "integer"
+        },
+        "partial_image_b64": {
+          "description": "Base64-encoded partial image.",
+          "type": "string"
+        },
+        "partial_image_index": {
+          "description": "Index of the partial image.",
+          "type": "integer"
+        },
+        "sequence_number": {
+          "description": "Monotonically increasing sequence number for ordering events.",
+          "type": "integer"
+        },
+        "type": {
+          "description": "The event type. Discriminates the payload.",
+          "enum": [
+            "response.image_generation_call.partial_image"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "sequence_number",
+        "item_id",
+        "output_index",
+        "partial_image_b64",
+        "partial_image_index"
+      ],
+      "title": "Image Generation Call Partial Image",
+      "type": "object"
+    },
+    "ResponseInProgressStreamEvent": {
+      "additionalProperties": true,
+      "description": "A `response.in_progress` server-sent event.",
+      "properties": {
+        "response": {
+          "$ref": "#/$defs/PublicResponseResource"
+        },
+        "sequence_number": {
+          "description": "Monotonically increasing sequence number for ordering events.",
+          "type": "integer"
+        },
+        "type": {
+          "description": "The event type. Discriminates the payload.",
+          "enum": [
+            "response.in_progress"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "sequence_number",
+        "response"
+      ],
+      "title": "In Progress",
+      "type": "object"
+    },
+    "ResponseIncompleteStreamEvent": {
+      "additionalProperties": true,
+      "description": "A `response.incomplete` server-sent event.",
+      "properties": {
+        "response": {
+          "$ref": "#/$defs/PublicResponseResource"
+        },
+        "sequence_number": {
+          "description": "Monotonically increasing sequence number for ordering events.",
+          "type": "integer"
+        },
+        "type": {
+          "description": "The event type. Discriminates the payload.",
+          "enum": [
+            "response.incomplete"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "sequence_number",
+        "response"
+      ],
+      "title": "Incomplete",
+      "type": "object"
+    },
+    "ResponseMCPCallArgumentsDeltaStreamEvent": {
+      "additionalProperties": true,
+      "description": "A `response.mcp_call_arguments.delta` server-sent event.",
+      "properties": {
+        "delta": {
+          "description": "Incremental text or argument chunk.",
+          "type": "string"
+        },
+        "item_id": {
+          "description": "ID of the output item this event refers to.",
+          "type": "string"
+        },
+        "output_index": {
+          "description": "Index of the output item in the response output array.",
+          "type": "integer"
+        },
+        "sequence_number": {
+          "description": "Monotonically increasing sequence number for ordering events.",
+          "type": "integer"
+        },
+        "type": {
+          "description": "The event type. Discriminates the payload.",
+          "enum": [
+            "response.mcp_call_arguments.delta"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "sequence_number",
+        "item_id",
+        "output_index",
+        "delta"
+      ],
+      "title": "MCP Call Arguments Delta",
+      "type": "object"
+    },
+    "ResponseMCPCallArgumentsDoneStreamEvent": {
+      "additionalProperties": true,
+      "description": "A `response.mcp_call_arguments.done` server-sent event.",
+      "properties": {
+        "arguments": {
+          "description": "The completed MCP-call arguments JSON.",
+          "type": "string"
+        },
+        "item_id": {
+          "description": "ID of the output item this event refers to.",
+          "type": "string"
+        },
+        "output_index": {
+          "description": "Index of the output item in the response output array.",
+          "type": "integer"
+        },
+        "sequence_number": {
+          "description": "Monotonically increasing sequence number for ordering events.",
+          "type": "integer"
+        },
+        "type": {
+          "description": "The event type. Discriminates the payload.",
+          "enum": [
+            "response.mcp_call_arguments.done"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "sequence_number",
+        "item_id",
+        "output_index",
+        "arguments"
+      ],
+      "title": "MCP Call Arguments Done",
+      "type": "object"
+    },
+    "ResponseMCPCallCompletedStreamEvent": {
+      "additionalProperties": true,
+      "description": "A `response.mcp_call.completed` server-sent event.",
+      "properties": {
+        "item_id": {
+          "description": "ID of the output item this event refers to.",
+          "type": "string"
+        },
+        "output_index": {
+          "description": "Index of the output item in the response output array.",
+          "type": "integer"
+        },
+        "sequence_number": {
+          "description": "Monotonically increasing sequence number for ordering events.",
+          "type": "integer"
+        },
+        "type": {
+          "description": "The event type. Discriminates the payload.",
+          "enum": [
+            "response.mcp_call.completed"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "sequence_number",
+        "item_id",
+        "output_index"
+      ],
+      "title": "MCP Call Completed",
+      "type": "object"
+    },
+    "ResponseMCPCallFailedStreamEvent": {
+      "additionalProperties": true,
+      "description": "A `response.mcp_call.failed` server-sent event.",
+      "properties": {
+        "item_id": {
+          "description": "ID of the output item this event refers to.",
+          "type": "string"
+        },
+        "output_index": {
+          "description": "Index of the output item in the response output array.",
+          "type": "integer"
+        },
+        "sequence_number": {
+          "description": "Monotonically increasing sequence number for ordering events.",
+          "type": "integer"
+        },
+        "type": {
+          "description": "The event type. Discriminates the payload.",
+          "enum": [
+            "response.mcp_call.failed"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "sequence_number",
+        "item_id",
+        "output_index"
+      ],
+      "title": "MCP Call Failed",
+      "type": "object"
+    },
+    "ResponseMCPCallInProgressStreamEvent": {
+      "additionalProperties": true,
+      "description": "A `response.mcp_call.in_progress` server-sent event.",
+      "properties": {
+        "item_id": {
+          "description": "ID of the output item this event refers to.",
+          "type": "string"
+        },
+        "output_index": {
+          "description": "Index of the output item in the response output array.",
+          "type": "integer"
+        },
+        "sequence_number": {
+          "description": "Monotonically increasing sequence number for ordering events.",
+          "type": "integer"
+        },
+        "type": {
+          "description": "The event type. Discriminates the payload.",
+          "enum": [
+            "response.mcp_call.in_progress"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "sequence_number",
+        "item_id",
+        "output_index"
+      ],
+      "title": "MCP Call In Progress",
+      "type": "object"
+    },
+    "ResponseMCPListToolsCompletedStreamEvent": {
+      "additionalProperties": true,
+      "description": "A `response.mcp_list_tools.completed` server-sent event.",
+      "properties": {
+        "item_id": {
+          "description": "ID of the output item this event refers to.",
+          "type": "string"
+        },
+        "output_index": {
+          "description": "Index of the output item in the response output array.",
+          "type": "integer"
+        },
+        "sequence_number": {
+          "description": "Monotonically increasing sequence number for ordering events.",
+          "type": "integer"
+        },
+        "type": {
+          "description": "The event type. Discriminates the payload.",
+          "enum": [
+            "response.mcp_list_tools.completed"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "sequence_number",
+        "item_id",
+        "output_index"
+      ],
+      "title": "MCP List Tools Completed",
+      "type": "object"
+    },
+    "ResponseMCPListToolsFailedStreamEvent": {
+      "additionalProperties": true,
+      "description": "A `response.mcp_list_tools.failed` server-sent event.",
+      "properties": {
+        "item_id": {
+          "description": "ID of the output item this event refers to.",
+          "type": "string"
+        },
+        "output_index": {
+          "description": "Index of the output item in the response output array.",
+          "type": "integer"
+        },
+        "sequence_number": {
+          "description": "Monotonically increasing sequence number for ordering events.",
+          "type": "integer"
+        },
+        "type": {
+          "description": "The event type. Discriminates the payload.",
+          "enum": [
+            "response.mcp_list_tools.failed"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "sequence_number",
+        "item_id",
+        "output_index"
+      ],
+      "title": "MCP List Tools Failed",
+      "type": "object"
+    },
+    "ResponseMCPListToolsInProgressStreamEvent": {
+      "additionalProperties": true,
+      "description": "A `response.mcp_list_tools.in_progress` server-sent event.",
+      "properties": {
+        "item_id": {
+          "description": "ID of the output item this event refers to.",
+          "type": "string"
+        },
+        "output_index": {
+          "description": "Index of the output item in the response output array.",
+          "type": "integer"
+        },
+        "sequence_number": {
+          "description": "Monotonically increasing sequence number for ordering events.",
+          "type": "integer"
+        },
+        "type": {
+          "description": "The event type. Discriminates the payload.",
+          "enum": [
+            "response.mcp_list_tools.in_progress"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "sequence_number",
+        "item_id",
+        "output_index"
+      ],
+      "title": "MCP List Tools In Progress",
+      "type": "object"
+    },
+    "ResponseOutputItemAddedStreamEvent": {
+      "additionalProperties": true,
+      "description": "A `response.output_item.added` server-sent event.",
+      "properties": {
+        "item": {
+          "additionalProperties": true,
+          "description": "The output item (message, function call, reasoning, etc.).",
+          "type": "object"
+        },
+        "output_index": {
+          "description": "Index of the output item in the response output array.",
+          "type": "integer"
+        },
+        "sequence_number": {
+          "description": "Monotonically increasing sequence number for ordering events.",
+          "type": "integer"
+        },
+        "type": {
+          "description": "The event type. Discriminates the payload.",
+          "enum": [
+            "response.output_item.added"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "sequence_number",
+        "output_index",
+        "item"
+      ],
+      "title": "Output Item Added",
+      "type": "object"
+    },
+    "ResponseOutputItemDoneStreamEvent": {
+      "additionalProperties": true,
+      "description": "A `response.output_item.done` server-sent event.",
+      "properties": {
+        "item": {
+          "additionalProperties": true,
+          "description": "The output item (message, function call, reasoning, etc.).",
+          "type": "object"
+        },
+        "output_index": {
+          "description": "Index of the output item in the response output array.",
+          "type": "integer"
+        },
+        "sequence_number": {
+          "description": "Monotonically increasing sequence number for ordering events.",
+          "type": "integer"
+        },
+        "type": {
+          "description": "The event type. Discriminates the payload.",
+          "enum": [
+            "response.output_item.done"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "sequence_number",
+        "output_index",
+        "item"
+      ],
+      "title": "Output Item Done",
+      "type": "object"
+    },
+    "ResponseOutputTextAnnotationAddedStreamEvent": {
+      "additionalProperties": true,
+      "description": "A `response.output_text.annotation.added` server-sent event.",
+      "properties": {
+        "annotation": {
+          "additionalProperties": true,
+          "description": "The annotation added to the output text.",
+          "type": "object"
+        },
+        "annotation_index": {
+          "description": "Index of the annotation within the content part.",
+          "type": "integer"
+        },
+        "content_index": {
+          "description": "Index of the content part within the output item.",
+          "type": "integer"
+        },
+        "item_id": {
+          "description": "ID of the output item this event refers to.",
+          "type": "string"
+        },
+        "output_index": {
+          "description": "Index of the output item in the response output array.",
+          "type": "integer"
+        },
+        "sequence_number": {
+          "description": "Monotonically increasing sequence number for ordering events.",
+          "type": "integer"
+        },
+        "type": {
+          "description": "The event type. Discriminates the payload.",
+          "enum": [
+            "response.output_text.annotation.added"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "sequence_number",
+        "item_id",
+        "output_index",
+        "content_index",
+        "annotation_index",
+        "annotation"
+      ],
+      "title": "Output Text Annotation Added",
+      "type": "object"
+    },
+    "ResponseOutputTextDeltaStreamEvent": {
+      "additionalProperties": true,
+      "description": "A `response.output_text.delta` server-sent event.",
+      "properties": {
+        "content_index": {
+          "description": "Index of the content part within the output item.",
+          "type": "integer"
+        },
+        "delta": {
+          "description": "Incremental text or argument chunk.",
+          "type": "string"
+        },
+        "item_id": {
+          "description": "ID of the output item this event refers to.",
+          "type": "string"
+        },
+        "logprobs": {
+          "description": "Log probability information for the emitted tokens.",
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "obfuscation": {
+          "description": "Obfuscation padding accompanying the delta, when present.",
+          "type": "string"
+        },
+        "output_index": {
+          "description": "Index of the output item in the response output array.",
+          "type": "integer"
+        },
+        "sequence_number": {
+          "description": "Monotonically increasing sequence number for ordering events.",
+          "type": "integer"
+        },
+        "type": {
+          "description": "The event type. Discriminates the payload.",
+          "enum": [
+            "response.output_text.delta"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "sequence_number",
+        "item_id",
+        "output_index",
+        "content_index",
+        "delta",
+        "logprobs"
+      ],
+      "title": "Output Text Delta",
+      "type": "object"
+    },
+    "ResponseOutputTextDoneStreamEvent": {
+      "additionalProperties": true,
+      "description": "A `response.output_text.done` server-sent event.",
+      "properties": {
+        "content_index": {
+          "description": "Index of the content part within the output item.",
+          "type": "integer"
+        },
+        "item_id": {
+          "description": "ID of the output item this event refers to.",
+          "type": "string"
+        },
+        "logprobs": {
+          "description": "Log probability information for the emitted tokens.",
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "output_index": {
+          "description": "Index of the output item in the response output array.",
+          "type": "integer"
+        },
+        "sequence_number": {
+          "description": "Monotonically increasing sequence number for ordering events.",
+          "type": "integer"
+        },
+        "text": {
+          "description": "The completed output text.",
+          "type": "string"
+        },
+        "type": {
+          "description": "The event type. Discriminates the payload.",
+          "enum": [
+            "response.output_text.done"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "sequence_number",
+        "item_id",
+        "output_index",
+        "content_index",
+        "text",
+        "logprobs"
+      ],
+      "title": "Output Text Done",
+      "type": "object"
+    },
+    "ResponseQueuedStreamEvent": {
+      "additionalProperties": true,
+      "description": "A `response.queued` server-sent event.",
+      "properties": {
+        "response": {
+          "$ref": "#/$defs/PublicResponseResource"
+        },
+        "sequence_number": {
+          "description": "Monotonically increasing sequence number for ordering events.",
+          "type": "integer"
+        },
+        "type": {
+          "description": "The event type. Discriminates the payload.",
+          "enum": [
+            "response.queued"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "sequence_number",
+        "response"
+      ],
+      "title": "Queued",
+      "type": "object"
+    },
+    "ResponseReasoningDeltaStreamEvent": {
+      "additionalProperties": true,
+      "description": "A `response.reasoning.delta` server-sent event.",
+      "properties": {
+        "content_index": {
+          "description": "Index of the content part within the output item.",
+          "type": "integer"
+        },
+        "delta": {
+          "description": "Incremental text or argument chunk.",
+          "type": "string"
+        },
+        "item_id": {
+          "description": "ID of the output item this event refers to.",
+          "type": "string"
+        },
+        "obfuscation": {
+          "description": "Obfuscation padding accompanying the delta, when present.",
+          "type": "string"
+        },
+        "output_index": {
+          "description": "Index of the output item in the response output array.",
+          "type": "integer"
+        },
+        "sequence_number": {
+          "description": "Monotonically increasing sequence number for ordering events.",
+          "type": "integer"
+        },
+        "type": {
+          "description": "The event type. Discriminates the payload.",
+          "enum": [
+            "response.reasoning.delta"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "sequence_number",
+        "item_id",
+        "output_index",
+        "content_index",
+        "delta"
+      ],
+      "title": "Reasoning Delta",
+      "type": "object"
+    },
+    "ResponseReasoningDoneStreamEvent": {
+      "additionalProperties": true,
+      "description": "A `response.reasoning.done` server-sent event.",
+      "properties": {
+        "content_index": {
+          "description": "Index of the content part within the output item.",
+          "type": "integer"
+        },
+        "item_id": {
+          "description": "ID of the output item this event refers to.",
+          "type": "string"
+        },
+        "output_index": {
+          "description": "Index of the output item in the response output array.",
+          "type": "integer"
+        },
+        "sequence_number": {
+          "description": "Monotonically increasing sequence number for ordering events.",
+          "type": "integer"
+        },
+        "text": {
+          "description": "The completed reasoning text.",
+          "type": "string"
+        },
+        "type": {
+          "description": "The event type. Discriminates the payload.",
+          "enum": [
+            "response.reasoning.done"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "sequence_number",
+        "item_id",
+        "output_index",
+        "content_index",
+        "text"
+      ],
+      "title": "Reasoning Done",
+      "type": "object"
+    },
+    "ResponseReasoningSummaryPartAddedStreamEvent": {
+      "additionalProperties": true,
+      "description": "A `response.reasoning_summary_part.added` server-sent event.",
+      "properties": {
+        "item_id": {
+          "description": "ID of the output item this event refers to.",
+          "type": "string"
+        },
+        "output_index": {
+          "description": "Index of the output item in the response output array.",
+          "type": "integer"
+        },
+        "part": {
+          "additionalProperties": true,
+          "description": "The reasoning summary part.",
+          "type": "object"
+        },
+        "sequence_number": {
+          "description": "Monotonically increasing sequence number for ordering events.",
+          "type": "integer"
+        },
+        "summary_index": {
+          "description": "Index of the reasoning summary part.",
+          "type": "integer"
+        },
+        "type": {
+          "description": "The event type. Discriminates the payload.",
+          "enum": [
+            "response.reasoning_summary_part.added"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "sequence_number",
+        "item_id",
+        "output_index",
+        "summary_index",
+        "part"
+      ],
+      "title": "Reasoning Summary Part Added",
+      "type": "object"
+    },
+    "ResponseReasoningSummaryPartDoneStreamEvent": {
+      "additionalProperties": true,
+      "description": "A `response.reasoning_summary_part.done` server-sent event.",
+      "properties": {
+        "item_id": {
+          "description": "ID of the output item this event refers to.",
+          "type": "string"
+        },
+        "output_index": {
+          "description": "Index of the output item in the response output array.",
+          "type": "integer"
+        },
+        "part": {
+          "additionalProperties": true,
+          "description": "The reasoning summary part.",
+          "type": "object"
+        },
+        "sequence_number": {
+          "description": "Monotonically increasing sequence number for ordering events.",
+          "type": "integer"
+        },
+        "summary_index": {
+          "description": "Index of the reasoning summary part.",
+          "type": "integer"
+        },
+        "type": {
+          "description": "The event type. Discriminates the payload.",
+          "enum": [
+            "response.reasoning_summary_part.done"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "sequence_number",
+        "item_id",
+        "output_index",
+        "summary_index",
+        "part"
+      ],
+      "title": "Reasoning Summary Part Done",
+      "type": "object"
+    },
+    "ResponseReasoningSummaryTextDeltaStreamEvent": {
+      "additionalProperties": true,
+      "description": "A `response.reasoning_summary_text.delta` server-sent event.",
+      "properties": {
+        "delta": {
+          "description": "Incremental text or argument chunk.",
+          "type": "string"
+        },
+        "item_id": {
+          "description": "ID of the output item this event refers to.",
+          "type": "string"
+        },
+        "obfuscation": {
+          "description": "Obfuscation padding accompanying the delta, when present.",
+          "type": "string"
+        },
+        "output_index": {
+          "description": "Index of the output item in the response output array.",
+          "type": "integer"
+        },
+        "sequence_number": {
+          "description": "Monotonically increasing sequence number for ordering events.",
+          "type": "integer"
+        },
+        "summary_index": {
+          "description": "Index of the reasoning summary part.",
+          "type": "integer"
+        },
+        "type": {
+          "description": "The event type. Discriminates the payload.",
+          "enum": [
+            "response.reasoning_summary_text.delta"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "sequence_number",
+        "item_id",
+        "output_index",
+        "summary_index",
+        "delta"
+      ],
+      "title": "Reasoning Summary Text Delta",
+      "type": "object"
+    },
+    "ResponseReasoningSummaryTextDoneStreamEvent": {
+      "additionalProperties": true,
+      "description": "A `response.reasoning_summary_text.done` server-sent event.",
+      "properties": {
+        "item_id": {
+          "description": "ID of the output item this event refers to.",
+          "type": "string"
+        },
+        "output_index": {
+          "description": "Index of the output item in the response output array.",
+          "type": "integer"
+        },
+        "sequence_number": {
+          "description": "Monotonically increasing sequence number for ordering events.",
+          "type": "integer"
+        },
+        "summary_index": {
+          "description": "Index of the reasoning summary part.",
+          "type": "integer"
+        },
+        "text": {
+          "description": "The completed reasoning summary text.",
+          "type": "string"
+        },
+        "type": {
+          "description": "The event type. Discriminates the payload.",
+          "enum": [
+            "response.reasoning_summary_text.done"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "sequence_number",
+        "item_id",
+        "output_index",
+        "summary_index",
+        "text"
+      ],
+      "title": "Reasoning Summary Text Done",
+      "type": "object"
+    },
+    "ResponseReasoningTextDeltaStreamEvent": {
+      "additionalProperties": true,
+      "description": "A `response.reasoning_text.delta` server-sent event.",
+      "properties": {
+        "content_index": {
+          "description": "Index of the content part within the output item.",
+          "type": "integer"
+        },
+        "delta": {
+          "description": "Incremental text or argument chunk.",
+          "type": "string"
+        },
+        "item_id": {
+          "description": "ID of the output item this event refers to.",
+          "type": "string"
+        },
+        "obfuscation": {
+          "description": "Obfuscation padding accompanying the delta, when present.",
+          "type": "string"
+        },
+        "output_index": {
+          "description": "Index of the output item in the response output array.",
+          "type": "integer"
+        },
+        "sequence_number": {
+          "description": "Monotonically increasing sequence number for ordering events.",
+          "type": "integer"
+        },
+        "type": {
+          "description": "The event type. Discriminates the payload.",
+          "enum": [
+            "response.reasoning_text.delta"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "sequence_number",
+        "item_id",
+        "output_index",
+        "content_index",
+        "delta"
+      ],
+      "title": "Reasoning Text Delta",
+      "type": "object"
+    },
+    "ResponseReasoningTextDoneStreamEvent": {
+      "additionalProperties": true,
+      "description": "A `response.reasoning_text.done` server-sent event.",
+      "properties": {
+        "content_index": {
+          "description": "Index of the content part within the output item.",
+          "type": "integer"
+        },
+        "item_id": {
+          "description": "ID of the output item this event refers to.",
+          "type": "string"
+        },
+        "output_index": {
+          "description": "Index of the output item in the response output array.",
+          "type": "integer"
+        },
+        "sequence_number": {
+          "description": "Monotonically increasing sequence number for ordering events.",
+          "type": "integer"
+        },
+        "text": {
+          "description": "The completed reasoning text.",
+          "type": "string"
+        },
+        "type": {
+          "description": "The event type. Discriminates the payload.",
+          "enum": [
+            "response.reasoning_text.done"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "sequence_number",
+        "item_id",
+        "output_index",
+        "content_index",
+        "text"
+      ],
+      "title": "Reasoning Text Done",
+      "type": "object"
+    },
+    "ResponseRefusalDeltaStreamEvent": {
+      "additionalProperties": true,
+      "description": "A `response.refusal.delta` server-sent event.",
+      "properties": {
+        "content_index": {
+          "description": "Index of the content part within the output item.",
+          "type": "integer"
+        },
+        "delta": {
+          "description": "Incremental text or argument chunk.",
+          "type": "string"
+        },
+        "item_id": {
+          "description": "ID of the output item this event refers to.",
+          "type": "string"
+        },
+        "output_index": {
+          "description": "Index of the output item in the response output array.",
+          "type": "integer"
+        },
+        "sequence_number": {
+          "description": "Monotonically increasing sequence number for ordering events.",
+          "type": "integer"
+        },
+        "type": {
+          "description": "The event type. Discriminates the payload.",
+          "enum": [
+            "response.refusal.delta"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "sequence_number",
+        "item_id",
+        "output_index",
+        "content_index",
+        "delta"
+      ],
+      "title": "Refusal Delta",
+      "type": "object"
+    },
+    "ResponseRefusalDoneStreamEvent": {
+      "additionalProperties": true,
+      "description": "A `response.refusal.done` server-sent event.",
+      "properties": {
+        "content_index": {
+          "description": "Index of the content part within the output item.",
+          "type": "integer"
+        },
+        "item_id": {
+          "description": "ID of the output item this event refers to.",
+          "type": "string"
+        },
+        "output_index": {
+          "description": "Index of the output item in the response output array.",
+          "type": "integer"
+        },
+        "refusal": {
+          "description": "The completed refusal text.",
+          "type": "string"
+        },
+        "sequence_number": {
+          "description": "Monotonically increasing sequence number for ordering events.",
+          "type": "integer"
+        },
+        "type": {
+          "description": "The event type. Discriminates the payload.",
+          "enum": [
+            "response.refusal.done"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "sequence_number",
+        "item_id",
+        "output_index",
+        "content_index",
+        "refusal"
+      ],
+      "title": "Refusal Done",
+      "type": "object"
+    },
+    "ResponseTelemetry": {
+      "additionalProperties": false,
+      "properties": {
+        "span_id": {
+          "type": "string"
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "trace_id",
+        "span_id"
+      ],
+      "type": "object"
+    },
+    "ResponseWebSearchCallCompletedStreamEvent": {
+      "additionalProperties": true,
+      "description": "A `response.web_search_call.completed` server-sent event.",
+      "properties": {
+        "item_id": {
+          "description": "ID of the output item this event refers to.",
+          "type": "string"
+        },
+        "output_index": {
+          "description": "Index of the output item in the response output array.",
+          "type": "integer"
+        },
+        "sequence_number": {
+          "description": "Monotonically increasing sequence number for ordering events.",
+          "type": "integer"
+        },
+        "type": {
+          "description": "The event type. Discriminates the payload.",
+          "enum": [
+            "response.web_search_call.completed"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "sequence_number",
+        "item_id",
+        "output_index"
+      ],
+      "title": "Web Search Call Completed",
+      "type": "object"
+    },
+    "ResponseWebSearchCallInProgressStreamEvent": {
+      "additionalProperties": true,
+      "description": "A `response.web_search_call.in_progress` server-sent event.",
+      "properties": {
+        "item_id": {
+          "description": "ID of the output item this event refers to.",
+          "type": "string"
+        },
+        "output_index": {
+          "description": "Index of the output item in the response output array.",
+          "type": "integer"
+        },
+        "sequence_number": {
+          "description": "Monotonically increasing sequence number for ordering events.",
+          "type": "integer"
+        },
+        "type": {
+          "description": "The event type. Discriminates the payload.",
+          "enum": [
+            "response.web_search_call.in_progress"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "sequence_number",
+        "item_id",
+        "output_index"
+      ],
+      "title": "Web Search Call In Progress",
+      "type": "object"
+    },
+    "ResponseWebSearchCallSearchingStreamEvent": {
+      "additionalProperties": true,
+      "description": "A `response.web_search_call.searching` server-sent event.",
+      "properties": {
+        "item_id": {
+          "description": "ID of the output item this event refers to.",
+          "type": "string"
+        },
+        "output_index": {
+          "description": "Index of the output item in the response output array.",
+          "type": "integer"
+        },
+        "sequence_number": {
+          "description": "Monotonically increasing sequence number for ordering events.",
+          "type": "integer"
+        },
+        "type": {
+          "description": "The event type. Discriminates the payload.",
+          "enum": [
+            "response.web_search_call.searching"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "sequence_number",
+        "item_id",
+        "output_index"
+      ],
+      "title": "Web Search Call Searching",
+      "type": "object"
+    },
+    "ServerToolUseDetails": {
+      "additionalProperties": false,
+      "properties": {
+        "advisor_requests": {
+          "format": "int64",
+          "type": "integer"
+        },
+        "code_interpreter_sessions": {
+          "format": "int64",
+          "type": "integer"
+        },
+        "datetime_requests": {
+          "format": "int64",
+          "type": "integer"
+        },
+        "fusion_requests": {
+          "format": "int64",
+          "type": "integer"
+        },
+        "image_generation_calls": {
+          "format": "int64",
+          "type": "integer"
+        },
+        "search_models_requests": {
+          "format": "int64",
+          "type": "integer"
+        },
+        "shell_commands": {
+          "format": "int64",
+          "type": "integer"
+        },
+        "subagent_requests": {
+          "format": "int64",
+          "type": "integer"
+        },
+        "web_fetch_requests": {
+          "format": "int64",
+          "type": "integer"
+        },
+        "web_search_requests": {
+          "format": "int64",
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    }
+  }
+}

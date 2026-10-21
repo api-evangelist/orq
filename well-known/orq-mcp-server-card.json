@@ -1,0 +1,15 @@
+{
+  "name": "orq.ai MCP Server",
+  "description": "Operate orq.ai from an agent: route to models, run evaluators, manage prompts, deployments, datasets, experiments, and read traces.",
+  "version": "1.0.0",
+  "serverInfo": { "name": "orq.ai MCP Server", "version": "1.0.0" },
+  "url": "https://my.orq.ai/v2/mcp",
+  "transport": "http",
+  "capabilities": { "tools": true, "resources": false },
+  "authentication": "api_key",
+  "tools": [
+    { "name": "list_models", "description": "List the models available through the orq.ai gateway.", "annotations": { "readOnlyHint": true } },
+    { "name": "invoke_agent", "description": "Invoke a deployed orq.ai agent and return its response.", "annotations": { "readOnlyHint": false } },
+    { "name": "search_logs", "description": "Search request/trace logs recorded on the orq.ai platform.", "annotations": { "readOnlyHint": true } }
+  ]
+}

@@ -1,0 +1,778 @@
+openapi: 3.2.0
+info:
+  title: orq.ai Agent Schedules API
+  version: '2.0'
+  description: orq.ai API documentation
+servers:
+- url: https://my.orq.ai
+security:
+- ApiKey: []
+tags:
+- description: Run agents on a cron cadence. Minimum firing interval is 1 hour.
+  name: Agent Schedules
+paths:
+  /v3/agents/{agent_key}/schedules:
+    get:
+      description: Lists all schedules attached to the specified agent, most recent first.
+      operationId: list-agent-schedules
+      parameters:
+      - description: The unique routing key of the agent the schedule belongs to.
+        in: path
+        name: agent_key
+        required: true
+        schema:
+          description: The unique routing key of the agent the schedule belongs to.
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  schedules:
+                    items:
+                      $ref: '#/components/schemas/PublicSchedule'
+                    type:
+                    - array
+                    - 'null'
+                required:
+                - schedules
+                type: object
+          description: Schedules listed (empty array if none).
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: The resource does not exist. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIErrorResponse'
+      summary: List schedules
+      tags:
+      - Agent Schedules
+      x-cli-group: schedules
+      x-cli-name: list
+      x-orq-gateway-group: true
+      x-speakeasy-group: schedules
+      x-speakeasy-name-override: list
+    post:
+      description: 'Creates a schedule that runs the agent on a cron cadence. Only `cron` is accepted, as a 6-field expression firing at most once per hour: hourly `0 0 * * * *`, daily `0 0 9 * * *`, or weekly `0 0 9 * * 1`.'
+      operationId: create-agent-schedule
+      parameters:
+      - description: The unique routing key of the agent the schedule belongs to.
+        in: path
+        name: agent_key
+        required: true
+        schema:
+          description: The unique routing key of the agent the schedule belongs to.
+          type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              daily_cron:
+                summary: Daily at 9am UTC
+                value:
+                  agent_tag: v2
+                  display_name: Daily morning briefing
+                  expression: 0 0 9 * * *
+                  payload:
+                    input: Generate the morning briefing for {{region}}
+                    memory_entity_id: mem_entity_123
+                    metadata:
+                      run_source: daily-briefing
+                    variables:
+                      region: EMEA
+                  type: cron
+              hourly_cron:
+                summary: Every hour (minimum allowed cadence)
+                value:
+                  display_name: Hourly ticket summary
+                  expression: 0 0 * * * *
+                  payload:
+                    input: Summarize new tickets from the last hour
+                  type: cron
+              weekly_cron:
+                summary: Weekly on Monday at 9am UTC
+                value:
+                  display_name: Weekly ticket status update
+                  expression: 0 0 9 * * 1
+                  payload:
+                    input: Post the weekly status update for TICKET-123.
+                  type: cron
+            schema:
+              additionalProperties: false
+              properties:
+                agent_tag:
+                  description: Pin this schedule to a specific agent version. Omit to always use the active version.
+                  type: string
+                display_name:
+                  description: Human-readable name of the schedule.
+                  type: string
+                expression:
+                  description: '6-field cron expression (sec min hour dom month dow). Seconds and minutes must be 0, day-of-month and month must be ''*''. Hour and weekday must each be a single integer or ''*''; ranges, lists, steps, and named days are rejected. Accepted shapes: hourly ''0 0 * * * *'', daily ''0 0 9 * * *'' (hour 0-23), weekly ''0 0 9 * * 1'' (weekday 0-6). Minimum firing cadence is 1 hour.'
+                  type: string
+                payload:
+                  $ref: '#/components/schemas/PublicSchedulePayload'
+                  description: Invocation payload delivered to the agent on every firing.
+                type:
+                  description: Schedule type. Only cron is accepted; the expression must be a 6-field cron expression firing at most once per hour.
+                  enum:
+                  - cron
+                  type: string
+              required:
+              - type
+              - expression
+              - display_name
+              - payload
+              type: object
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  _id:
+                    description: ULID identifying this schedule.
+                    type: string
+                  agent_key:
+                    type: string
+                  agent_tag:
+                    description: Pinned agent version. Omit to always run the agent's current active version.
+                    type: string
+                  created:
+                    format: date-time
+                    type: string
+                  created_by_id:
+                    description: ID of the API key that created the schedule.
+                    type: string
+                  display_name:
+                    description: Human-readable name of the schedule. Omitted for schedules created before display names were required.
+                    type: string
+                  expression:
+                    description: 6-field cron expression. Schedules stored before the cron-only restriction may also return an @every duration or an @at RFC3339 timestamp.
+                    type: string
+                  generation:
+                    description: Monotonic counter incremented when the schedule's firing cadence changes, allowing outdated in-flight triggers to be ignored.
+                    format: int64
+                    type: integer
+                  is_active:
+                    description: Whether the schedule is currently firing. Legacy once schedules flip to false automatically after firing.
+                    type: boolean
+                  last_triggered_at:
+                    description: Timestamp of the most recent firing, if any.
+                    format: date-time
+                    type: string
+                  payload:
+                    $ref: '#/components/schemas/PublicSchedulePayload'
+                  trigger_count:
+                    description: Total firings since creation or last expression/type change.
+                    format: int64
+                    type: integer
+                  type:
+                    description: Schedule type. Only cron can be created or updated; once and interval only appear on schedules stored before that restriction.
+                    enum:
+                    - cron
+                    - once
+                    - interval
+                    type: string
+                  updated:
+                    format: date-time
+                    type: string
+                  updated_by_id:
+                    description: ID of the API key that last updated the schedule. Omitted until the schedule is updated.
+                    type: string
+                required:
+                - _id
+                - agent_key
+                - type
+                - expression
+                - is_active
+                - generation
+                - payload
+                - created_by_id
+                - created
+                - updated
+                - trigger_count
+                type: object
+          description: Schedule created.
+        '400':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  error:
+                    $ref: '#/components/schemas/PublicScheduleErrorDetail'
+                required:
+                - error
+                type: object
+          description: Invalid schedule type, expression, or sub-hour cadence.
+        '404':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  error:
+                    $ref: '#/components/schemas/PublicScheduleErrorDetail'
+                required:
+                - error
+                type: object
+          description: Agent (or agent version, when agent_tag is set) not found.
+      summary: Create schedule
+      tags:
+      - Agent Schedules
+      x-cli-group: schedules
+      x-cli-name: create
+      x-orq-gateway-group: true
+      x-speakeasy-group: schedules
+      x-speakeasy-name-override: create
+  /v3/agents/{agent_key}/schedules/{schedule_id}:
+    delete:
+      description: Permanently removes the schedule. It will not run again.
+      operationId: delete-agent-schedule
+      parameters:
+      - description: The unique routing key of the agent the schedule belongs to.
+        in: path
+        name: agent_key
+        required: true
+        schema:
+          description: The unique routing key of the agent the schedule belongs to.
+          type: string
+      - description: The schedule's ULID, as returned from create.
+        in: path
+        name: schedule_id
+        required: true
+        schema:
+          description: The schedule's ULID, as returned from create.
+          type: string
+      responses:
+        '204':
+          description: Schedule deleted.
+        '404':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  error:
+                    $ref: '#/components/schemas/PublicScheduleErrorDetail'
+                required:
+                - error
+                type: object
+          description: Schedule not found, or belongs to a different agent.
+      summary: Delete schedule
+      tags:
+      - Agent Schedules
+      x-cli-group: schedules
+      x-cli-name: delete
+      x-orq-gateway-group: true
+      x-speakeasy-group: schedules
+      x-speakeasy-name-override: delete
+    get:
+      description: Retrieves a single schedule by ID.
+      operationId: retrieve-agent-schedule
+      parameters:
+      - description: The unique routing key of the agent the schedule belongs to.
+        in: path
+        name: agent_key
+        required: true
+        schema:
+          description: The unique routing key of the agent the schedule belongs to.
+          type: string
+      - description: The schedule's ULID, as returned from create.
+        in: path
+        name: schedule_id
+        required: true
+        schema:
+          description: The schedule's ULID, as returned from create.
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  _id:
+                    description: ULID identifying this schedule.
+                    type: string
+                  agent_key:
+                    type: string
+                  agent_tag:
+                    description: Pinned agent version. Omit to always run the agent's current active version.
+                    type: string
+                  created:
+                    format: date-time
+                    type: string
+                  created_by_id:
+                    description: ID of the API key that created the schedule.
+                    type: string
+                  display_name:
+                    description: Human-readable name of the schedule. Omitted for schedules created before display names were required.
+                    type: string
+                  expression:
+                    description: 6-field cron expression. Schedules stored before the cron-only restriction may also return an @every duration or an @at RFC3339 timestamp.
+                    type: string
+                  generation:
+                    description: Monotonic counter incremented when the schedule's firing cadence changes, allowing outdated in-flight triggers to be ignored.
+                    format: int64
+                    type: integer
+                  is_active:
+                    description: Whether the schedule is currently firing. Legacy once schedules flip to false automatically after firing.
+                    type: boolean
+                  last_triggered_at:
+                    description: Timestamp of the most recent firing, if any.
+                    format: date-time
+                    type: string
+                  payload:
+                    $ref: '#/components/schemas/PublicSchedulePayload'
+                  trigger_count:
+                    description: Total firings since creation or last expression/type change.
+                    format: int64
+                    type: integer
+                  type:
+                    description: Schedule type. Only cron can be created or updated; once and interval only appear on schedules stored before that restriction.
+                    enum:
+                    - cron
+                    - once
+                    - interval
+                    type: string
+                  updated:
+                    format: date-time
+                    type: string
+                  updated_by_id:
+                    description: ID of the API key that last updated the schedule. Omitted until the schedule is updated.
+                    type: string
+                required:
+                - _id
+                - agent_key
+                - type
+                - expression
+                - is_active
+                - generation
+                - payload
+                - created_by_id
+                - created
+                - updated
+                - trigger_count
+                type: object
+          description: Schedule retrieved.
+        '404':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  error:
+                    $ref: '#/components/schemas/PublicScheduleErrorDetail'
+                required:
+                - error
+                type: object
+          description: Schedule not found, or belongs to a different agent.
+      summary: Retrieve schedule
+      tags:
+      - Agent Schedules
+      x-cli-group: schedules
+      x-cli-name: retrieve
+      x-orq-gateway-group: true
+      x-speakeasy-group: schedules
+      x-speakeasy-name-override: retrieve
+    patch:
+      description: Partially updates a schedule. Any omitted field is left unchanged. Changing `expression` or `type` (or reactivating from inactive) reschedules the next run and bumps `generation`; payload-only and `agent_tag`-only changes leave the firing cadence in place.
+      operationId: update-agent-schedule
+      parameters:
+      - description: The unique routing key of the agent the schedule belongs to.
+        in: path
+        name: agent_key
+        required: true
+        schema:
+          description: The unique routing key of the agent the schedule belongs to.
+          type: string
+      - description: The schedule's ULID, as returned from create.
+        in: path
+        name: schedule_id
+        required: true
+        schema:
+          description: The schedule's ULID, as returned from create.
+          type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              change_cadence:
+                summary: Change the firing time (resets cadence, bumps generation)
+                value:
+                  expression: 0 0 9 * * *
+              deactivate:
+                summary: Deactivate a schedule (stops future firings)
+                value:
+                  is_active: false
+              rename:
+                summary: Rename a schedule
+                value:
+                  display_name: Nightly report
+              update_payload:
+                summary: Update only the payload (keeps firing cadence in place)
+                value:
+                  payload:
+                    input: Updated input for the next run
+                    variables:
+                      region: APAC
+            schema:
+              additionalProperties: false
+              properties:
+                agent_tag:
+                  description: Change the pinned agent version.
+                  type: string
+                display_name:
+                  description: Rename the schedule.
+                  type: string
+                expression:
+                  description: Update the schedule expression. Same 6-field cron shapes as create; minimum firing cadence is 1 hour.
+                  type: string
+                is_active:
+                  description: Activate or deactivate the schedule. Deactivating stops future executions; activating schedules future executions using the current values.
+                  type: boolean
+                payload:
+                  $ref: '#/components/schemas/PublicSchedulePayload'
+                  description: Update the invocation payload. Payload-only changes do not reset the firing cadence or bump generation.
+                type:
+                  description: Change the schedule type. Only cron is accepted. Changing the type or expression reschedules future executions and increments generation.
+                  enum:
+                  - cron
+                  type: string
+              type: object
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  _id:
+                    description: ULID identifying this schedule.
+                    type: string
+                  agent_key:
+                    type: string
+                  agent_tag:
+                    description: Pinned agent version. Omit to always run the agent's current active version.
+                    type: string
+                  created:
+                    format: date-time
+                    type: string
+                  created_by_id:
+                    description: ID of the API key that created the schedule.
+                    type: string
+                  display_name:
+                    description: Human-readable name of the schedule. Omitted for schedules created before display names were required.
+                    type: string
+                  expression:
+                    description: 6-field cron expression. Schedules stored before the cron-only restriction may also return an @every duration or an @at RFC3339 timestamp.
+                    type: string
+                  generation:
+                    description: Monotonic counter incremented when the schedule's firing cadence changes, allowing outdated in-flight triggers to be ignored.
+                    format: int64
+                    type: integer
+                  is_active:
+                    description: Whether the schedule is currently firing. Legacy once schedules flip to false automatically after firing.
+                    type: boolean
+                  last_triggered_at:
+                    description: Timestamp of the most recent firing, if any.
+                    format: date-time
+                    type: string
+                  payload:
+                    $ref: '#/components/schemas/PublicSchedulePayload'
+                  trigger_count:
+                    description: Total firings since creation or last expression/type change.
+                    format: int64
+                    type: integer
+                  type:
+                    description: Schedule type. Only cron can be created or updated; once and interval only appear on schedules stored before that restriction.
+                    enum:
+                    - cron
+                    - once
+                    - interval
+                    type: string
+                  updated:
+                    format: date-time
+                    type: string
+                  updated_by_id:
+                    description: ID of the API key that last updated the schedule. Omitted until the schedule is updated.
+                    type: string
+                required:
+                - _id
+                - agent_key
+                - type
+                - expression
+                - is_active
+                - generation
+                - payload
+                - created_by_id
+                - created
+                - updated
+                - trigger_count
+                type: object
+          description: Schedule updated.
+        '400':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  error:
+                    $ref: '#/components/schemas/PublicScheduleErrorDetail'
+                required:
+                - error
+                type: object
+          description: Invalid type, expression, or sub-hour cadence.
+        '404':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  error:
+                    $ref: '#/components/schemas/PublicScheduleErrorDetail'
+                required:
+                - error
+                type: object
+          description: Schedule or agent version not found.
+      summary: Update schedule
+      tags:
+      - Agent Schedules
+      x-cli-group: schedules
+      x-cli-name: update
+      x-orq-gateway-group: true
+      x-speakeasy-group: schedules
+      x-speakeasy-name-override: update
+  /v3/agents/{agent_key}/schedules/{schedule_id}/execution:
+    post:
+      description: Runs the schedule's payload immediately (approximately 10 seconds after the request). The schedule's regular cadence is unaffected. Inactive schedules return 400.
+      operationId: trigger-agent-schedule
+      parameters:
+      - description: The unique routing key of the agent the schedule belongs to.
+        in: path
+        name: agent_key
+        required: true
+        schema:
+          description: The unique routing key of the agent the schedule belongs to.
+          type: string
+      - description: The schedule's ULID, as returned from create.
+        in: path
+        name: schedule_id
+        required: true
+        schema:
+          description: The schedule's ULID, as returned from create.
+          type: string
+      responses:
+        '202':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  schedule_id:
+                    type: string
+                  status:
+                    description: Always "triggered" on success.
+                    type: string
+                required:
+                - status
+                - schedule_id
+                type: object
+          description: Execution scheduled for immediate delivery.
+        '400':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  error:
+                    $ref: '#/components/schemas/PublicScheduleErrorDetail'
+                required:
+                - error
+                type: object
+          description: Schedule is inactive.
+        '404':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  error:
+                    $ref: '#/components/schemas/PublicScheduleErrorDetail'
+                required:
+                - error
+                type: object
+          description: Schedule not found, or belongs to a different agent.
+      summary: Trigger schedule execution
+      tags:
+      - Agent Schedules
+      x-cli-group: schedules
+      x-cli-name: trigger
+      x-orq-gateway-group: true
+      x-speakeasy-group: schedules
+      x-speakeasy-name-override: trigger
+components:
+  schemas:
+    APIErrorResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        error:
+          $ref: '#/components/schemas/APIError'
+      required:
+      - error
+    PublicSchedule:
+      additionalProperties: false
+      properties:
+        _id:
+          description: ULID identifying this schedule.
+          type: string
+        agent_key:
+          type: string
+        agent_tag:
+          description: Pinned agent version. Omit to always run the agent's current active version.
+          type: string
+        created:
+          format: date-time
+          type: string
+        created_by_id:
+          description: ID of the API key that created the schedule.
+          type: string
+        display_name:
+          description: Human-readable name of the schedule. Omitted for schedules created before display names were required.
+          type: string
+        expression:
+          description: 6-field cron expression. Schedules stored before the cron-only restriction may also return an @every duration or an @at RFC3339 timestamp.
+          type: string
+        generation:
+          description: Monotonic counter incremented when the schedule's firing cadence changes, allowing outdated in-flight triggers to be ignored.
+          format: int64
+          type: integer
+        is_active:
+          description: Whether the schedule is currently firing. Legacy once schedules flip to false automatically after firing.
+          type: boolean
+        last_triggered_at:
+          description: Timestamp of the most recent firing, if any.
+          format: date-time
+          type: string
+        payload:
+          $ref: '#/components/schemas/PublicSchedulePayload'
+        trigger_count:
+          description: Total firings since creation or last expression/type change.
+          format: int64
+          type: integer
+        type:
+          description: Schedule type. Only cron can be created or updated; once and interval only appear on schedules stored before that restriction.
+          enum:
+          - cron
+          - once
+          - interval
+          type: string
+        updated:
+          format: date-time
+          type: string
+        updated_by_id:
+          description: ID of the API key that last updated the schedule. Omitted until the schedule is updated.
+          type: string
+      required:
+      - _id
+      - agent_key
+      - type
+      - expression
+      - is_active
+      - generation
+      - payload
+      - created_by_id
+      - created
+      - updated
+      - trigger_count
+      type: object
+    PublicSchedulePayload:
+      additionalProperties: false
+      properties:
+        input:
+          description: Input to pass to the agent on each firing. Same shape as the Responses API input — a string or an array of input items.
+        memory_entity_id:
+          description: Optional memory store entity ID to attach to each run.
+          type: string
+        metadata:
+          additionalProperties:
+            type: string
+          description: Opaque string key/value pairs attached to every response generated by this schedule.
+          type: object
+        variables:
+          additionalProperties: {}
+          description: 'Template variables substituted into instructions. Supports secret values: {"secret": true, "value": "..."}.'
+          type: object
+      type: object
+    PublicScheduleErrorDetail:
+      additionalProperties: false
+      properties:
+        code:
+          description: Stable error code, e.g. invalid_expression, schedule_not_found, agent_not_found.
+          type: string
+        message:
+          description: Human-readable error description.
+          type: string
+      required:
+      - code
+      - message
+      type: object
+    APIError:
+      additionalProperties: false
+      properties:
+        code:
+          type:
+          - string
+          - 'null'
+        failures: {}
+        message:
+          type: string
+        param:
+          type:
+          - string
+          - 'null'
+        type:
+          type: string
+      required:
+      - message
+      - type
+      - param
+      - code
+      type: object
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Human-readable error message.
+        code:
+          type: integer
+          description: gRPC status code, when the service reports one.
+        details:
+          type: array
+          items: {}
+          description: Additional error details, when the service reports any.
+      required:
+      - message
+  securitySchemes:
+    ApiKey:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+externalDocs:
+  url: https://docs.orq.ai
+  description: orq.ai Documentation
+x-speakeasy-timeout: 600000

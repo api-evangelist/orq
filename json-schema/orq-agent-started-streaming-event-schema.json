@@ -1,0 +1,554 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/orq/main/json-schema/orq-agent-started-streaming-event-schema.json",
+  "title": "Agent Started Event",
+  "description": "Emitted when the agent begins processing. Contains configuration details including the model, instructions, system prompt, and input message.",
+  "x-generated": "2026-10-21",
+  "x-method": "derived",
+  "x-generator": "derive-json-schema.py",
+  "x-source": "openapi/orq-openapi.json#/components/schemas/AgentStartedStreamingEvent",
+  "type": "object",
+  "properties": {
+    "type": {
+      "type": "string",
+      "enum": [
+        "event.agents.started"
+      ]
+    },
+    "timestamp": {
+      "type": "string",
+      "description": "ISO timestamp of the event"
+    },
+    "data": {
+      "type": "object",
+      "properties": {
+        "workflowRunId": {
+          "type": "string"
+        },
+        "integration_id": {
+          "type": "string"
+        },
+        "inputMessage": {
+          "type": "object",
+          "properties": {
+            "messageId": {
+              "type": "string"
+            },
+            "role": {
+              "type": "string",
+              "enum": [
+                "user",
+                "agent",
+                "tool",
+                "system"
+              ],
+              "description": "Extended A2A message role"
+            },
+            "parts": {
+              "type": "array",
+              "items": {
+                "oneOf": [
+                  {
+                    "$ref": "#/$defs/TextPart"
+                  },
+                  {
+                    "$ref": "#/$defs/ErrorPart"
+                  },
+                  {
+                    "$ref": "#/$defs/DataPart"
+                  },
+                  {
+                    "$ref": "#/$defs/FilePart"
+                  },
+                  {
+                    "$ref": "#/$defs/ToolCallPart"
+                  },
+                  {
+                    "$ref": "#/$defs/ToolResultPart"
+                  }
+                ]
+              }
+            },
+            "metadata": {
+              "type": "object",
+              "additionalProperties": {}
+            }
+          },
+          "required": [
+            "role",
+            "parts"
+          ]
+        },
+        "modelId": {
+          "type": "string"
+        },
+        "instructions": {
+          "type": "string"
+        },
+        "system_prompt": {
+          "type": "string"
+        },
+        "settings": {
+          "type": "object",
+          "properties": {
+            "max_iterations": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 100,
+              "minimum": 1,
+              "default": 100,
+              "description": "Maximum iterations(llm calls) before the agent will stop executing."
+            },
+            "max_execution_time": {
+              "type": "integer",
+              "minimum": 2,
+              "exclusiveMinimum": 0,
+              "maximum": 600,
+              "default": 600,
+              "description": "Maximum time (in seconds) for the agent thinking process. This does not include the time for tool calls and sub agent calls. It will be loosely enforced, the in progress LLM calls will not be terminated and the last assistant message will be returned."
+            },
+            "max_cost": {
+              "type": "number",
+              "minimum": 0,
+              "default": 0,
+              "description": "Maximum cost in USD for the agent execution. When the accumulated cost exceeds this limit, the agent will stop executing. Set to 0 for unlimited. Only supported in v3 responses"
+            },
+            "tool_approval_required": {
+              "type": "string",
+              "enum": [
+                "all",
+                "respect_tool",
+                "none"
+              ],
+              "default": "respect_tool",
+              "description": "If all, the agent will require approval for all tools. If respect_tool, the agent will require approval for tools that have the requires_approval flag set to true. If none, the agent will not require approval for any tools."
+            },
+            "chat_exposed": {
+              "type": "boolean",
+              "description": "When enabled, this agent is exposed as a selectable target in AI Chat for users to consume."
+            },
+            "tools": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "format": "ulid",
+                    "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+                    "readOnly": true,
+                    "description": "The id of the resource"
+                  },
+                  "key": {
+                    "type": "string",
+                    "description": "Optional tool key for custom tools"
+                  },
+                  "action_type": {
+                    "type": "string"
+                  },
+                  "display_name": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "Optional tool description"
+                  },
+                  "configuration": {
+                    "type": "object",
+                    "additionalProperties": {},
+                    "description": "Static tool configuration set at design time. Merged over LLM-provided arguments at execution time."
+                  },
+                  "requires_approval": {
+                    "type": "boolean",
+                    "default": false
+                  },
+                  "tool_id": {
+                    "type": "string",
+                    "description": "Nested tool ID for MCP tools (identifies specific tool within MCP server)"
+                  },
+                  "conditions": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "condition": {
+                          "type": "string",
+                          "description": "The argument of the tool call to evaluate"
+                        },
+                        "operator": {
+                          "type": "string",
+                          "description": "The operator to use"
+                        },
+                        "value": {
+                          "type": "string",
+                          "description": "The value to compare against"
+                        }
+                      },
+                      "required": [
+                        "condition",
+                        "operator",
+                        "value"
+                      ]
+                    },
+                    "default": []
+                  },
+                  "timeout": {
+                    "type": "number",
+                    "minimum": 1,
+                    "maximum": 600,
+                    "description": "Tool execution timeout in seconds for this agent (max: 10 minutes). Overrides the timeout configured on the tool definition."
+                  }
+                },
+                "required": [
+                  "id",
+                  "action_type"
+                ]
+              },
+              "default": []
+            },
+            "evaluators": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "Unique key or identifier of the evaluator"
+                  },
+                  "sample_rate": {
+                    "type": "number",
+                    "minimum": 1,
+                    "maximum": 100,
+                    "default": 50,
+                    "description": "The percentage of executions to evaluate with this evaluator (1-100). For example, a value of 50 means the evaluator will run on approximately half of the executions."
+                  },
+                  "execute_on": {
+                    "type": "string",
+                    "enum": [
+                      "input",
+                      "output"
+                    ],
+                    "description": "Determines whether the evaluator runs on the agent input (user message) or output (agent response)."
+                  },
+                  "options": {
+                    "type": "object",
+                    "additionalProperties": {},
+                    "description": "Evaluator-specific configuration, passed through to the evaluator at run time. For orq_pii_detection this carries regions, entities, entity_thresholds, language and threshold, and is validated against PIIDetectionGuardrailOptions: regions and entities are two mutually exclusive coverage modes, and every entity_thresholds key must also appear in entities. on_failure is rejected: an evaluator acting as a guardrail always fails closed."
+                  }
+                },
+                "required": [
+                  "id",
+                  "execute_on"
+                ]
+              },
+              "title": "Agent evaluator configuration",
+              "description": "Configuration for an evaluator applied to the agent"
+            },
+            "guardrails": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "Unique key or identifier of the evaluator"
+                  },
+                  "sample_rate": {
+                    "type": "number",
+                    "minimum": 1,
+                    "maximum": 100,
+                    "default": 50,
+                    "description": "The percentage of executions to evaluate with this evaluator (1-100). For example, a value of 50 means the evaluator will run on approximately half of the executions."
+                  },
+                  "execute_on": {
+                    "type": "string",
+                    "enum": [
+                      "input",
+                      "output"
+                    ],
+                    "description": "Determines whether the evaluator runs on the agent input (user message) or output (agent response)."
+                  },
+                  "options": {
+                    "type": "object",
+                    "additionalProperties": {},
+                    "description": "Evaluator-specific configuration, passed through to the evaluator at run time. For orq_pii_detection this carries regions, entities, entity_thresholds, language and threshold, and is validated against PIIDetectionGuardrailOptions: regions and entities are two mutually exclusive coverage modes, and every entity_thresholds key must also appear in entities. on_failure is rejected: an evaluator acting as a guardrail always fails closed."
+                  }
+                },
+                "required": [
+                  "id",
+                  "execute_on"
+                ]
+              },
+              "title": "Agent guardrail configuration",
+              "description": "Configuration for a guardrail applied to the agent. sample_rate has no effect here: a guardrail is a gate rather than a measurement, so it runs on every request."
+            }
+          },
+          "default": {
+            "max_execution_time": 600,
+            "max_iterations": 100,
+            "max_cost": 0,
+            "tool_approval_required": "respect_tool",
+            "tools": []
+          }
+        },
+        "agent_manifest_id": {
+          "type": "string"
+        },
+        "agent_key": {
+          "type": "string"
+        },
+        "agent_description": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "agent_source": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "internal",
+            "external",
+            "experiment",
+            null
+          ]
+        },
+        "variables": {
+          "type": "object",
+          "additionalProperties": {}
+        },
+        "tool_execution_id": {
+          "type": "string"
+        },
+        "is_continuation": {
+          "type": "boolean"
+        },
+        "stream": {
+          "type": "boolean"
+        },
+        "responseId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "workflowRunId",
+        "inputMessage",
+        "modelId",
+        "instructions",
+        "system_prompt",
+        "agent_manifest_id",
+        "agent_key"
+      ]
+    }
+  },
+  "required": [
+    "type",
+    "timestamp",
+    "data"
+  ],
+  "$defs": {
+    "DataPart": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "data"
+          ]
+        },
+        "data": {
+          "type": "object",
+          "additionalProperties": {}
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": {}
+        }
+      },
+      "required": [
+        "kind",
+        "data"
+      ],
+      "title": "Data Part",
+      "description": "A structured data part containing JSON-serializable key-value pairs. Used for passing structured information between agents and tools."
+    },
+    "ErrorPart": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "error"
+          ]
+        },
+        "error": {
+          "type": "string"
+        },
+        "code": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "kind",
+        "error"
+      ],
+      "title": "Error Part",
+      "description": "An error content part containing error information. Used when an error occurs during agent execution."
+    },
+    "FilePart": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "file"
+          ]
+        },
+        "file": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "bytes": {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "base64 encoded content of the file"
+                },
+                "mimeType": {
+                  "type": "string",
+                  "description": "Optional mimeType for the file"
+                },
+                "name": {
+                  "type": "string",
+                  "description": "Optional name for the file"
+                }
+              },
+              "required": [
+                "bytes"
+              ],
+              "title": "Binary format",
+              "description": "Binary in base64 format. Check in the model's documentation for the supported mime types for the binary format."
+            },
+            {
+              "type": "object",
+              "properties": {
+                "uri": {
+                  "type": "string",
+                  "description": "URL for the File content"
+                },
+                "mimeType": {
+                  "type": "string",
+                  "description": "Optional mimeType for the file"
+                },
+                "name": {
+                  "type": "string",
+                  "description": "Optional name for the file"
+                }
+              },
+              "required": [
+                "uri"
+              ],
+              "title": "File in URI format",
+              "description": "File in URI format. Check in the model's documentation for the supported mime types for the URI format"
+            }
+          ]
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": {}
+        }
+      },
+      "required": [
+        "kind",
+        "file"
+      ],
+      "title": "File Part",
+      "description": "A file content part that can contain either base64-encoded bytes or a URI reference. Used for images, documents, and other binary content in agent communications."
+    },
+    "TextPart": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "text"
+          ]
+        },
+        "text": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "text"
+      ],
+      "title": "Text Part",
+      "description": "A text content part containing plain text or markdown. Used for agent messages, user input, and text-based responses."
+    },
+    "ToolCallPart": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "tool_call"
+          ]
+        },
+        "tool_name": {
+          "type": "string"
+        },
+        "tool_call_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "arguments": {
+          "type": "object",
+          "additionalProperties": {}
+        },
+        "thought_signature": {
+          "type": "string"
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": {}
+        }
+      },
+      "required": [
+        "kind",
+        "tool_name",
+        "tool_call_id",
+        "arguments"
+      ],
+      "title": "Tool Call Part",
+      "description": "A tool invocation request from an agent. Contains the tool name, unique call ID, and arguments for the tool execution."
+    },
+    "ToolResultPart": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "tool_result"
+          ]
+        },
+        "tool_call_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "result": {},
+        "metadata": {
+          "type": "object",
+          "additionalProperties": {}
+        }
+      },
+      "required": [
+        "kind",
+        "tool_call_id"
+      ],
+      "title": "Tool Result Part",
+      "description": "The result of a tool execution. Contains the tool call ID for correlation and the result data from the tool invocation."
+    }
+  }
+}

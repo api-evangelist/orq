@@ -1,0 +1,499 @@
+generated: '2026-10-21'
+method: probed
+generator: harvest-well-known.py
+source: Live GET of the named /.well-known/ path list on every host the record knows; every row is a request that
+  was issued.
+summary:
+  hosts_probed: 11
+  paths_probed: 121
+  documents_served: 20
+hosts:
+- host: my.orq.ai
+  control:
+    path: /.well-known/apis-io-negative-control-7f3ab91c.json
+    status: 200
+    bytes: 60731
+  documents:
+  - path: /.well-known/security.txt
+    status: 200
+    standard: RFC 9116
+    note: '200 matching the host''s soft-200 control response or an error body: not a document'
+  - path: /.well-known/openid-configuration
+    status: 200
+    standard: OpenID Connect Discovery 1.0
+    note: '200 matching the host''s soft-200 control response or an error body: not a document'
+  - path: /.well-known/oauth-authorization-server
+    status: 200
+    standard: RFC 8414
+    note: '200 matching the host''s soft-200 control response or an error body: not a document'
+  - path: /.well-known/oauth-protected-resource
+    status: 200
+    standard: RFC 9728
+    content_type: application/json
+    file: orq-my-oauth-protected-resource.json
+  - path: /.well-known/api-catalog
+    status: 200
+    standard: RFC 9727
+    content_type: application/linkset+json
+    file: orq-my-api-catalog.json
+  - path: /.well-known/apis.json
+    status: 200
+    standard: APIs.json
+    note: '200 matching the host''s soft-200 control response or an error body: not a document'
+  - path: /.well-known/ai-plugin.json
+    status: 200
+    standard: OpenAI plugin manifest
+    note: '200 matching the host''s soft-200 control response or an error body: not a document'
+  - path: /.well-known/aauth-resource.json
+    status: 200
+    standard: AAuth
+    note: '200 matching the host''s soft-200 control response or an error body: not a document'
+  - path: /.well-known/ucp.json
+    status: 200
+    standard: UCP
+    note: '200 matching the host''s soft-200 control response or an error body: not a document'
+  - path: /.well-known/acp.json
+    status: 200
+    standard: ACP
+    note: '200 matching the host''s soft-200 control response or an error body: not a document'
+  - path: /.well-known/mcp/server-card.json
+    status: 200
+    standard: MCP server card
+    content_type: application/json
+    file: orq-my-mcp-server-card.json
+- host: docs.orq.ai
+  control:
+    path: /.well-known/apis-io-negative-control-7f3ab91c.json
+    status: 404
+    bytes: 0
+  documents:
+  - path: /.well-known/security.txt
+    status: 404
+    standard: RFC 9116
+  - path: /.well-known/openid-configuration
+    status: 404
+    standard: OpenID Connect Discovery 1.0
+  - path: /.well-known/oauth-authorization-server
+    status: 404
+    standard: RFC 8414
+  - path: /.well-known/oauth-protected-resource
+    status: 404
+    standard: RFC 9728
+  - path: /.well-known/api-catalog
+    status: 404
+    standard: RFC 9727
+  - path: /.well-known/apis.json
+    status: 404
+    standard: APIs.json
+  - path: /.well-known/ai-plugin.json
+    status: 404
+    standard: OpenAI plugin manifest
+  - path: /.well-known/aauth-resource.json
+    status: 404
+    standard: AAuth
+  - path: /.well-known/ucp.json
+    status: 404
+    standard: UCP
+  - path: /.well-known/acp.json
+    status: 404
+    standard: ACP
+  - path: /.well-known/mcp/server-card.json
+    status: 404
+    standard: MCP server card
+- host: orq.ai
+  control:
+    path: /.well-known/apis-io-negative-control-7f3ab91c.json
+    status: 404
+    bytes: 0
+  documents:
+  - path: /.well-known/security.txt
+    status: 200
+    standard: RFC 9116
+    content_type: text/plain;charset=utf-8
+    file: orq-security.txt
+  - path: /.well-known/openid-configuration
+    status: 404
+    standard: OpenID Connect Discovery 1.0
+  - path: /.well-known/oauth-authorization-server
+    status: 404
+    standard: RFC 8414
+  - path: /.well-known/oauth-protected-resource
+    status: 404
+    standard: RFC 9728
+  - path: /.well-known/api-catalog
+    status: 200
+    standard: RFC 9727
+    content_type: application/json;charset=utf-8
+    file: orq-api-catalog.json
+  - path: /.well-known/apis.json
+    status: 404
+    standard: APIs.json
+  - path: /.well-known/ai-plugin.json
+    status: 200
+    standard: OpenAI plugin manifest
+    content_type: application/json;charset=utf-8
+    file: orq-ai-plugin.json
+  - path: /.well-known/aauth-resource.json
+    status: 404
+    standard: AAuth
+  - path: /.well-known/ucp.json
+    status: 404
+    standard: UCP
+  - path: /.well-known/acp.json
+    status: 404
+    standard: ACP
+  - path: /.well-known/mcp/server-card.json
+    status: 200
+    standard: MCP server card
+    content_type: application/json;charset=utf-8
+    file: orq-mcp-server-card.json
+- host: api.orq.ai
+  control:
+    path: /.well-known/apis-io-negative-control-7f3ab91c.json
+    status: 404
+    bytes: 0
+  documents:
+  - path: /.well-known/security.txt
+    status: 404
+    standard: RFC 9116
+  - path: /.well-known/openid-configuration
+    status: 404
+    standard: OpenID Connect Discovery 1.0
+  - path: /.well-known/oauth-authorization-server
+    status: 404
+    standard: RFC 8414
+  - path: /.well-known/oauth-protected-resource
+    status: 200
+    standard: RFC 9728
+    content_type: application/json
+    file: orq-api-oauth-protected-resource.json
+  - path: /.well-known/api-catalog
+    status: 200
+    standard: RFC 9727
+    content_type: application/linkset+json
+    file: orq-api-api-catalog.json
+  - path: /.well-known/apis.json
+    status: 404
+    standard: APIs.json
+  - path: /.well-known/ai-plugin.json
+    status: 404
+    standard: OpenAI plugin manifest
+  - path: /.well-known/aauth-resource.json
+    status: 404
+    standard: AAuth
+  - path: /.well-known/ucp.json
+    status: 404
+    standard: UCP
+  - path: /.well-known/acp.json
+    status: 404
+    standard: ACP
+  - path: /.well-known/mcp/server-card.json
+    status: 200
+    standard: MCP server card
+    content_type: application/json
+    file: orq-api-mcp-server-card.json
+- host: api.typesafe.ai
+  control:
+    path: /.well-known/apis-io-negative-control-7f3ab91c.json
+    status: 404
+    bytes: 0
+  documents:
+  - path: /.well-known/security.txt
+    status: 404
+    standard: RFC 9116
+  - path: /.well-known/openid-configuration
+    status: 404
+    standard: OpenID Connect Discovery 1.0
+  - path: /.well-known/oauth-authorization-server
+    status: 404
+    standard: RFC 8414
+  - path: /.well-known/oauth-protected-resource
+    status: 404
+    standard: RFC 9728
+  - path: /.well-known/api-catalog
+    status: 404
+    standard: RFC 9727
+  - path: /.well-known/apis.json
+    status: 404
+    standard: APIs.json
+  - path: /.well-known/ai-plugin.json
+    status: 404
+    standard: OpenAI plugin manifest
+  - path: /.well-known/aauth-resource.json
+    status: 404
+    standard: AAuth
+  - path: /.well-known/ucp.json
+    status: 404
+    standard: UCP
+  - path: /.well-known/acp.json
+    status: 404
+    standard: ACP
+  - path: /.well-known/mcp/server-card.json
+    status: 404
+    standard: MCP server card
+- host: docs.lakera.ai
+  control:
+    path: /.well-known/apis-io-negative-control-7f3ab91c.json
+    status: 404
+    bytes: 0
+  documents:
+  - path: /.well-known/security.txt
+    status: 200
+    standard: RFC 9116
+    content_type: text/plain; charset=utf-8
+    file: orq-docs-security.txt
+  - path: /.well-known/openid-configuration
+    status: 200
+    standard: OpenID Connect Discovery 1.0
+    note: 200 but the body is not the document this path names
+  - path: /.well-known/oauth-authorization-server
+    status: 200
+    standard: RFC 8414
+    content_type: application/json
+    file: orq-docs-oauth-authorization-server.json
+  - path: /.well-known/oauth-protected-resource
+    status: 200
+    standard: RFC 9728
+    content_type: application/json
+    file: orq-docs-oauth-protected-resource.json
+  - path: /.well-known/api-catalog
+    status: 200
+    standard: RFC 9727
+    content_type: application/linkset+json; profile="https://www.rfc-editor.org/info/rfc9727"
+    file: orq-docs-api-catalog.json
+  - path: /.well-known/apis.json
+    status: 404
+    standard: APIs.json
+  - path: /.well-known/ai-plugin.json
+    status: 404
+    standard: OpenAI plugin manifest
+  - path: /.well-known/aauth-resource.json
+    status: 404
+    standard: AAuth
+  - path: /.well-known/ucp.json
+    status: 404
+    standard: UCP
+  - path: /.well-known/acp.json
+    status: 404
+    standard: ACP
+  - path: /.well-known/mcp/server-card.json
+    status: 404
+    standard: MCP server card
+- host: docs.typesafe.ai
+  control:
+    path: /.well-known/apis-io-negative-control-7f3ab91c.json
+    status: 404
+    bytes: 0
+  documents:
+  - path: /.well-known/security.txt
+    status: 404
+    standard: RFC 9116
+  - path: /.well-known/openid-configuration
+    status: 404
+    standard: OpenID Connect Discovery 1.0
+  - path: /.well-known/oauth-authorization-server
+    status: 404
+    standard: RFC 8414
+  - path: /.well-known/oauth-protected-resource
+    status: 404
+    standard: RFC 9728
+  - path: /.well-known/api-catalog
+    status: 404
+    standard: RFC 9727
+  - path: /.well-known/apis.json
+    status: 404
+    standard: APIs.json
+  - path: /.well-known/ai-plugin.json
+    status: 404
+    standard: OpenAI plugin manifest
+  - path: /.well-known/aauth-resource.json
+    status: 404
+    standard: AAuth
+  - path: /.well-known/ucp.json
+    status: 404
+    standard: UCP
+  - path: /.well-known/acp.json
+    status: 404
+    standard: ACP
+  - path: /.well-known/mcp/server-card.json
+    status: 404
+    standard: MCP server card
+- host: guardrailsai.com
+  control:
+    path: /.well-known/apis-io-negative-control-7f3ab91c.json
+    status: 404
+    bytes: 0
+  documents:
+  - path: /.well-known/security.txt
+    status: 404
+    standard: RFC 9116
+  - path: /.well-known/openid-configuration
+    status: 404
+    standard: OpenID Connect Discovery 1.0
+  - path: /.well-known/oauth-authorization-server
+    status: 404
+    standard: RFC 8414
+  - path: /.well-known/oauth-protected-resource
+    status: 404
+    standard: RFC 9728
+  - path: /.well-known/api-catalog
+    status: 404
+    standard: RFC 9727
+  - path: /.well-known/apis.json
+    status: 404
+    standard: APIs.json
+  - path: /.well-known/ai-plugin.json
+    status: 404
+    standard: OpenAI plugin manifest
+  - path: /.well-known/aauth-resource.json
+    status: 404
+    standard: AAuth
+  - path: /.well-known/ucp.json
+    status: 404
+    standard: UCP
+  - path: /.well-known/acp.json
+    status: 404
+    standard: ACP
+  - path: /.well-known/mcp/server-card.json
+    status: 404
+    standard: MCP server card
+- host: mintlify.com
+  control:
+    path: /.well-known/apis-io-negative-control-7f3ab91c.json
+    status: 404
+    bytes: 0
+  documents:
+  - path: /.well-known/security.txt
+    status: 404
+    standard: RFC 9116
+  - path: /.well-known/openid-configuration
+    status: 200
+    standard: OpenID Connect Discovery 1.0
+    content_type: application/json; charset=utf-8
+    file: orq-mintlify-openid-configuration.json
+  - path: /.well-known/oauth-authorization-server
+    status: 200
+    standard: RFC 8414
+    content_type: application/json; charset=utf-8
+    file: orq-mintlify-oauth-authorization-server.json
+  - path: /.well-known/oauth-protected-resource
+    status: 200
+    standard: RFC 9728
+    content_type: application/json; charset=utf-8
+    file: orq-mintlify-oauth-protected-resource.json
+  - path: /.well-known/api-catalog
+    status: 404
+    standard: RFC 9727
+  - path: /.well-known/apis.json
+    status: 404
+    standard: APIs.json
+  - path: /.well-known/ai-plugin.json
+    status: 404
+    standard: OpenAI plugin manifest
+  - path: /.well-known/aauth-resource.json
+    status: 404
+    standard: AAuth
+  - path: /.well-known/ucp.json
+    status: 404
+    standard: UCP
+  - path: /.well-known/acp.json
+    status: 404
+    standard: ACP
+  - path: /.well-known/mcp/server-card.json
+    status: 404
+    standard: MCP server card
+- host: trust.orq.ai
+  control:
+    path: /.well-known/apis-io-negative-control-7f3ab91c.json
+    status: 200
+    bytes: 6794
+  documents:
+  - path: /.well-known/security.txt
+    status: 200
+    standard: RFC 9116
+    note: '200 matching the host''s soft-200 control response or an error body: not a document'
+  - path: /.well-known/openid-configuration
+    status: 200
+    standard: OpenID Connect Discovery 1.0
+    note: '200 matching the host''s soft-200 control response or an error body: not a document'
+  - path: /.well-known/oauth-authorization-server
+    status: 200
+    standard: RFC 8414
+    note: '200 matching the host''s soft-200 control response or an error body: not a document'
+  - path: /.well-known/oauth-protected-resource
+    status: 200
+    standard: RFC 9728
+    note: '200 matching the host''s soft-200 control response or an error body: not a document'
+  - path: /.well-known/api-catalog
+    status: 200
+    standard: RFC 9727
+    note: '200 matching the host''s soft-200 control response or an error body: not a document'
+  - path: /.well-known/apis.json
+    status: 200
+    standard: APIs.json
+    note: '200 matching the host''s soft-200 control response or an error body: not a document'
+  - path: /.well-known/ai-plugin.json
+    status: 200
+    standard: OpenAI plugin manifest
+    note: '200 matching the host''s soft-200 control response or an error body: not a document'
+  - path: /.well-known/aauth-resource.json
+    status: 200
+    standard: AAuth
+    note: '200 matching the host''s soft-200 control response or an error body: not a document'
+  - path: /.well-known/ucp.json
+    status: 200
+    standard: UCP
+    note: '200 matching the host''s soft-200 control response or an error body: not a document'
+  - path: /.well-known/acp.json
+    status: 200
+    standard: ACP
+    note: '200 matching the host''s soft-200 control response or an error body: not a document'
+  - path: /.well-known/mcp/server-card.json
+    status: 200
+    standard: MCP server card
+    note: '200 matching the host''s soft-200 control response or an error body: not a document'
+- host: mcp.mintlify.com
+  control:
+    path: /.well-known/apis-io-negative-control-7f3ab91c.json
+    status: 404
+    bytes: 0
+  documents:
+  - path: /.well-known/security.txt
+    status: 404
+    standard: RFC 9116
+  - path: /.well-known/openid-configuration
+    status: 200
+    standard: OpenID Connect Discovery 1.0
+    content_type: application/json; charset=utf-8
+    file: orq-mcp-openid-configuration.json
+  - path: /.well-known/oauth-authorization-server
+    status: 200
+    standard: RFC 8414
+    content_type: application/json; charset=utf-8
+    file: orq-mcp-oauth-authorization-server.json
+  - path: /.well-known/oauth-protected-resource
+    status: 200
+    standard: RFC 9728
+    content_type: application/json; charset=utf-8
+    file: orq-mcp-oauth-protected-resource.json
+  - path: /.well-known/api-catalog
+    status: 404
+    standard: RFC 9727
+  - path: /.well-known/apis.json
+    status: 404
+    standard: APIs.json
+  - path: /.well-known/ai-plugin.json
+    status: 404
+    standard: OpenAI plugin manifest
+  - path: /.well-known/aauth-resource.json
+    status: 404
+    standard: AAuth
+  - path: /.well-known/ucp.json
+    status: 404
+    standard: UCP
+  - path: /.well-known/acp.json
+    status: 404
+    standard: ACP
+  - path: /.well-known/mcp/server-card.json
+    status: 404
+    standard: MCP server card

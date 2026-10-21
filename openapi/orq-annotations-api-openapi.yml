@@ -1,0 +1,195 @@
+openapi: 3.2.0
+info:
+  title: orq.ai Annotations API
+  version: '2.0'
+  description: orq.ai API documentation
+servers:
+- url: https://my.orq.ai
+security:
+- ApiKey: []
+tags:
+- name: Annotations
+paths:
+  /v2/traces/{trace_id}/spans/{span_id}/annotation:
+    post:
+      tags:
+      - Annotations
+      x-speakeasy-group: annotations
+      x-speakeasy-name-override: create
+      x-cli-group: traces
+      x-cli-name: create
+      operationId: CreateAnnotation
+      summary: Annotate a span
+      description: Attach one or more annotations to a specific span. A standard annotation references a human review by key and supplies a value. A correction references an existing evaluator output by parent_annotation_id and supplies the corrected value, validated against that evaluator's output schema.
+      parameters:
+      - schema:
+          type: string
+          description: Unique identifier of the trace
+        required: true
+        description: Unique identifier of the trace
+        name: trace_id
+        in: path
+      - schema:
+          type: string
+          description: Unique identifier of the span
+        required: true
+        description: Unique identifier of the span
+        name: span_id
+        in: path
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                annotations:
+                  type: array
+                  items:
+                    anyOf:
+                    - type: object
+                      properties:
+                        key:
+                          type: string
+                          description: Unique key of the review.
+                        value:
+                          anyOf:
+                          - type: string
+                            minLength: 0
+                            maxLength: 3000
+                          - type: number
+                          - type: boolean
+                          - type: array
+                            items:
+                              type: string
+                            minItems: 1
+                          description: The feedback value. For single-select, provide a string or single-element array. For multi-select, provide an array of strings. For range evaluations, provide a number. For boolean, provide a boolean. For text/correction, provide a string.
+                      required:
+                      - key
+                      - value
+                      additionalProperties: false
+                    - type: object
+                      properties:
+                        parent_annotation_id:
+                          type: string
+                          description: The eval id of the evaluator annotation being corrected.
+                        value:
+                          anyOf:
+                          - type: string
+                            minLength: 0
+                            maxLength: 3000
+                          - type: number
+                          - type: boolean
+                          - type: array
+                            items:
+                              type: string
+                            minItems: 1
+                          description: The feedback value. For single-select, provide a string or single-element array. For multi-select, provide an array of strings. For range evaluations, provide a number. For boolean, provide a boolean. For text/correction, provide a string.
+                        explanation:
+                          type: string
+                          maxLength: 3000
+                          description: Optional explanation for the correction.
+                      required:
+                      - parent_annotation_id
+                      - value
+                      additionalProperties: false
+                  minItems: 1
+                  maxItems: 10
+                metadata:
+                  type: object
+                  properties:
+                    identity_id:
+                      type: string
+              required:
+              - annotations
+      responses:
+        '200':
+          description: Span annotated
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      tags:
+      - Annotations
+      x-speakeasy-group: annotations
+      x-speakeasy-name-override: delete
+      x-cli-group: traces
+      x-cli-name: delete
+      operationId: DeleteAnnotation
+      summary: Remove an annotation from a span
+      description: Remove one or more annotations from a specific span by their evaluator keys, or remove corrections by the eval ids of their parent annotations.
+      parameters:
+      - schema:
+          type: string
+          description: Unique identifier of the trace
+        required: true
+        description: Unique identifier of the trace
+        name: trace_id
+        in: path
+      - schema:
+          type: string
+          description: Unique identifier of the span
+        required: true
+        description: Unique identifier of the span
+        name: span_id
+        in: path
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                keys:
+                  type: array
+                  items:
+                    type: string
+                  maxItems: 10
+                  description: Unique keys of the reviews to remove
+                parent_annotation_ids:
+                  type: array
+                  items:
+                    type: string
+                  maxItems: 10
+                  description: Eval ids whose corrections should be removed
+                metadata:
+                  type: object
+                  properties:
+                    identity_id:
+                      type: string
+      responses:
+        '200':
+          description: Annotation removed
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Human-readable error message.
+        code:
+          type: integer
+          description: gRPC status code, when the service reports one.
+        details:
+          type: array
+          items: {}
+          description: Additional error details, when the service reports any.
+      required:
+      - message
+  securitySchemes:
+    ApiKey:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+externalDocs:
+  url: https://docs.orq.ai
+  description: orq.ai Documentation
+x-speakeasy-timeout: 600000

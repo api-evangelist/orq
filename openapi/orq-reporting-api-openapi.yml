@@ -1,0 +1,316 @@
+openapi: 3.2.0
+info:
+  title: orq.ai Reporting API
+  version: '2.0'
+  description: orq.ai API documentation
+servers:
+- url: https://my.orq.ai
+security:
+- ApiKey: []
+tags:
+- name: Reporting
+  description: GenAI reporting API over canonical analytics rollups. Accepts a metric name, time range, grain, group-by, and filters; returns a typed time series and optional totals.
+paths:
+  /v2/reporting:
+    post:
+      tags:
+      - Reporting
+      summary: Query reporting metrics
+      description: Returns time-series, scalar, and top-list analytics for AI usage, cost, latency, evaluator results, and guardrail outcomes.
+      operationId: ReportingQuery
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QueryReportRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueryReportResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: reporting
+      x-speakeasy-name-override: query
+components:
+  schemas:
+    Totals:
+      type: object
+      properties:
+        metrics:
+          type: object
+          additionalProperties:
+            type: number
+            format: double
+          description: "Same shape and rules as `DataPoint.metrics`, aggregated across the\n whole window."
+    QueryReportResponse:
+      type: object
+      properties:
+        object:
+          enum:
+          - report
+          type: string
+          description: Object discriminator for typed SDKs and JSON parsers; always `report`.
+        request:
+          allOf:
+          - $ref: '#/components/schemas/QueryReportRequest'
+          description: "The request that produced this response, parroted back so caller\n code never has to remember its own payload to interpret the result."
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/DataPoint'
+          description: Time-ordered buckets.
+        totals:
+          allOf:
+          - $ref: '#/components/schemas/Totals'
+          description: "Totals across the whole window. Present only when\n `include_totals=true` on the request."
+        has_more:
+          type: boolean
+          description: "Pagination contract. Always populated; currently false because the\n server caps the response at `limit` instead of issuing cursors."
+        meta:
+          allOf:
+          - $ref: '#/components/schemas/ResponseMeta'
+          description: Diagnostic metadata.
+    ResponseMeta:
+      type: object
+      properties:
+        effective_grain:
+          enum:
+          - minute
+          - hour
+          - day
+          type: string
+          description: Bucket grain actually applied. Differs from the requested value when `grain=auto`.
+        row_count:
+          type: integer
+          description: "Number of rows in `data`. Cheap hint for clients that paginate\n client-side; mirrors `len(data)`."
+          format: int32
+        request_id:
+          type: string
+          description: "Stable identifier for this query. Forward in support tickets so\n server logs can be correlated. Also returned in the\n `X-Request-Id` response header."
+        currency:
+          enum:
+          - USD
+          type: string
+          description: ISO 4217 currency code for cost fields. Always `USD` today.
+        warnings:
+          type: array
+          items:
+            type: string
+          description: Non-fatal warnings about the response. May contain `totals_unavailable` when totals were requested but failed.
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Human-readable error message.
+        code:
+          type: integer
+          description: gRPC status code, when the service reports one.
+        details:
+          type: array
+          items: {}
+          description: Additional error details, when the service reports any.
+      required:
+      - message
+    QueryReportRequest:
+      required:
+      - metric
+      - from
+      - to
+      type: object
+      properties:
+        metric:
+          enum:
+          - genai.requests
+          - genai.tokens
+          - genai.cost
+          - genai.errors
+          - genai.error_rate
+          - genai.latency.p50
+          - genai.latency.p95
+          - genai.latency.p99
+          - genai.ttft.avg
+          - genai.ttft.p50
+          - genai.ttft.p95
+          - genai.evaluator.runs
+          - genai.evaluator.pass_rate
+          - genai.evaluator.score.avg
+          - genai.guardrail.runs
+          - genai.guardrail.block_rate
+          - genai.guardrail.triggered
+          - genai.usage
+          type: string
+          description: Catalogue metric to query.
+        from:
+          type: string
+          description: Inclusive lower bound for the report window (RFC 3339, UTC).
+          format: date-time
+        to:
+          type: string
+          description: Exclusive upper bound for the report window (RFC 3339, UTC).
+          format: date-time
+        grain:
+          enum:
+          - auto
+          - minute
+          - hour
+          - day
+          type: string
+          description: Requested bucket grain. Use `auto` or omit the field to let the server choose based on the requested range.
+        group_by:
+          type: array
+          items:
+            type: string
+            enum:
+            - project
+            - identity
+            - provider
+            - model
+            - product
+            - api_key
+            - status_code
+            - http_status_code
+            - credential_type
+            - dimension
+            - dimension_type
+            - tag
+            - agent
+            - tool
+            - deployment
+            - evaluator
+            - dataset
+            - prompt
+            - policy
+            - conversation
+            - thread
+            - memory_store
+            - knowledge
+            - sheet
+            - guardrail_origin
+            - evaluator_name
+            - evaluator_type
+            - evaluator_version
+            - result_type
+            - evaluation_stage
+            - guardrail_stage
+            - evaluator_stage
+            - guardrail_action
+            - result_label
+          description: Reporting dimensions to break down by. Valid dimensions depend on the selected metric.
+        filters:
+          type: array
+          items:
+            $ref: '#/components/schemas/Filter'
+          description: Up to 20 allowlisted predicates combined with AND.
+        limit:
+          type: integer
+          description: "Maximum bucket rows returned. Defaults to 1000 and is capped at\n 5000."
+          format: int32
+        time_zone:
+          type: string
+          description: "IANA time zone applied to bucket boundaries, for example\n `America/New_York`. Response timestamps remain UTC. Empty means UTC."
+        include_totals:
+          type: boolean
+          description: "When true, include a `totals` block aggregated across the full\n report window."
+        mode:
+          enum:
+          - timeseries
+          - scalar
+          type: string
+          description: Value shaping. `timeseries` (default) buckets by time; `scalar` returns one aggregated row per group over the whole window, ordered by value (top list), or a single row when `group_by` is empty.
+        sort:
+          enum:
+          - desc
+          - asc
+          type: string
+          description: Value ordering for `scalar` rows. Defaults to `desc`. Ignored for `timeseries`.
+    Filter:
+      type: object
+      properties:
+        field:
+          enum:
+          - project
+          - identity
+          - provider
+          - model
+          - product
+          - api_key
+          - status_code
+          - http_status_code
+          - credential_type
+          - billing_billable
+          - dimension
+          - dimension_type
+          - tag
+          - agent
+          - tool
+          - deployment
+          - evaluator
+          - dataset
+          - prompt
+          - policy
+          - conversation
+          - thread
+          - memory_store
+          - knowledge
+          - sheet
+          - guardrail_origin
+          - evaluator_name
+          - evaluator_type
+          - evaluator_version
+          - result_type
+          - evaluation_stage
+          - guardrail_stage
+          - evaluator_stage
+          - guardrail_action
+          - result_label
+          type: string
+          description: Public reporting dimension to filter on. Valid fields depend on the selected metric.
+        op:
+          enum:
+          - eq
+          - neq
+          - in
+          - not_in
+          type: string
+          description: Predicate operator. `eq` and `neq` accept exactly one value; `in` and `not_in` accept 1-100 values.
+        values:
+          type: array
+          items:
+            type: string
+          description: "Values compared against the selected field. Values are interpreted\n as public API strings, not SQL fragments."
+    DataPoint:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          description: "Bucket start in UTC, RFC 3339. Clients that need epoch milliseconds\n can derive them from this value. Unset for `mode=scalar` rows, which\n aggregate the whole window."
+          format: date-time
+        dimensions:
+          type: object
+          additionalProperties:
+            type: string
+          description: "Public breakdown labels for this bucket, keyed by group-by column.\n Empty when no group-by was requested. Empty values are omitted so\n the caller never has to special-case `\"\"`."
+        metrics:
+          type: object
+          additionalProperties:
+            type: number
+            format: double
+          description: "Metric values for this bucket. Single-metric requests carry one\n entry keyed by the requested metric name (e.g. `\"genai.cost\"` →\n `0.000495`). Bundle metrics carry one entry per field. Numbers are\n pre-rounded to 10 significant digits to avoid IEEE-754 display\n noise like `0.00009900000000000001`."
+  securitySchemes:
+    ApiKey:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+externalDocs:
+  url: https://docs.orq.ai
+  description: orq.ai Documentation
+x-speakeasy-timeout: 600000

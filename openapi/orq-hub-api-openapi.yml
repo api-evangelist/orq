@@ -1,0 +1,217 @@
+openapi: 3.2.0
+info:
+  title: orq.ai Hub API
+  version: '2.0'
+  description: orq.ai API documentation
+servers:
+- url: https://my.orq.ai
+security:
+- ApiKey: []
+tags:
+- name: Hub
+  description: Hub items are reusable templates available to a workspace.
+paths:
+  /v2/hub/search:
+    get:
+      tags:
+      - Hub
+      summary: Search hub items
+      description: Returns hub items available to the current workspace, sorted by display name.
+      operationId: HubSearch
+      parameters:
+      - name: q
+        in: query
+        schema:
+          type: string
+      - name: types
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchHubItemsResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: hub
+      x-speakeasy-name-override: search
+      x-code-samples:
+      - lang: curl
+        label: Core - Search hub items
+        source: "curl --get 'https://my.orq.ai/v2/hub/search' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\" \\\n  --data-urlencode 'q=summarize' \\\n  --data-urlencode 'types=prompt'\n"
+      - lang: python
+        label: Python - Search hub items
+        source: "import os\nfrom orq_ai_sdk import Orq\n\nclient = Orq(api_key=os.environ[\"ORQ_API_KEY\"])\n\nresult = client.hub.search(\n    q=\"summarize\",\n    types=[\"prompt\"],\n)\n\nfor hit in result.hits:\n    print(hit.document.id, hit.document.display_name)\n"
+      - lang: typescript
+        label: Node.js - Search hub items
+        source: "import { Orq } from '@orq-ai/node';\n\nconst client = new Orq({\n  apiKey: process.env.ORQ_API_KEY,\n});\n\nconst result = await client.hub.search({\n  q: 'summarize',\n  types: ['prompt'],\n});\n\nfor (const hit of result.hits) {\n  console.log(hit.document.id, hit.document.displayName);\n}\n"
+  /v2/hub/{id}:
+    get:
+      tags:
+      - Hub
+      summary: Get a hub item
+      description: Retrieves a hub item available to the current workspace.
+      operationId: HubGet
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetHubItemResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Not permitted for this key, project or workspace. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: hub
+      x-speakeasy-name-override: get
+      x-code-samples:
+      - lang: curl
+        label: Core - Retrieve hub item
+        source: "curl --request GET \\\n  --url 'https://my.orq.ai/v2/hub/hub_01HZXW2K7Y8Q9M0N1P2R3S4T5V' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\"\n"
+      - lang: python
+        label: Python - Retrieve hub item
+        source: "import os\nfrom orq_ai_sdk import Orq\n\nclient = Orq(api_key=os.environ[\"ORQ_API_KEY\"])\n\nresult = client.hub.get(\n    id=\"hub_01HZXW2K7Y8Q9M0N1P2R3S4T5V\",\n)\n\nprint(result.hub_item.display_name)\n"
+      - lang: typescript
+        label: Node.js - Retrieve hub item
+        source: "import { Orq } from '@orq-ai/node';\n\nconst client = new Orq({\n  apiKey: process.env.ORQ_API_KEY,\n});\n\nconst result = await client.hub.get({\n  id: 'hub_01HZXW2K7Y8Q9M0N1P2R3S4T5V',\n});\n\nconsole.log(result.hubItem.displayName);\n"
+components:
+  schemas:
+    HubItem:
+      required:
+      - id
+      - entity_id
+      - display_name
+      - description
+      - type
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique hub item ID.
+        entity_id:
+          type: string
+          description: ID of the workspace entity represented by this hub item.
+        display_name:
+          type: string
+          description: Human-readable hub item name.
+        description:
+          type: string
+          description: Hub item description.
+        type:
+          type: string
+          description: Hub item type.
+        is_active:
+          type: boolean
+          description: Whether a vendor hub item is active.
+        is_private:
+          type: boolean
+          description: Whether a vendor hub item is private.
+        is_provided_by_orq:
+          type: boolean
+          description: Whether the hub item is provided by orq.
+        engine:
+          type: string
+          description: Execution engine for vendor hub item templates.
+        key:
+          type: string
+          description: Stable vendor template key.
+        evaluator:
+          type: object
+          description: Evaluator template payload.
+        prompt:
+          type: object
+          description: Prompt template payload.
+    GetHubItemResponse:
+      required:
+      - hub_item
+      type: object
+      properties:
+        hub_item:
+          $ref: '#/components/schemas/HubItem'
+    HubItemSummary:
+      required:
+      - id
+      - display_name
+      - description
+      - type
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique hub search item ID.
+        entity_id:
+          type: string
+          description: 'ID of the workspace entity represented by this hub item. Empty on search results: the field is not part of the search index.'
+        display_name:
+          type: string
+          description: Human-readable hub item name.
+        description:
+          type: string
+          description: Hub item description.
+        type:
+          type: string
+          description: Hub item type.
+    SearchHubItemsResponse:
+      required:
+      - hits
+      type: object
+      properties:
+        hits:
+          type: array
+          items:
+            $ref: '#/components/schemas/HubSearchHit'
+    HubSearchHit:
+      required:
+      - document
+      type: object
+      properties:
+        document:
+          $ref: '#/components/schemas/HubItemSummary'
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Human-readable error message.
+        code:
+          type: integer
+          description: gRPC status code, when the service reports one.
+        details:
+          type: array
+          items: {}
+          description: Additional error details, when the service reports any.
+      required:
+      - message
+  securitySchemes:
+    ApiKey:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+externalDocs:
+  url: https://docs.orq.ai
+  description: orq.ai Documentation
+x-speakeasy-timeout: 600000

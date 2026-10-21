@@ -1,0 +1,260 @@
+openapi: 3.2.0
+info:
+  title: orq.ai Router API
+  version: '2.0'
+  description: orq.ai API documentation
+servers:
+- url: https://my.orq.ai
+security:
+- ApiKey: []
+tags:
+- name: Router
+paths:
+  /v2/router/ocr:
+    post:
+      tags:
+      - Router
+      x-speakeasy-group: router
+      x-speakeasy-name-override: ocr
+      x-cli-group: ocr
+      x-cli-name: ocr
+      description: Extracts text content while maintaining document structure and hierarchy
+      requestBody:
+        required: true
+        description: input
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                model:
+                  type: string
+                  description: ID of the model to use for OCR.
+                document:
+                  anyOf:
+                  - type: object
+                    properties:
+                      type:
+                        type: string
+                        enum:
+                        - document_url
+                      document_url:
+                        type: string
+                        format: uri
+                        description: URL of the document to process
+                      document_name:
+                        type: string
+                        description: The name of the document
+                    required:
+                    - type
+                    - document_url
+                  - type: object
+                    properties:
+                      type:
+                        type: string
+                        enum:
+                        - image_url
+                      image_url:
+                        anyOf:
+                        - type: string
+                          description: Base64 encoded image
+                        - type: object
+                          properties:
+                            url:
+                              type: string
+                              format: uri
+                            detail:
+                              type: string
+                          required:
+                          - url
+                          description: URL of the image to process
+                    required:
+                    - type
+                    - image_url
+                  description: Document to run OCR on. Can be a DocumentURLChunk or ImageURLChunk.
+                pages:
+                  type:
+                  - array
+                  - 'null'
+                  items:
+                    type: integer
+                  description: Specific pages to process. Can be a single number, range, or list. Starts from 0. Null for all pages.
+                ocr_settings:
+                  type: object
+                  properties:
+                    include_image_base64:
+                      type:
+                      - boolean
+                      - 'null'
+                      description: Whether to include image Base64 in the response. Null for default.
+                    max_images_to_include:
+                      type: integer
+                      description: Maximum number of images to extract. Null for no limit.
+                    image_min_size:
+                      type: integer
+                      description: Minimum height and width of image to extract. Null for no minimum.
+                  description: Optional settings for the OCR run
+              required:
+              - model
+              - document
+      responses:
+        '200':
+          description: Represents an OCR response from the API.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  model:
+                    type: string
+                    description: ID of the model used for OCR.
+                  pages:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        index:
+                          type: number
+                          description: The page index in a pdf document starting from 0
+                        markdown:
+                          type: string
+                          description: The markdown string response of the page
+                        images:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              id:
+                                type: string
+                                description: The id of the image
+                              image_base64:
+                                type:
+                                - string
+                                - 'null'
+                                description: The base64 encoded image
+                            required:
+                            - id
+                        dimensions:
+                          type:
+                          - object
+                          - 'null'
+                          properties:
+                            dpi:
+                              type: integer
+                              description: Dots per inch of the page-image
+                            height:
+                              type: integer
+                              description: Height of the image in pixels
+                            width:
+                              type: integer
+                              description: Width of the image in pixels
+                          required:
+                          - dpi
+                          - height
+                          - width
+                          description: The dimensions of the PDF Page's screenshot image
+                      required:
+                      - index
+                      - markdown
+                      - images
+                  usage:
+                    oneOf:
+                    - type: object
+                      properties:
+                        type:
+                          type: string
+                          enum:
+                          - pages
+                        pages_processed:
+                          type: integer
+                          description: The number of pages processed
+                        input_cost:
+                          type: number
+                          description: Cost (USD) attributed to input processing. Present when billing was computed for this response.
+                        output_cost:
+                          type: number
+                          description: Cost (USD) attributed to output processing. Present when billing was computed for this response.
+                        total_cost:
+                          type: number
+                          description: Total cost (USD) of the response. Present when billing was computed for this response.
+                      required:
+                      - type
+                      - pages_processed
+                      description: The usage information for the OCR run counted as pages processed
+                    - type: object
+                      properties:
+                        type:
+                          type: string
+                          enum:
+                          - tokens
+                        tokens_processed:
+                          type: integer
+                          description: The number of tokens processed
+                        input_cost:
+                          type: number
+                          description: Cost (USD) attributed to input processing. Present when billing was computed for this response.
+                        output_cost:
+                          type: number
+                          description: Cost (USD) attributed to output processing. Present when billing was computed for this response.
+                        total_cost:
+                          type: number
+                          description: Total cost (USD) of the response. Present when billing was computed for this response.
+                      required:
+                      - type
+                      - tokens_processed
+                      description: The usage information for the OCR run counted as tokens processed
+                required:
+                - model
+                - pages
+                - usage
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIErrorResponse'
+      summary: Create router ocr
+      x-summary-source: derived
+      operationId: postV2RouterOcr
+      x-operation-id-source: derived
+components:
+  schemas:
+    APIErrorResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        error:
+          $ref: '#/components/schemas/APIError'
+      required:
+      - error
+    APIError:
+      additionalProperties: false
+      properties:
+        code:
+          type:
+          - string
+          - 'null'
+        failures: {}
+        message:
+          type: string
+        param:
+          type:
+          - string
+          - 'null'
+        type:
+          type: string
+      required:
+      - message
+      - type
+      - param
+      - code
+      type: object
+  securitySchemes:
+    ApiKey:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+externalDocs:
+  url: https://docs.orq.ai
+  description: orq.ai Documentation
+x-speakeasy-timeout: 600000

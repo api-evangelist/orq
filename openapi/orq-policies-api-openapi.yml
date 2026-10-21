@@ -1,0 +1,680 @@
+openapi: 3.2.0
+info:
+  title: orq.ai Policies API
+  version: '2.0'
+  description: orq.ai API documentation
+servers:
+- url: https://my.orq.ai
+security:
+- ApiKey: []
+tags:
+- name: Policies
+paths:
+  /v2/policies:
+    get:
+      description: Returns a paginated list of policies for the current project.
+      operationId: PolicyList
+      parameters:
+      - explode: false
+        in: query
+        name: limit
+        schema:
+          default: 10
+          format: int64
+          maximum: 200
+          minimum: 1
+          type: integer
+      - description: A cursor for use in pagination.
+        explode: false
+        in: query
+        name: starting_after
+        schema:
+          description: A cursor for use in pagination.
+          type: string
+      - description: A cursor for use in pagination.
+        explode: false
+        in: query
+        name: ending_before
+        schema:
+          description: A cursor for use in pagination.
+          type: string
+      - description: Optional filter by project ID.
+        explode: false
+        in: query
+        name: project_id
+        schema:
+          description: Optional filter by project ID.
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    items:
+                      $ref: '#/components/schemas/Policy'
+                    type:
+                    - array
+                    - 'null'
+                  has_more:
+                    type: boolean
+                  object:
+                    type: string
+                required:
+                - object
+                - data
+                - has_more
+                type: object
+          description: Policies retrieved successfully
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      summary: List policies
+      tags:
+      - Policies
+      x-cli-group: policies
+      x-cli-hidden: true
+      x-cli-name: list
+      x-speakeasy-group: policies
+      x-speakeasy-name-override: list
+    post:
+      description: Creates a new router policy with model configuration, evaluators, retry settings, and limits.
+      operationId: PolicyCreate
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              properties:
+                description:
+                  maxLength: 2048
+                  type: string
+                display_name:
+                  maxLength: 256
+                  minLength: 1
+                  type: string
+                enabled:
+                  type: boolean
+                evaluators:
+                  items:
+                    $ref: '#/components/schemas/EvaluatorRef'
+                  type:
+                  - array
+                  - 'null'
+                limits:
+                  $ref: '#/components/schemas/Limits'
+                models_config:
+                  $ref: '#/components/schemas/ModelsConfig'
+                project_id:
+                  description: Optional project ID. If null/omitted, the entity is global (workspace-wide).
+                  type: string
+                retry_config:
+                  $ref: '#/components/schemas/PolicyRetryConfig'
+                timeout:
+                  format: int64
+                  minimum: 1000
+                  type: integer
+              required:
+              - display_name
+              type: object
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  _id:
+                    type: string
+                  created_at:
+                    format: date-time
+                    type: string
+                  created_by_id:
+                    type: string
+                  description:
+                    maxLength: 2048
+                    type: string
+                  display_name:
+                    maxLength: 256
+                    minLength: 1
+                    type: string
+                  enabled:
+                    type: boolean
+                  evaluators:
+                    items:
+                      $ref: '#/components/schemas/EvaluatorRef'
+                    type:
+                    - array
+                    - 'null'
+                  limits:
+                    $ref: '#/components/schemas/Limits'
+                  models_config:
+                    $ref: '#/components/schemas/ModelsConfig'
+                  project_id:
+                    type: string
+                  retry_config:
+                    $ref: '#/components/schemas/PolicyRetryConfig'
+                  slug:
+                    minLength: 1
+                    type: string
+                  timeout:
+                    format: int64
+                    minimum: 1000
+                    type: integer
+                  updated_at:
+                    format: date-time
+                    type: string
+                  updated_by_id:
+                    type: string
+                required:
+                - _id
+                - created_at
+                - updated_at
+                - created_by_id
+                - updated_by_id
+                - project_id
+                - display_name
+                - slug
+                - enabled
+                - timeout
+                type: object
+          description: Policy created successfully
+        '400':
+          description: Bad request
+        '409':
+          description: Slug conflict
+      summary: Create policy
+      tags:
+      - Policies
+      x-cli-group: policies
+      x-cli-hidden: true
+      x-cli-name: create
+      x-speakeasy-group: policies
+      x-speakeasy-name-override: create
+  /v2/policies/{policy_id}:
+    delete:
+      description: Deletes an existing policy by ID.
+      operationId: PolicyDelete
+      parameters:
+      - description: The ID of the policy
+        in: path
+        name: policy_id
+        required: true
+        schema:
+          description: The ID of the policy
+          type: string
+      responses:
+        '204':
+          description: Policy deleted successfully
+        '404':
+          description: Policy not found
+      summary: Delete policy
+      tags:
+      - Policies
+      x-cli-group: policies
+      x-cli-hidden: true
+      x-cli-name: delete
+      x-speakeasy-group: policies
+      x-speakeasy-name-override: delete
+    get:
+      description: Retrieves the details of an existing policy by ID.
+      operationId: PolicyGet
+      parameters:
+      - description: The ID of the policy
+        in: path
+        name: policy_id
+        required: true
+        schema:
+          description: The ID of the policy
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  _id:
+                    type: string
+                  created_at:
+                    format: date-time
+                    type: string
+                  created_by_id:
+                    type: string
+                  description:
+                    maxLength: 2048
+                    type: string
+                  display_name:
+                    maxLength: 256
+                    minLength: 1
+                    type: string
+                  enabled:
+                    type: boolean
+                  evaluators:
+                    items:
+                      $ref: '#/components/schemas/EvaluatorRef'
+                    type:
+                    - array
+                    - 'null'
+                  limits:
+                    $ref: '#/components/schemas/Limits'
+                  models_config:
+                    $ref: '#/components/schemas/ModelsConfig'
+                  project_id:
+                    type: string
+                  retry_config:
+                    $ref: '#/components/schemas/PolicyRetryConfig'
+                  slug:
+                    minLength: 1
+                    type: string
+                  timeout:
+                    format: int64
+                    minimum: 1000
+                    type: integer
+                  updated_at:
+                    format: date-time
+                    type: string
+                  updated_by_id:
+                    type: string
+                required:
+                - _id
+                - created_at
+                - updated_at
+                - created_by_id
+                - updated_by_id
+                - project_id
+                - display_name
+                - slug
+                - enabled
+                - timeout
+                type: object
+          description: Policy retrieved successfully
+        '404':
+          description: Policy not found
+      summary: Get policy
+      tags:
+      - Policies
+      x-cli-group: policies
+      x-cli-hidden: true
+      x-cli-name: retrieve
+      x-speakeasy-group: policies
+      x-speakeasy-name-override: retrieve
+    patch:
+      description: Partially updates an existing policy. Only provided fields are updated.
+      operationId: PolicyUpdate
+      parameters:
+      - description: The ID of the policy
+        in: path
+        name: policy_id
+        required: true
+        schema:
+          description: The ID of the policy
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              properties:
+                description:
+                  maxLength: 2048
+                  type: string
+                display_name:
+                  maxLength: 256
+                  minLength: 1
+                  type: string
+                enabled:
+                  type: boolean
+                evaluators:
+                  items:
+                    $ref: '#/components/schemas/EvaluatorRef'
+                  type: array
+                limits:
+                  $ref: '#/components/schemas/Limits'
+                models_config:
+                  $ref: '#/components/schemas/ModelsConfig'
+                project_id:
+                  description: Optional project ID to assign the policy to.
+                  type: string
+                retry_config:
+                  $ref: '#/components/schemas/PolicyRetryConfig'
+                timeout:
+                  format: int64
+                  minimum: 1000
+                  type: integer
+              type: object
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  _id:
+                    type: string
+                  created_at:
+                    format: date-time
+                    type: string
+                  created_by_id:
+                    type: string
+                  description:
+                    maxLength: 2048
+                    type: string
+                  display_name:
+                    maxLength: 256
+                    minLength: 1
+                    type: string
+                  enabled:
+                    type: boolean
+                  evaluators:
+                    items:
+                      $ref: '#/components/schemas/EvaluatorRef'
+                    type:
+                    - array
+                    - 'null'
+                  limits:
+                    $ref: '#/components/schemas/Limits'
+                  models_config:
+                    $ref: '#/components/schemas/ModelsConfig'
+                  project_id:
+                    type: string
+                  retry_config:
+                    $ref: '#/components/schemas/PolicyRetryConfig'
+                  slug:
+                    minLength: 1
+                    type: string
+                  timeout:
+                    format: int64
+                    minimum: 1000
+                    type: integer
+                  updated_at:
+                    format: date-time
+                    type: string
+                  updated_by_id:
+                    type: string
+                required:
+                - _id
+                - created_at
+                - updated_at
+                - created_by_id
+                - updated_by_id
+                - project_id
+                - display_name
+                - slug
+                - enabled
+                - timeout
+                type: object
+          description: Policy updated successfully
+        '400':
+          description: Bad request
+        '404':
+          description: Policy not found
+        '409':
+          description: Slug conflict
+      summary: Update policy
+      tags:
+      - Policies
+      x-cli-group: policies
+      x-cli-hidden: true
+      x-cli-name: update
+      x-speakeasy-group: policies
+      x-speakeasy-name-override: update
+components:
+  schemas:
+    BudgetLimit:
+      additionalProperties: false
+      properties:
+        amount:
+          format: double
+          maximum: 1000000
+          minimum: 0.01
+          type: number
+        currency:
+          enum:
+          - usd
+          type: string
+        period:
+          enum:
+          - hour
+          - day
+          - week
+          - month
+          type: string
+      required:
+      - amount
+      - period
+      - currency
+      type: object
+    TokenLimit:
+      additionalProperties: false
+      properties:
+        amount:
+          format: int64
+          maximum: 1000000000
+          minimum: 1
+          type: integer
+        period:
+          enum:
+          - hour
+          - day
+          - week
+          - month
+          type: string
+      required:
+      - amount
+      - period
+      type: object
+    EvaluatorRef:
+      additionalProperties: false
+      properties:
+        execute_on:
+          enum:
+          - input
+          - output
+          - both
+          type: string
+        id:
+          minLength: 1
+          type: string
+        is_guardrail:
+          type: boolean
+        options:
+          additionalProperties: {}
+          type: object
+        sample_rate:
+          format: double
+          maximum: 1
+          minimum: 0
+          type: number
+        timeout:
+          format: int64
+          maximum: 600000
+          minimum: 1000
+          type: integer
+      required:
+      - id
+      - execute_on
+      type: object
+    PolicyRetryConfig:
+      additionalProperties: false
+      properties:
+        count:
+          format: int64
+          maximum: 5
+          minimum: 1
+          type: integer
+        on_codes:
+          items:
+            format: int64
+            type: integer
+          type:
+          - array
+          - 'null'
+      required:
+      - count
+      type: object
+    Limits:
+      additionalProperties: false
+      properties:
+        budget:
+          $ref: '#/components/schemas/BudgetLimit'
+        requests:
+          $ref: '#/components/schemas/RequestLimit'
+        tokens:
+          $ref: '#/components/schemas/TokenLimit'
+      type: object
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Human-readable error message.
+        code:
+          type: integer
+          description: gRPC status code, when the service reports one.
+        details:
+          type: array
+          items: {}
+          description: Additional error details, when the service reports any.
+      required:
+      - message
+    ModelRef:
+      additionalProperties: false
+      properties:
+        display_name:
+          type: string
+        integration_id:
+          type: string
+        model:
+          minLength: 1
+          type: string
+        weight:
+          format: double
+          maximum: 1
+          minimum: 0
+          type: number
+      required:
+      - model
+      type: object
+    ModelsConfig:
+      additionalProperties: false
+      properties:
+        mode:
+          enum:
+          - fallback
+          - latency_based
+          - weighted
+          - round_robin
+          type: string
+        models:
+          items:
+            $ref: '#/components/schemas/ModelRef'
+          minItems: 1
+          type:
+          - array
+          - 'null'
+        fallback_on_codes:
+          items:
+            format: int64
+            type: integer
+          maxItems: 20
+          type:
+          - array
+          - 'null'
+          uniqueItems: true
+      required:
+      - mode
+      - models
+      type: object
+    Policy:
+      additionalProperties: false
+      properties:
+        _id:
+          type: string
+        created_at:
+          format: date-time
+          type: string
+        created_by_id:
+          type: string
+        description:
+          maxLength: 2048
+          type: string
+        display_name:
+          maxLength: 256
+          minLength: 1
+          type: string
+        enabled:
+          type: boolean
+        evaluators:
+          items:
+            $ref: '#/components/schemas/EvaluatorRef'
+          type:
+          - array
+          - 'null'
+        limits:
+          $ref: '#/components/schemas/Limits'
+        models_config:
+          $ref: '#/components/schemas/ModelsConfig'
+        project_id:
+          type: string
+        retry_config:
+          $ref: '#/components/schemas/PolicyRetryConfig'
+        slug:
+          minLength: 1
+          type: string
+        timeout:
+          format: int64
+          minimum: 1000
+          type: integer
+        updated_at:
+          format: date-time
+          type: string
+        updated_by_id:
+          type: string
+      required:
+      - _id
+      - created_at
+      - updated_at
+      - created_by_id
+      - updated_by_id
+      - project_id
+      - display_name
+      - slug
+      - enabled
+      - timeout
+      type: object
+    RequestLimit:
+      additionalProperties: false
+      properties:
+        amount:
+          format: int64
+          maximum: 1000000000
+          minimum: 1
+          type: integer
+        period:
+          enum:
+          - hour
+          - day
+          - week
+          - month
+          type: string
+      required:
+      - amount
+      - period
+      type: object
+  securitySchemes:
+    ApiKey:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+externalDocs:
+  url: https://docs.orq.ai
+  description: orq.ai Documentation
+x-speakeasy-timeout: 600000

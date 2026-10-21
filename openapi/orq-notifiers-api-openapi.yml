@@ -1,0 +1,522 @@
+openapi: 3.2.0
+info:
+  title: orq.ai Notifiers API
+  version: '2.0'
+  description: orq.ai API documentation
+servers:
+- url: https://my.orq.ai
+security:
+- ApiKey: []
+tags:
+- name: Notifiers
+  description: Notifier destinations used to send delivery and workflow notifications.
+paths:
+  /v2/notifiers:
+    get:
+      tags:
+      - Notifiers
+      summary: List notifiers
+      description: Returns notifier destinations visible to the caller, ordered by creation time with the newest notifier first.
+      operationId: NotifierList
+      parameters:
+      - name: limit
+        in: query
+        description: Optional. Number of notifiers to return. Defaults to 25 and must be between 1 and 200.
+        schema:
+          type: integer
+          format: int32
+      - name: starting_after
+        in: query
+        description: Cursor for forward pagination. Set to the `_id` of the last item from the previous page.
+        schema:
+          type: string
+      - name: ending_before
+        in: query
+        description: Cursor for backward pagination. Set to the `_id` of the first item from the previous page.
+        schema:
+          type: string
+      - name: project_id
+        in: query
+        description: Restrict results to one project. Must be a project the caller is authorized for.
+        schema:
+          type: string
+      - name: search
+        in: query
+        description: Optional. Case-insensitive substring match on the notifier name.
+        schema:
+          type: string
+      - name: type
+        in: query
+        description: Optional. Restrict results to these notifier types.
+        schema:
+          type: array
+          items:
+            $ref: '#/components/schemas/NotifierType'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListNotifiersResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: notifiers
+      x-speakeasy-name-override: list
+      x-code-samples:
+      - lang: curl
+        label: Core - List notifiers
+        source: "curl --get 'https://my.orq.ai/v2/notifiers' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\" \\\n  --data-urlencode 'project_id=proj_01HZXW2K7Y8Q9M0N1P2R3S4T5V' \\\n  --data-urlencode 'limit=25'\n"
+      - lang: python
+        label: Python - List notifiers
+        source: "import os\nfrom orq_ai_sdk import Orq\n\nclient = Orq(api_key=os.environ[\"ORQ_API_KEY\"])\n\npage = client.notifiers.list(\n    project_id=\"proj_01HZXW2K7Y8Q9M0N1P2R3S4T5V\",\n    limit=25,\n)\n\nfor notifier in page.data:\n    print(notifier._id, notifier.display_name)\n"
+      - lang: typescript
+        label: Node.js - List notifiers
+        source: "import { Orq } from '@orq-ai/node';\n\nconst client = new Orq({\n  apiKey: process.env.ORQ_API_KEY,\n});\n\nconst page = await client.notifiers.list({\n  projectId: 'proj_01HZXW2K7Y8Q9M0N1P2R3S4T5V',\n  limit: 25,\n});\n\nfor (const notifier of page.data) {\n  console.log(notifier._id, notifier.displayName);\n}\n"
+    post:
+      tags:
+      - Notifiers
+      summary: Create a notifier
+      description: Creates a notifier destination in a project. Choose `NOTIFIER_TYPE_EMAIL`, `NOTIFIER_TYPE_SLACK_WEBHOOK`, or `NOTIFIER_TYPE_WEBHOOK` and provide the matching destination fields.
+      operationId: NotifierCreate
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateNotifierRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateNotifierResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: notifiers
+      x-speakeasy-name-override: create
+      x-code-samples:
+      - lang: curl
+        label: Core - Create email notifier
+        source: "curl --request POST \\\n  --url 'https://my.orq.ai/v2/notifiers' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\" \\\n  --header 'Content-Type: application/json' \\\n  --data '{\n    \"project_id\": \"proj_01HZXW2K7Y8Q9M0N1P2R3S4T5V\",\n    \"display_name\": \"Production alerts\",\n    \"type\": \"NOTIFIER_TYPE_EMAIL\",\n    \"emails\": [\"ops@example.com\", \"alerts@example.com\"],\n    \"metadata\": {\"environment\": \"production\"}\n  }'\n"
+      - lang: python
+        label: Python - Create email notifier
+        source: "import os\nfrom orq_ai_sdk import Orq\n\nclient = Orq(api_key=os.environ[\"ORQ_API_KEY\"])\n\nresult = client.notifiers.create(\n    project_id=\"proj_01HZXW2K7Y8Q9M0N1P2R3S4T5V\",\n    display_name=\"Production alerts\",\n    type=\"NOTIFIER_TYPE_EMAIL\",\n    emails=[\"ops@example.com\", \"alerts@example.com\"],\n    metadata={\"environment\": \"production\"},\n)\n\nprint(result.notifier._id)\n"
+      - lang: typescript
+        label: Node.js - Create email notifier
+        source: "import { Orq } from '@orq-ai/node';\n\nconst client = new Orq({\n  apiKey: process.env.ORQ_API_KEY,\n});\n\nconst result = await client.notifiers.create({\n  projectId: 'proj_01HZXW2K7Y8Q9M0N1P2R3S4T5V',\n  displayName: 'Production alerts',\n  type: 'NOTIFIER_TYPE_EMAIL',\n  emails: ['ops@example.com', 'alerts@example.com'],\n  metadata: { environment: 'production' },\n});\n\nconsole.log(result.notifier._id);\n"
+  /v2/notifiers/{notifier_id}:
+    get:
+      tags:
+      - Notifiers
+      summary: Retrieve a notifier
+      description: Retrieves an existing notifier by ID.
+      operationId: NotifierGet
+      parameters:
+      - name: notifier_id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetNotifierResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: The resource does not exist. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: notifiers
+      x-speakeasy-name-override: get
+      x-code-samples:
+      - lang: curl
+        label: Core - Retrieve notifier
+        source: "curl --request GET \\\n  --url 'https://my.orq.ai/v2/notifiers/notifier_01HZXW2K7Y8Q9M0N1P2R3S4T5V' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\"\n"
+      - lang: python
+        label: Python - Retrieve notifier
+        source: "import os\nfrom orq_ai_sdk import Orq\n\nclient = Orq(api_key=os.environ[\"ORQ_API_KEY\"])\n\nresult = client.notifiers.get(\n    notifier_id=\"notifier_01HZXW2K7Y8Q9M0N1P2R3S4T5V\",\n)\n\nprint(result.notifier.display_name)\n"
+      - lang: typescript
+        label: Node.js - Retrieve notifier
+        source: "import { Orq } from '@orq-ai/node';\n\nconst client = new Orq({\n  apiKey: process.env.ORQ_API_KEY,\n});\n\nconst result = await client.notifiers.get({\n  notifierId: 'notifier_01HZXW2K7Y8Q9M0N1P2R3S4T5V',\n});\n\nconsole.log(result.notifier.displayName);\n"
+    delete:
+      tags:
+      - Notifiers
+      summary: Delete a notifier
+      description: Deletes an existing notifier by ID.
+      operationId: NotifierDelete
+      parameters:
+      - name: notifier_id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteNotifierResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: notifiers
+      x-speakeasy-name-override: delete
+      x-code-samples:
+      - lang: curl
+        label: Core - Delete notifier
+        source: "curl --request DELETE \\\n  --url 'https://my.orq.ai/v2/notifiers/notifier_01HZXW2K7Y8Q9M0N1P2R3S4T5V' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\"\n"
+      - lang: python
+        label: Python - Delete notifier
+        source: "import os\nfrom orq_ai_sdk import Orq\n\nclient = Orq(api_key=os.environ[\"ORQ_API_KEY\"])\n\nclient.notifiers.delete(\n    notifier_id=\"notifier_01HZXW2K7Y8Q9M0N1P2R3S4T5V\",\n)\n"
+      - lang: typescript
+        label: Node.js - Delete notifier
+        source: "import { Orq } from '@orq-ai/node';\n\nconst client = new Orq({\n  apiKey: process.env.ORQ_API_KEY,\n});\n\nawait client.notifiers.delete({\n  notifierId: 'notifier_01HZXW2K7Y8Q9M0N1P2R3S4T5V',\n});\n"
+    patch:
+      tags:
+      - Notifiers
+      summary: Update a notifier
+      description: Partially updates an existing notifier. When changing `type`, provide the destination fields required by the new notifier type.
+      operationId: NotifierUpdate
+      parameters:
+      - name: notifier_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateNotifierRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateNotifierResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: notifiers
+      x-speakeasy-name-override: update
+      x-code-samples:
+      - lang: curl
+        label: Core - Update notifier
+        source: "curl --request PATCH \\\n  --url 'https://my.orq.ai/v2/notifiers/notifier_01HZXW2K7Y8Q9M0N1P2R3S4T5V' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\" \\\n  --header 'Content-Type: application/json' \\\n  --data '{\n    \"display_name\": \"Production incident alerts\",\n    \"emails\": [\"incidents@example.com\"]\n  }'\n"
+      - lang: python
+        label: Python - Update notifier
+        source: "import os\nfrom orq_ai_sdk import Orq\n\nclient = Orq(api_key=os.environ[\"ORQ_API_KEY\"])\n\nresult = client.notifiers.update(\n    notifier_id=\"notifier_01HZXW2K7Y8Q9M0N1P2R3S4T5V\",\n    display_name=\"Production incident alerts\",\n    emails=[\"incidents@example.com\"],\n)\n\nprint(result.notifier.display_name)\n"
+      - lang: typescript
+        label: Node.js - Update notifier
+        source: "import { Orq } from '@orq-ai/node';\n\nconst client = new Orq({\n  apiKey: process.env.ORQ_API_KEY,\n});\n\nconst result = await client.notifiers.update({\n  notifierId: 'notifier_01HZXW2K7Y8Q9M0N1P2R3S4T5V',\n  displayName: 'Production incident alerts',\n  emails: ['incidents@example.com'],\n});\n\nconsole.log(result.notifier.displayName);\n"
+components:
+  schemas:
+    DeleteNotifierResponse:
+      type: object
+      properties: {}
+    NotifierType:
+      type: string
+      enum:
+      - NOTIFIER_TYPE_EMAIL
+      - NOTIFIER_TYPE_SLACK_WEBHOOK
+      - NOTIFIER_TYPE_WEBHOOK
+    Notifier:
+      required:
+      - _id
+      - display_name
+      - created_at
+      - updated_at
+      - type
+      type: object
+      properties:
+        _id:
+          type: string
+          description: Unique notifier identifier assigned by ORQ.
+        project_id:
+          type: string
+          description: Project that contains the notifier. Empty for workspace-wide notifiers.
+        display_name:
+          type: string
+          description: Human-readable notifier name.
+        created_at:
+          type: string
+          description: Time when the notifier was created.
+          format: date-time
+        updated_at:
+          type: string
+          description: Time when the notifier was last updated.
+          format: date-time
+        created_by_id:
+          type: string
+          description: User ID that created the notifier.
+        updated_by_id:
+          type: string
+          description: User ID that last updated the notifier.
+        metadata:
+          type: object
+          description: Custom JSON metadata stored with the notifier.
+        type:
+          description: Notifier destination type. Use `NOTIFIER_TYPE_EMAIL`, `NOTIFIER_TYPE_SLACK_WEBHOOK`, or `NOTIFIER_TYPE_WEBHOOK`.
+          $ref: '#/components/schemas/NotifierType'
+        emails:
+          type: array
+          items:
+            type: string
+          description: Email addresses notified when `type` is `NOTIFIER_TYPE_EMAIL`.
+        incoming_webhook_url:
+          type: string
+          description: Slack incoming webhook URL used when `type` is `NOTIFIER_TYPE_SLACK_WEBHOOK`.
+        webhook_url:
+          type: string
+          description: Generic webhook URL used when `type` is `NOTIFIER_TYPE_WEBHOOK`.
+        headers:
+          type: object
+          description: Optional HTTP headers for generic webhooks. Each entry may be a string value or an object with `secret` and `value`.
+      description: Notifier resource. The destination field present on the resource depends on `type` and is captured in `oneOf`.
+      oneOf:
+      - title: Email notifier
+        type: object
+        description: '`emails` is present for email notifiers.'
+        required:
+        - type
+        - emails
+        properties:
+          type:
+            type: string
+            enum:
+            - NOTIFIER_TYPE_EMAIL
+          emails:
+            type: array
+            items:
+              type: string
+            description: Email addresses notified when `type` is `NOTIFIER_TYPE_EMAIL`.
+      - title: Slack webhook notifier
+        type: object
+        description: '`incoming_webhook_url` is present for Slack webhook notifiers.'
+        required:
+        - type
+        - incoming_webhook_url
+        properties:
+          type:
+            type: string
+            enum:
+            - NOTIFIER_TYPE_SLACK_WEBHOOK
+          incoming_webhook_url:
+            type: string
+            description: Slack incoming webhook URL used when `type` is `NOTIFIER_TYPE_SLACK_WEBHOOK`.
+      - title: Generic webhook notifier
+        type: object
+        description: '`webhook_url` is present for generic webhook notifiers; `headers` is optional.'
+        required:
+        - type
+        - webhook_url
+        properties:
+          type:
+            type: string
+            enum:
+            - NOTIFIER_TYPE_WEBHOOK
+          webhook_url:
+            type: string
+            description: Generic webhook URL used when `type` is `NOTIFIER_TYPE_WEBHOOK`.
+    UpdateNotifierRequest:
+      required: []
+      type: object
+      properties:
+        project_id:
+          type: string
+          description: Optional. New containing project. Workspace-scoped callers may set an empty value to make the notifier workspace-wide. Project-scoped API keys remain pinned to the API key's project.
+        display_name:
+          type: string
+          description: Optional. New human-readable notifier name.
+        metadata:
+          type: object
+          description: Optional. Replacement custom JSON metadata.
+        type:
+          description: Optional. New destination type. When provided, also provide the destination field required by the new type.
+          $ref: '#/components/schemas/NotifierType'
+        emails:
+          type: array
+          items:
+            type: string
+          description: Optional replacement email recipients. Required when changing `type` to `NOTIFIER_TYPE_EMAIL`.
+        incoming_webhook_url:
+          type: string
+          description: Optional replacement Slack incoming webhook URL. Required when changing `type` to `NOTIFIER_TYPE_SLACK_WEBHOOK`.
+        webhook_url:
+          type: string
+          description: Optional replacement generic webhook URL. Required when changing `type` to `NOTIFIER_TYPE_WEBHOOK`.
+        headers:
+          type: object
+          description: Optional replacement generic webhook headers. Secret header values returned by GET or LIST are masked as an empty string; omit those entries or replace them with the real value when updating.
+      description: Partial notifier update. All request body fields are optional individually, but at least one field must be provided. When changing `type`, include the destination field required by the new type. Secret header values returned by GET or LIST are masked as an empty string; omit those entries or replace them with the real value when updating.
+      minProperties: 1
+    CreateNotifierRequest:
+      required:
+      - display_name
+      - type
+      type: object
+      properties:
+        project_id:
+          type: string
+          description: Optional. Workspace-scoped callers may set this to create a project-scoped notifier, or omit it for a workspace-wide notifier. Project-scoped API keys create in the API key's project.
+        display_name:
+          type: string
+          description: Required. Human-readable notifier name.
+        metadata:
+          type: object
+          description: Optional. Custom JSON metadata stored with the notifier.
+        type:
+          description: Required. Destination type. Use `NOTIFIER_TYPE_EMAIL`, `NOTIFIER_TYPE_SLACK_WEBHOOK`, or `NOTIFIER_TYPE_WEBHOOK`.
+          $ref: '#/components/schemas/NotifierType'
+        emails:
+          type: array
+          items:
+            type: string
+          description: Required when `type` is `NOTIFIER_TYPE_EMAIL`. Omit for other notifier types.
+        incoming_webhook_url:
+          type: string
+          description: Required when `type` is `NOTIFIER_TYPE_SLACK_WEBHOOK`. Omit for other notifier types.
+        webhook_url:
+          type: string
+          description: Required when `type` is `NOTIFIER_TYPE_WEBHOOK`. Omit for other notifier types.
+        headers:
+          type: object
+          description: 'Optional generic webhook headers. Each value may be a string or `{ "secret": true, "value": "..." }`.'
+      description: Create notifier request. `project_id`, `display_name`, and `type` are always required. The destination field required by `type` is captured in `oneOf`.
+      oneOf:
+      - title: Email notifier create request
+        type: object
+        description: '`emails` is required when `type` is `NOTIFIER_TYPE_EMAIL`.'
+        required:
+        - type
+        - emails
+        properties:
+          type:
+            type: string
+            enum:
+            - NOTIFIER_TYPE_EMAIL
+          emails:
+            type: array
+            items:
+              type: string
+            description: Required when `type` is `NOTIFIER_TYPE_EMAIL`. Omit for other notifier types.
+      - title: Slack webhook notifier create request
+        type: object
+        description: '`incoming_webhook_url` is required when `type` is `NOTIFIER_TYPE_SLACK_WEBHOOK`.'
+        required:
+        - type
+        - incoming_webhook_url
+        properties:
+          type:
+            type: string
+            enum:
+            - NOTIFIER_TYPE_SLACK_WEBHOOK
+          incoming_webhook_url:
+            type: string
+            description: Required when `type` is `NOTIFIER_TYPE_SLACK_WEBHOOK`. Omit for other notifier types.
+      - title: Generic webhook notifier create request
+        type: object
+        description: '`webhook_url` is required when `type` is `NOTIFIER_TYPE_WEBHOOK`; `headers` is optional.'
+        required:
+        - type
+        - webhook_url
+        properties:
+          type:
+            type: string
+            enum:
+            - NOTIFIER_TYPE_WEBHOOK
+          webhook_url:
+            type: string
+            description: Required when `type` is `NOTIFIER_TYPE_WEBHOOK`. Omit for other notifier types.
+    CreateNotifierResponse:
+      required:
+      - notifier
+      type: object
+      properties:
+        notifier:
+          $ref: '#/components/schemas/Notifier'
+    ListNotifiersResponse:
+      required:
+      - object
+      - data
+      - has_more
+      type: object
+      properties:
+        object:
+          type: string
+          description: Object discriminator for list responses; always `list`.
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Notifier'
+          description: Page of notifiers.
+        has_more:
+          type: boolean
+          description: Whether more notifiers are available in the selected pagination direction.
+    UpdateNotifierResponse:
+      required:
+      - notifier
+      type: object
+      properties:
+        notifier:
+          $ref: '#/components/schemas/Notifier'
+    GetNotifierResponse:
+      required:
+      - notifier
+      type: object
+      properties:
+        notifier:
+          $ref: '#/components/schemas/Notifier'
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Human-readable error message.
+        code:
+          type: integer
+          description: gRPC status code, when the service reports one.
+        details:
+          type: array
+          items: {}
+          description: Additional error details, when the service reports any.
+      required:
+      - message
+  securitySchemes:
+    ApiKey:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+externalDocs:
+  url: https://docs.orq.ai
+  description: orq.ai Documentation
+x-speakeasy-timeout: 600000

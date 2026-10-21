@@ -1,0 +1,444 @@
+openapi: 3.2.0
+info:
+  title: orq.ai Management keys API
+  version: '2.0'
+  description: orq.ai API documentation
+servers:
+- url: https://my.orq.ai
+security:
+- ApiKey: []
+tags:
+- name: Management keys
+  description: Management keys are workspace-scoped credentials that authenticate programmatic access to workspace administration surfaces (API keys, budgets). Unlike project-scoped API keys, a management key always operates at the workspace level.
+paths:
+  /v2/management-keys:
+    get:
+      tags:
+      - Management keys
+      summary: List management keys
+      description: Returns management keys in the current workspace, ordered by creation time with the newest key first. The `api_key` and `token_hash` fields are never returned by this endpoint; only `token_prefix` is included.
+      operationId: ManagementKeyList
+      parameters:
+      - name: limit
+        in: query
+        description: Page size, 1–200. Unset uses the server default (25).
+        schema:
+          type: integer
+          format: int32
+      - name: starting_after
+        in: query
+        description: "Cursor for forward pagination. Set to the `management_key_id` of the\n last item from the previous page."
+        schema:
+          type: string
+      - name: ending_before
+        in: query
+        description: "Cursor for backward pagination. Set to the `management_key_id` of the\n first item from the previous page."
+        schema:
+          type: string
+      - name: status
+        in: query
+        description: 'Optional filter: only return keys with this status.'
+        schema:
+          $ref: '#/components/schemas/ManagementKeyStatus'
+      - name: search
+        in: query
+        description: "Optional case-insensitive substring match against the management-key\n name. Empty means no name filter."
+        schema:
+          type: string
+      - name: permission_mode
+        in: query
+        description: "Optional filter: only return keys whose permission mode is one of\n the listed presets. Empty means no permission-mode filter."
+        schema:
+          type: array
+          items:
+            $ref: '#/components/schemas/ManagementPermissionMode'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListManagementKeysResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: managementKeys
+      x-speakeasy-name-override: list
+    post:
+      tags:
+      - Management keys
+      summary: Create a new management key
+      description: Mints a new opaque management key (`sk-orq--`) in the workspace. The raw secret is returned ONCE in the response and is never retrievable afterwards. The stored record retains only `token_prefix` and a SHA-256 `token_hash`.
+      operationId: ManagementKeyCreate
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateManagementKeyRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateManagementKeyResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: managementKeys
+      x-speakeasy-name-override: create
+  /v2/management-keys/capabilities:
+    get:
+      tags:
+      - Management keys
+      summary: List management capability catalog
+      description: 'Returns the management capability catalog: the set of workspace-admin permission domains that can be granted to a management key. Each entry includes the domain id, display name, group, and the read / write verb support. Drives the permissions UI in the dashboard.'
+      operationId: ManagementKeyListCapabilities
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListManagementCapabilitiesResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: managementKeys
+      x-speakeasy-name-override: listCapabilities
+  /v2/management-keys/{management_key_id}:
+    get:
+      tags:
+      - Management keys
+      summary: Retrieve a management key
+      description: Retrieves the metadata for an existing management key by its unique identifier. The raw secret is never returned — only `token_prefix`, `permission_mode`, and lifecycle fields.
+      operationId: ManagementKeyGet
+      parameters:
+      - name: management_key_id
+        in: path
+        description: Management key id to retrieve (e.g. `01H...`).
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetManagementKeyResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Not permitted for this key, project or workspace. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: managementKeys
+      x-speakeasy-name-override: get
+    delete:
+      tags:
+      - Management keys
+      summary: Delete a management key
+      description: Permanently deletes a management key. Cache entries are invalidated immediately so an in-flight token cannot ride out the TTL. The response body is empty on success.
+      operationId: ManagementKeyDelete
+      parameters:
+      - name: management_key_id
+        in: path
+        description: Management key id to delete.
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteManagementKeyResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: managementKeys
+      x-speakeasy-name-override: delete
+    patch:
+      tags:
+      - Management keys
+      summary: Update a management key
+      description: 'Updates mutable fields of a management key: display name, status (active / disabled / revoked), permission mode and access map, and expiry. Omitted fields keep their current values.'
+      operationId: ManagementKeyUpdate
+      parameters:
+      - name: management_key_id
+        in: path
+        description: Management key id to update.
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateManagementKeyRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateManagementKeyResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: managementKeys
+      x-speakeasy-name-override: update
+components:
+  schemas:
+    GetManagementKeyResponse:
+      required:
+      - management_key
+      type: object
+      properties:
+        management_key:
+          allOf:
+          - $ref: '#/components/schemas/ManagementKey'
+          description: Requested management-key. Raw token never included.
+    ManagementDomain:
+      type: object
+      properties:
+        id:
+          type: string
+          description: "Stable domain identifier (e.g. \"api-key\", \"budget\"). Used as the\n key in ManagementKey.access and as the verb prefix in resolved\n permissions (e.g. budget.list, budget.view, budget.create)."
+        display_name:
+          type: string
+          description: Human-readable label for the dashboard.
+        group:
+          description: Logical group used by the UI to render this entry.
+          $ref: '#/components/schemas/ManagementDomainGroup'
+        readable:
+          type: boolean
+          description: Whether this domain can be granted read access.
+        writable:
+          type: boolean
+          description: Whether this domain can be granted write access.
+      description: "ManagementDomain describes a permission domain that can be granted\n to a management key. Verbs are derived from id + readable/writable."
+    ManagementKeyStatus:
+      type: string
+      enum:
+      - MANAGEMENT_KEY_STATUS_ACTIVE
+      - MANAGEMENT_KEY_STATUS_DISABLED
+      - MANAGEMENT_KEY_STATUS_REVOKED
+    ManagementKey:
+      required:
+      - management_key_id
+      - name
+      - permission_mode
+      - token_prefix
+      - status
+      - created_at
+      - updated_at
+      type: object
+      properties:
+        management_key_id:
+          type: string
+          description: "Canonical key identifier (ULID). Embedded in opaque tokens as\n `sk-orq-<id>-<secret>`."
+        name:
+          type: string
+          description: Human-readable name shown in the dashboard.
+        permission_mode:
+          description: "Permission preset. `all` and `read_only` resolve at auth time from\n the management capability catalog. `restricted` reads the per-domain\n `access` map."
+          $ref: '#/components/schemas/ManagementPermissionMode'
+        access:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/AccessLevel'
+          description: "Per-domain access map. Only populated when `permission_mode` is\n `MANAGEMENT_PERMISSION_MODE_RESTRICTED`. The authoritative list of\n valid keys (Domain.id values) is returned by the List management\n capability catalog endpoint (GET /v2/management-keys/capabilities)."
+        token_prefix:
+          type: string
+          description: "Displayable prefix for UI listings (e.g. \"sk-orq-01HXY...\"). Safe\n to expose."
+        status:
+          description: Lifecycle status.
+          $ref: '#/components/schemas/ManagementKeyStatus'
+        created_by_id:
+          type: string
+          description: 'Audit: user who created the key.'
+        updated_by_id:
+          type: string
+          description: 'Audit: user who last updated the key.'
+        created_at:
+          type: string
+          description: Time the key was created.
+          format: date-time
+        updated_at:
+          type: string
+          description: Time the key was last updated.
+          format: date-time
+        last_used_at:
+          type: string
+          description: Last authenticated use.
+          format: date-time
+        expires_at:
+          type: string
+          description: "Optional expiration. Keys whose `expires_at` is in the past are\n rejected when used. Unset means the key never expires."
+          format: date-time
+      description: "ManagementKey defines permissions, expiration, and revocation for a\n management key. Management keys are always\n workspace-scoped — there is no project_scope field, and they have no\n per-user owner (every management key is workspace-owned;\n `created_by_id` records who created it)."
+    UpdateManagementKeyResponse:
+      required:
+      - management_key
+      type: object
+      properties:
+        management_key:
+          allOf:
+          - $ref: '#/components/schemas/ManagementKey'
+          description: Updated management-key.
+    ManagementPermissionMode:
+      type: string
+      enum:
+      - MANAGEMENT_PERMISSION_MODE_ALL
+      - MANAGEMENT_PERMISSION_MODE_RESTRICTED
+      - MANAGEMENT_PERMISSION_MODE_READ_ONLY
+    AccessLevel:
+      type: string
+      enum:
+      - ACCESS_LEVEL_NONE
+      - ACCESS_LEVEL_READ
+      - ACCESS_LEVEL_WRITE
+    CreateManagementKeyRequest:
+      required:
+      - name
+      - permission_mode
+      type: object
+      properties:
+        name:
+          type: string
+          description: Human-readable name. Required.
+        permission_mode:
+          description: Permission preset. Required; an omitted or unspecified value is rejected with INVALID_ARGUMENT rather than defaulted to full access.
+          $ref: '#/components/schemas/ManagementPermissionMode'
+        access:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/AccessLevel'
+          description: "Per-domain access map. Required when `permission_mode` =\n `MANAGEMENT_PERMISSION_MODE_RESTRICTED`. See `ManagementKey.access`\n for the catalog of valid keys (Domain.id) and AccessLevel string\n values, or fetch the live catalog via the capability catalog\n endpoint."
+        expires_at:
+          type: string
+          description: "Optional expiration. The key is rejected once `expires_at` is in the\n past. Unset means the key never expires."
+          format: date-time
+    ListManagementKeysResponse:
+      required:
+      - object
+      - data
+      - has_more
+      type: object
+      properties:
+        object:
+          type: string
+          description: Object discriminator for list responses; always `list`.
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ManagementKey'
+          description: "Page of management-keys, ordered newest first. `token_hash` and\n `api_key` are always elided in list responses."
+        has_more:
+          type: boolean
+          description: "Whether more management-keys are available in the selected pagination\n direction."
+    DeleteManagementKeyResponse:
+      type: object
+      properties: {}
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Human-readable error message.
+        code:
+          type: integer
+          description: gRPC status code, when the service reports one.
+        details:
+          type: array
+          items: {}
+          description: Additional error details, when the service reports any.
+      required:
+      - message
+    CreateManagementKeyResponse:
+      required:
+      - management_key
+      - token
+      type: object
+      properties:
+        management_key:
+          allOf:
+          - $ref: '#/components/schemas/ManagementKey'
+          description: Newly minted management-key record.
+        token:
+          type: string
+          description: "Raw bearer token in the form `sk-orq-<management_key_id>-<secret>`.\n Returned ONCE; the API never exposes this value again."
+    ListManagementCapabilitiesResponse:
+      required:
+      - domains
+      type: object
+      properties:
+        domains:
+          type: array
+          items:
+            $ref: '#/components/schemas/ManagementDomain'
+          description: Full management capability catalog.
+    ManagementDomainGroup:
+      type: string
+      enum:
+      - DOMAIN_GROUP_WORKSPACE_ADMIN
+    UpdateManagementKeyRequest:
+      required: []
+      type: object
+      properties:
+        name:
+          type: string
+          description: New name. Omit to keep current.
+        status:
+          description: New lifecycle status. Omit to keep current. A revoked key cannot change status; the call fails with FAILED_PRECONDITION.
+          $ref: '#/components/schemas/ManagementKeyStatus'
+        permission_mode:
+          description: New permission preset. Omit to keep current.
+          $ref: '#/components/schemas/ManagementPermissionMode'
+        access:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/AccessLevel'
+          description: "Replacement access map. Required when changing to\n `MANAGEMENT_PERMISSION_MODE_RESTRICTED`; ignored otherwise. Provide\n an empty map to clear."
+        expires_at:
+          type: string
+          description: "New expiration. Omit to keep current. Set `clear_expires_at = true`\n to remove an existing expiration."
+          format: date-time
+        clear_expires_at:
+          type: boolean
+          description: Force-clear the expiration. Mutually exclusive with `expires_at`.
+  securitySchemes:
+    ApiKey:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+externalDocs:
+  url: https://docs.orq.ai
+  description: orq.ai Documentation
+x-speakeasy-timeout: 600000

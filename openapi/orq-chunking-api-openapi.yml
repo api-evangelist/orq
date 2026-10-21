@@ -1,0 +1,502 @@
+openapi: 3.2.0
+info:
+  title: orq.ai Chunking API
+  version: '2.0'
+  description: orq.ai API documentation
+servers:
+- url: https://my.orq.ai
+security:
+- ApiKey: []
+tags:
+- name: Chunking
+  description: Split text into smaller chunks for retrieval and generation workflows.
+paths:
+  /v2/chunking:
+    post:
+      tags:
+      - Chunking
+      summary: Parse text
+      description: Split large text documents into smaller, manageable chunks using different chunking strategies optimized for RAG (Retrieval-Augmented Generation) workflows. This endpoint supports multiple chunking algorithms including token-based, sentence-based, recursive, semantic, and specialized strategies.
+      operationId: parse
+      requestBody:
+        content:
+          application/json:
+            schema:
+              oneOf:
+              - type: object
+                properties:
+                  text:
+                    type: string
+                    description: The text content to be chunked
+                  metadata:
+                    type: boolean
+                    default: true
+                    description: Whether to include metadata for each chunk
+                  return_type:
+                    type: string
+                    enum:
+                    - chunks
+                    - texts
+                    default: chunks
+                    description: 'Return format: chunks (with metadata) or texts (plain strings)'
+                  strategy:
+                    type: string
+                    enum:
+                    - token
+                    title: Token Chunker
+                  chunk_size:
+                    type: integer
+                    exclusiveMinimum: 0
+                    default: 512
+                    description: Maximum tokens per chunk
+                  chunk_overlap:
+                    type: integer
+                    minimum: 0
+                    default: 0
+                    description: Number of tokens to overlap between chunks
+                required:
+                - text
+                - strategy
+                title: Token Chunker Strategy
+                description: Splits text based on token count. Best for ensuring chunks fit within LLM context windows and maintaining consistent chunk sizes for embedding models.
+              - type: object
+                properties:
+                  text:
+                    type: string
+                    description: The text content to be chunked
+                  metadata:
+                    type: boolean
+                    default: true
+                    description: Whether to include metadata for each chunk
+                  return_type:
+                    type: string
+                    enum:
+                    - chunks
+                    - texts
+                    default: chunks
+                    description: 'Return format: chunks (with metadata) or texts (plain strings)'
+                  strategy:
+                    type: string
+                    enum:
+                    - sentence
+                    title: Sentence Chunker
+                  chunk_size:
+                    type: integer
+                    exclusiveMinimum: 0
+                    default: 512
+                    description: Maximum tokens per chunk
+                  chunk_overlap:
+                    type: integer
+                    minimum: 0
+                    default: 0
+                    description: Number of overlapping tokens between chunks
+                  min_sentences_per_chunk:
+                    type: integer
+                    exclusiveMinimum: 0
+                    default: 1
+                    description: Minimum number of sentences per chunk
+                required:
+                - text
+                - strategy
+                title: Sentence Chunker Strategy
+                description: Splits text at sentence boundaries while respecting token limits. Ideal for maintaining semantic coherence and readability.
+              - type: object
+                properties:
+                  text:
+                    type: string
+                    description: The text content to be chunked
+                  metadata:
+                    type: boolean
+                    default: true
+                    description: Whether to include metadata for each chunk
+                  return_type:
+                    type: string
+                    enum:
+                    - chunks
+                    - texts
+                    default: chunks
+                    description: 'Return format: chunks (with metadata) or texts (plain strings)'
+                  strategy:
+                    type: string
+                    enum:
+                    - recursive
+                    title: Recursive Chunker
+                  chunk_size:
+                    type: integer
+                    exclusiveMinimum: 0
+                    default: 512
+                    description: Maximum tokens per chunk
+                  separators:
+                    type: array
+                    items:
+                      type: string
+                    default:
+                    - '
+
+
+                      '
+                    - '
+
+                      '
+                    - ' '
+                    - ''
+                    description: Hierarchy of separators to use for splitting
+                  min_characters_per_chunk:
+                    type: integer
+                    exclusiveMinimum: 0
+                    default: 24
+                    description: Minimum characters allowed per chunk
+                required:
+                - text
+                - strategy
+                title: Recursive Chunker Strategy
+                description: Recursively splits text using a hierarchy of separators (paragraphs, sentences, words). Versatile general-purpose chunker that preserves document structure.
+              - type: object
+                properties:
+                  text:
+                    type: string
+                    description: The text content to be chunked
+                  metadata:
+                    type: boolean
+                    default: true
+                    description: Whether to include metadata for each chunk
+                  return_type:
+                    type: string
+                    enum:
+                    - chunks
+                    - texts
+                    default: chunks
+                    description: 'Return format: chunks (with metadata) or texts (plain strings)'
+                  strategy:
+                    type: string
+                    enum:
+                    - semantic
+                    title: Semantic Chunker
+                  chunk_size:
+                    type: integer
+                    exclusiveMinimum: 0
+                    default: 512
+                    description: Maximum tokens per chunk
+                  threshold:
+                    anyOf:
+                    - type: number
+                      minimum: 0
+                      maximum: 1
+                    - type: string
+                      enum:
+                      - auto
+                    default: auto
+                    description: Similarity threshold for grouping (0-1) or "auto" for automatic detection
+                  embedding_model:
+                    type: string
+                    description: Embedding model to use for semantic similarity. [Available embedding models](/ai-gateway/supported-models#embedding-models)
+                  dimensions:
+                    type: integer
+                    exclusiveMinimum: 0
+                    description: 'Number of dimensions for the embedding output. Required for text-embedding-3 models. Supported range: 256-3072 for text-embedding-3-large, 256-1536 for text-embedding-3-small.'
+                  max_tokens:
+                    type: integer
+                    exclusiveMinimum: 0
+                    description: Maximum number of tokens per embedding request. Default is 8191 for text-embedding-3 models.
+                  mode:
+                    type: string
+                    enum:
+                    - window
+                    - sentence
+                    default: window
+                    description: 'Chunking mode: window-based or sentence-based similarity'
+                  similarity_window:
+                    type: integer
+                    exclusiveMinimum: 0
+                    default: 1
+                    description: Window size for similarity comparison
+                required:
+                - text
+                - strategy
+                - embedding_model
+                title: Semantic Chunker Strategy
+                description: Groups semantically similar sentences using embeddings. Excellent for maintaining topic coherence and context within chunks.
+              - type: object
+                properties:
+                  text:
+                    type: string
+                    description: The text content to be chunked
+                  metadata:
+                    type: boolean
+                    default: true
+                    description: Whether to include metadata for each chunk
+                  return_type:
+                    type: string
+                    enum:
+                    - chunks
+                    - texts
+                    default: chunks
+                    description: 'Return format: chunks (with metadata) or texts (plain strings)'
+                  strategy:
+                    type: string
+                    enum:
+                    - agentic
+                    title: Agentic Chunker
+                  model:
+                    type: string
+                    description: Model to use for chunking. [Available models](/ai-gateway/supported-models#chat-models)
+                    example: openai/gpt-5.6-sol
+                  chunk_size:
+                    type: integer
+                    exclusiveMinimum: 0
+                    default: 1024
+                    description: Maximum tokens per chunk
+                  candidate_size:
+                    type: integer
+                    exclusiveMinimum: 0
+                    default: 128
+                    description: Size of candidate splits for LLM evaluation
+                  min_characters_per_chunk:
+                    type: integer
+                    exclusiveMinimum: 0
+                    default: 24
+                    description: Minimum characters allowed per chunk
+                  system_prompt:
+                    type: string
+                    description: Custom system prompt for the agentic chunker LLM. Overrides the default prompt that instructs the model how to identify chunk boundaries. Maximum 20,000 tokens.
+                required:
+                - text
+                - strategy
+                - model
+                title: Agentic Chunker Strategy
+                description: Agentic LLM-powered chunker that uses AI to determine optimal split points. Best for complex documents requiring intelligent segmentation.
+              - type: object
+                properties:
+                  text:
+                    type: string
+                    description: The text content to be chunked
+                  metadata:
+                    type: boolean
+                    default: true
+                    description: Whether to include metadata for each chunk
+                  return_type:
+                    type: string
+                    enum:
+                    - chunks
+                    - texts
+                    default: chunks
+                    description: 'Return format: chunks (with metadata) or texts (plain strings)'
+                  strategy:
+                    type: string
+                    enum:
+                    - fast
+                    title: Fast Chunker
+                  target_size:
+                    type: integer
+                    exclusiveMinimum: 0
+                    default: 4096
+                    description: Target chunk size in bytes
+                  delimiters:
+                    type: string
+                    default: '
+
+                      .?'
+                    description: Single-byte delimiter characters. Each character is treated as a separate delimiter (e.g., ".?!" splits on period, question mark, or exclamation). Use escaped sequences for special chars.
+                  pattern:
+                    type: string
+                    description: Multi-byte pattern for splitting (e.g., "▁" for SentencePiece tokenizers). Takes precedence over delimiters if set.
+                  prefix:
+                    type: boolean
+                    default: false
+                    description: Attach delimiter to start of next chunk instead of end of current chunk
+                  consecutive:
+                    type: boolean
+                    default: false
+                    description: When true, splits at the START of consecutive delimiter runs, keeping the run with the following chunk (e.g., splits before "\n\n\n" not in the middle)
+                  forward_fallback:
+                    type: boolean
+                    default: false
+                    description: Search forward if no delimiter found in backward search window
+                required:
+                - text
+                - strategy
+                title: Fast Chunker Strategy
+                description: High-performance SIMD-optimized byte-level chunking. Best for large files (>1MB) where speed and memory efficiency are critical. 2x faster and 3x less memory than token-based chunking.
+              - title: Late Chunker Strategy
+                required:
+                - text
+                - strategy
+                - embedding_model
+                type: object
+                properties:
+                  text:
+                    type: string
+                    description: The text content to be chunked
+                  metadata:
+                    type: boolean
+                    default: true
+                    description: Whether to include metadata for each chunk
+                  return_type:
+                    enum:
+                    - chunks
+                    - texts
+                    type: string
+                    default: chunks
+                    description: 'Return format: chunks (with metadata) or texts (plain strings)'
+                  strategy:
+                    title: Late Chunker
+                    enum:
+                    - late
+                    type: string
+                  chunk_size:
+                    exclusiveMinimum: 0
+                    type: integer
+                    default: 512
+                    description: Maximum tokens per chunk
+                  separators:
+                    type: array
+                    items:
+                      type: string
+                    description: Hierarchy of separators to use for splitting
+                    default:
+                    - '
+
+
+                      '
+                    - '
+
+                      '
+                    - ' '
+                    - ''
+                  min_characters_per_chunk:
+                    exclusiveMinimum: 0
+                    type: integer
+                    default: 24
+                    description: Minimum characters allowed per chunk
+                  embedding_model:
+                    type: string
+                    description: Embedding model used to generate context-aware chunk embeddings. [Available embedding models](/ai-gateway/supported-models#embedding-models)
+                  dimensions:
+                    exclusiveMinimum: 0
+                    type: integer
+                    description: 'Number of dimensions for the embedding output. Required for text-embedding-3 models. Supported range: 256-3072 for text-embedding-3-large, 256-1536 for text-embedding-3-small.'
+                  max_tokens:
+                    exclusiveMinimum: 0
+                    type: integer
+                    description: Maximum number of tokens per embedding request. Default is 8191 for text-embedding-3 models.
+                description: Splits text after preserving the full-document context in its embeddings. Best for retrieval workflows where each chunk should retain information from the surrounding document.
+              title: Chunking Request
+              description: Request payload for text chunking with strategy-specific configuration
+            example:
+              text: The quick brown fox jumps over the lazy dog. This is a sample text that will be chunked into smaller pieces. Each chunk will maintain context while respecting the maximum chunk size.
+              strategy: semantic
+              chunk_size: 256
+              threshold: 0.8
+              embedding_model: openai/text-embedding-3-small
+              dimensions: 512
+              mode: window
+              similarity_window: 1
+              metadata: true
+        required: true
+      responses:
+        '200':
+          description: Text successfully chunked
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParseResponse'
+              example:
+                chunks:
+                - id: 01HQ3K4M5N6P7Q8R9SATBVCWDX
+                  text: The quick brown fox jumps over the lazy dog.
+                  index: 0
+                  metadata:
+                    start_index: 0
+                    end_index: 44
+                    token_count: 10
+                - id: 01HQ3K4M5N6P7Q8R9SATBVCWDY
+                  text: This is a sample text that will be chunked into smaller pieces.
+                  index: 1
+                  metadata:
+                    start_index: 45
+                    end_index: 108
+                    token_count: 12
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: chunking
+      x-speakeasy-name-override: parse
+      x-cli-group: chunking
+      x-cli-name: parse
+      x-code-samples:
+      - lang: typescript
+        label: Node.js
+        source: "import { Orq } from \"@orq-ai/node\";\n\nconst orq = new Orq({\n  apiKey: process.env[\"ORQ_API_KEY\"]\n});\n\nconst result = await orq.chunking.parse({\n  text: \"Your long text content here...\",\n  strategy: \"semantic\",\n  chunkSize: 256,\n  threshold: 0.8,\n  embeddingModel: \"openai/text-embedding-3-small\",\n  dimensions: 512\n});\n\nconsole.log(result.chunks);"
+      - lang: python
+        label: Python
+        source: "from orq_ai_sdk import Orq\n\norq = Orq(api_key=os.getenv(\"ORQ_API_KEY\"))\n\nresult = orq.chunking.parse(\n    text=\"Your long text content here...\",\n    strategy=\"semantic\",\n    chunk_size=256,\n    threshold=0.8,\n    embedding_model=\"openai/text-embedding-3-small\",\n    dimensions=512\n)\n\nfor chunk in result.chunks:\n    print(f\"Chunk {chunk.index}: {chunk.text[:50]}...\")"
+components:
+  schemas:
+    ChunkMetadata:
+      required:
+      - start_index
+      - end_index
+      - token_count
+      type: object
+      properties:
+        start_index:
+          type: integer
+          format: int32
+        end_index:
+          type: integer
+          format: int32
+        token_count:
+          type: integer
+          format: int32
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Human-readable error message.
+        code:
+          type: integer
+          description: gRPC status code, when the service reports one.
+        details:
+          type: array
+          items: {}
+          description: Additional error details, when the service reports any.
+      required:
+      - message
+    Chunk:
+      required:
+      - id
+      - text
+      - index
+      type: object
+      properties:
+        id:
+          type: string
+        text:
+          type: string
+        index:
+          type: integer
+          format: int32
+        metadata:
+          $ref: '#/components/schemas/ChunkMetadata'
+    ParseResponse:
+      required:
+      - chunks
+      type: object
+      properties:
+        chunks:
+          type: array
+          items:
+            $ref: '#/components/schemas/Chunk'
+  securitySchemes:
+    ApiKey:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+externalDocs:
+  url: https://docs.orq.ai
+  description: orq.ai Documentation
+x-speakeasy-timeout: 600000

@@ -1,0 +1,998 @@
+openapi: 3.2.0
+info:
+  title: orq.ai Memory Stores API
+  version: '2.0'
+  description: orq.ai API documentation
+servers:
+- url: https://my.orq.ai
+security:
+- ApiKey: []
+tags:
+- name: Memory Stores
+  description: Create and manage memory stores, memories, and memory documents.
+paths:
+  /v2/memory-stores:
+    get:
+      tags:
+      - Memory Stores
+      summary: List memory stores
+      description: Retrieves a paginated list of memory stores in the workspace. Use cursor-based pagination parameters to navigate through the results.
+      operationId: GetAllMemoryStores
+      parameters:
+      - schema:
+          type: integer
+          minimum: 1
+          maximum: 200
+          default: 10
+          description: A limit on the number of objects to be returned. Limit can range between 1 and 200, and the default is 10
+        required: false
+        description: A limit on the number of objects to be returned. Limit can range between 1 and 200, and the default is 10
+        name: limit
+        in: query
+      - schema:
+          type: string
+          description: A cursor for use in pagination. `starting_after` is an object ID that defines your place in the list. For instance, if you make a list request and receive 20 objects, ending with `01JJ1HDHN79XAS7A01WB3HYSDB`, your subsequent call can include `starting_after=01JJ1HDHN79XAS7A01WB3HYSDB` in order to fetch the next page of the list.
+        required: false
+        description: A cursor for use in pagination. `starting_after` is an object ID that defines your place in the list. For instance, if you make a list request and receive 20 objects, ending with `01JJ1HDHN79XAS7A01WB3HYSDB`, your subsequent call can include `starting_after=01JJ1HDHN79XAS7A01WB3HYSDB` in order to fetch the next page of the list.
+        name: starting_after
+        in: query
+      - schema:
+          type: string
+          description: A cursor for use in pagination. `ending_before` is an object ID that defines your place in the list. For instance, if you make a list request and receive 20 objects, starting with `01JJ1HDHN79XAS7A01WB3HYSDB`, your subsequent call can include `ending_before=01JJ1HDHN79XAS7A01WB3HYSDB` in order to fetch the previous page of the list.
+        required: false
+        description: A cursor for use in pagination. `ending_before` is an object ID that defines your place in the list. For instance, if you make a list request and receive 20 objects, starting with `01JJ1HDHN79XAS7A01WB3HYSDB`, your subsequent call can include `ending_before=01JJ1HDHN79XAS7A01WB3HYSDB` in order to fetch the previous page of the list.
+        name: ending_before
+        in: query
+      - schema:
+          type: string
+          description: Filter memory stores by key (case-insensitive match)
+        required: false
+        description: Filter memory stores by key (case-insensitive match)
+        name: search
+        in: query
+      - schema:
+          type: string
+          description: Filter by the users who last updated the memory store. Accepts a comma-separated list of user IDs
+        required: false
+        description: Filter by the users who last updated the memory store. Accepts a comma-separated list of user IDs
+        name: updated_by
+        in: query
+      - schema:
+          type: string
+          description: Filter memory stores by project ID
+        required: false
+        description: Filter memory stores by project ID
+        name: project_id
+        in: query
+      responses:
+        '200':
+          description: Successfully retrieved the list of memory stores.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListMemoryStoresResponse'
+        '401':
+          description: Unauthorized - Bearer token is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HonoApiError'
+      x-speakeasy-group: memoryStores
+      x-speakeasy-name-override: list
+      x-cli-group: memory-stores
+      x-cli-name: list
+    post:
+      tags:
+      - Memory Stores
+      summary: Create memory store
+      operationId: CreateMemoryStore
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMemoryStoreRequest'
+        required: true
+      responses:
+        '201':
+          description: Memory store successfully created with the specified configuration.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MemoryStore'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: memoryStores
+      x-speakeasy-name-override: create
+      x-cli-group: memory-stores
+      x-cli-name: create
+  /v2/memory-stores/{memory_store_key}:
+    get:
+      tags:
+      - Memory Stores
+      summary: Retrieve memory store
+      description: Retrieves detailed information about a specific memory store, including its configuration and metadata.
+      operationId: RetrieveMemoryStore
+      parameters:
+      - name: memory_store_key
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Memory store details successfully retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MemoryStore'
+        '401':
+          description: Unauthorized - Bearer token is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HonoApiError'
+        '403':
+          description: Forbidden - Insufficient permissions to access this memory store.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HonoApiError'
+        '404':
+          description: Memory store not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HonoApiError'
+      x-speakeasy-group: memoryStores
+      x-speakeasy-name-override: retrieve
+      x-cli-group: memory-stores
+      x-cli-name: retrieve
+    delete:
+      tags:
+      - Memory Stores
+      summary: Delete memory store
+      description: Permanently delete a memory store, including memories and documents.
+      operationId: DeleteMemoryStore
+      parameters:
+      - name: memory_store_key
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          description: Memory store successfully deleted.
+        '401':
+          description: Unauthorized - Bearer token is missing or invalid
+        '403':
+          description: Forbidden - Insufficient permissions to delete memory store
+        '404':
+          description: Memory store not found
+      x-speakeasy-group: memoryStores
+      x-speakeasy-name-override: delete
+      x-cli-group: memory-stores
+      x-cli-name: delete
+    patch:
+      tags:
+      - Memory Stores
+      summary: Update memory store
+      description: Update the memory store configuration
+      operationId: UpdateMemoryStore
+      parameters:
+      - name: memory_store_key
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateMemoryStoreRequest'
+        required: true
+      responses:
+        '200':
+          description: Memory store successfully updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MemoryStore'
+        '400':
+          description: Bad Request - Invalid update data provided
+        '401':
+          description: Unauthorized - Bearer token is missing or invalid
+        '403':
+          description: Forbidden - Insufficient permissions to update memory store
+        '404':
+          description: Memory store not found
+      x-speakeasy-group: memoryStores
+      x-speakeasy-name-override: update
+      x-cli-group: memory-stores
+      x-cli-name: update
+  /v2/memory-stores/{memory_store_key}/memories:
+    get:
+      tags:
+      - Memory Stores
+      summary: List all memories
+      description: Retrieves a paginated list of memories for the memory store
+      operationId: GetAllMemories
+      parameters:
+      - schema:
+          type: string
+          description: The unique key identifier of the memory store
+        required: true
+        description: The unique key identifier of the memory store
+        name: memory_store_key
+        in: path
+      - schema:
+          type: integer
+          minimum: 1
+          maximum: 200
+          default: 10
+          description: A limit on the number of objects to be returned. Limit can range between 1 and 200, and the default is 10
+        required: false
+        description: A limit on the number of objects to be returned. Limit can range between 1 and 200, and the default is 10
+        name: limit
+        in: query
+      - schema:
+          type: string
+          description: A cursor for use in pagination. `starting_after` is an object ID that defines your place in the list. For instance, if you make a list request and receive 20 objects, ending with `01JJ1HDHN79XAS7A01WB3HYSDB`, your subsequent call can include `starting_after=01JJ1HDHN79XAS7A01WB3HYSDB` in order to fetch the next page of the list.
+        required: false
+        description: A cursor for use in pagination. `starting_after` is an object ID that defines your place in the list. For instance, if you make a list request and receive 20 objects, ending with `01JJ1HDHN79XAS7A01WB3HYSDB`, your subsequent call can include `starting_after=01JJ1HDHN79XAS7A01WB3HYSDB` in order to fetch the next page of the list.
+        name: starting_after
+        in: query
+      - schema:
+          type: string
+          description: A cursor for use in pagination. `ending_before` is an object ID that defines your place in the list. For instance, if you make a list request and receive 20 objects, starting with `01JJ1HDHN79XAS7A01WB3HYSDB`, your subsequent call can include `ending_before=01JJ1HDHN79XAS7A01WB3HYSDB` in order to fetch the previous page of the list.
+        required: false
+        description: A cursor for use in pagination. `ending_before` is an object ID that defines your place in the list. For instance, if you make a list request and receive 20 objects, starting with `01JJ1HDHN79XAS7A01WB3HYSDB`, your subsequent call can include `ending_before=01JJ1HDHN79XAS7A01WB3HYSDB` in order to fetch the previous page of the list.
+        name: ending_before
+        in: query
+      - schema:
+          type: string
+          description: Search query to filter memories by entity_id
+        required: false
+        description: Search query to filter memories by entity_id
+        name: q
+        in: query
+      responses:
+        '200':
+          description: Successfully retrieved the list of memories.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListMemoriesResponse'
+        '401':
+          description: Unauthorized - Bearer token is missing or invalid
+        '403':
+          description: Forbidden - Insufficient permissions to access memories
+        '404':
+          description: The resource does not exist. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: memoryStores
+      x-speakeasy-name-override: listMemories
+      x-cli-group: memory-stores
+      x-cli-name: listMemories
+    post:
+      tags:
+      - Memory Stores
+      summary: Create a new memory
+      description: Creates a new memory in the specified memory store.
+      operationId: CreateMemory
+      parameters:
+      - name: memory_store_key
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMemoryRequest'
+        required: true
+      responses:
+        '201':
+          description: Memory successfully created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Memory'
+        '400':
+          description: Bad Request - Invalid memory data provided
+        '401':
+          description: Unauthorized - Bearer token is missing or invalid
+        '403':
+          description: Forbidden - Insufficient permissions to create memories
+      x-speakeasy-group: memoryStores
+      x-speakeasy-name-override: createMemory
+      x-cli-group: memory-stores
+      x-cli-name: createMemory
+  /v2/memory-stores/{memory_store_key}/memories/{memory_entity_id}:
+    get:
+      tags:
+      - Memory Stores
+      summary: Retrieve a specific memory
+      description: Retrieves details of a specific memory by its ID
+      operationId: RetrieveMemory
+      parameters:
+      - name: memory_store_key
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: memory_entity_id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Memory successfully retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Memory'
+        '401':
+          description: Unauthorized - Bearer token is missing or invalid
+        '403':
+          description: Forbidden - Insufficient permissions to access memory
+        '404':
+          description: Memory not found
+      x-speakeasy-group: memoryStores
+      x-speakeasy-name-override: retrieveMemory
+      x-cli-group: memory-stores
+      x-cli-name: retrieveMemory
+    delete:
+      tags:
+      - Memory Stores
+      summary: Delete a specific memory
+      description: 'Permanently deletes a specific memory.
+
+
+        Use this endpoint to:
+
+        - Remove a memory from the store
+
+        - Clean up unused memories
+
+        - Manage memory storage space'
+      operationId: DeleteMemory
+      parameters:
+      - name: memory_store_key
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: memory_entity_id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          description: Memory successfully deleted.
+        '401':
+          description: Unauthorized - Bearer token is missing or invalid
+        '403':
+          description: Forbidden - Insufficient permissions to delete memory
+        '404':
+          description: Memory not found
+      x-speakeasy-group: memoryStores
+      x-speakeasy-name-override: deleteMemory
+      x-cli-group: memory-stores
+      x-cli-name: deleteMemory
+    patch:
+      tags:
+      - Memory Stores
+      summary: Update a specific memory
+      description: Updates the details of a specific memory.
+      operationId: UpdateMemory
+      parameters:
+      - name: memory_store_key
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: memory_entity_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateMemoryRequest'
+        required: true
+      responses:
+        '200':
+          description: Memory successfully updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Memory'
+        '400':
+          description: Bad Request - Invalid update data provided
+        '401':
+          description: Unauthorized - Bearer token is missing or invalid
+        '403':
+          description: Forbidden - Insufficient permissions to update memory
+        '404':
+          description: Memory not found
+      x-speakeasy-group: memoryStores
+      x-speakeasy-name-override: updateMemory
+      x-cli-group: memory-stores
+      x-cli-name: updateMemory
+  /v2/memory-stores/{memory_store_key}/memories/{memory_entity_id}/documents:
+    get:
+      tags:
+      - Memory Stores
+      summary: List all documents for a memory
+      description: Retrieves a paginated list of documents associated with a specific memory.
+      operationId: GetAllMemoryDocuments
+      parameters:
+      - schema:
+          type: string
+          description: The unique key identifier of the memory store
+        required: true
+        description: The unique key identifier of the memory store
+        name: memory_store_key
+        in: path
+      - schema:
+          type: string
+          description: The unique identifier of the memory
+        required: true
+        description: The unique identifier of the memory
+        name: memory_entity_id
+        in: path
+      - schema:
+          type: integer
+          minimum: 1
+          maximum: 200
+          default: 10
+          description: A limit on the number of objects to be returned. Limit can range between 1 and 200, and the default is 10
+        required: false
+        description: A limit on the number of objects to be returned. Limit can range between 1 and 200, and the default is 10
+        name: limit
+        in: query
+      - schema:
+          type: string
+          description: A cursor for use in pagination. `starting_after` is an object ID that defines your place in the list. For instance, if you make a list request and receive 20 objects, ending with `01JJ1HDHN79XAS7A01WB3HYSDB`, your subsequent call can include `starting_after=01JJ1HDHN79XAS7A01WB3HYSDB` in order to fetch the next page of the list.
+        required: false
+        description: A cursor for use in pagination. `starting_after` is an object ID that defines your place in the list. For instance, if you make a list request and receive 20 objects, ending with `01JJ1HDHN79XAS7A01WB3HYSDB`, your subsequent call can include `starting_after=01JJ1HDHN79XAS7A01WB3HYSDB` in order to fetch the next page of the list.
+        name: starting_after
+        in: query
+      - schema:
+          type: string
+          description: A cursor for use in pagination. `ending_before` is an object ID that defines your place in the list. For instance, if you make a list request and receive 20 objects, starting with `01JJ1HDHN79XAS7A01WB3HYSDB`, your subsequent call can include `ending_before=01JJ1HDHN79XAS7A01WB3HYSDB` in order to fetch the previous page of the list.
+        required: false
+        description: A cursor for use in pagination. `ending_before` is an object ID that defines your place in the list. For instance, if you make a list request and receive 20 objects, starting with `01JJ1HDHN79XAS7A01WB3HYSDB`, your subsequent call can include `ending_before=01JJ1HDHN79XAS7A01WB3HYSDB` in order to fetch the previous page of the list.
+        name: ending_before
+        in: query
+      - schema:
+          type: string
+          format: date-time
+          description: Filter documents updated after this ISO datetime
+        required: false
+        description: Filter documents updated after this ISO datetime
+        name: updated_after
+        in: query
+      - schema:
+          type: string
+          format: date-time
+          description: Filter documents updated before this ISO datetime
+        required: false
+        description: Filter documents updated before this ISO datetime
+        name: updated_before
+        in: query
+      responses:
+        '200':
+          description: Successfully retrieved the list of memory documents.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListMemoryDocumentsResponse'
+        '401':
+          description: Unauthorized - Bearer token is missing or invalid
+        '403':
+          description: Forbidden - Insufficient permissions to access memory documents
+        '404':
+          description: Memory not found
+      x-speakeasy-group: memoryStores
+      x-speakeasy-name-override: listDocuments
+      x-cli-group: memory-stores
+      x-cli-name: listDocuments
+    post:
+      tags:
+      - Memory Stores
+      summary: Create a new memory document
+      description: Creates a new document in the specified memory.
+      operationId: CreateMemoryDocument
+      parameters:
+      - name: memory_store_key
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: memory_entity_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMemoryDocumentRequest'
+        required: true
+      responses:
+        '201':
+          description: Memory document successfully created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MemoryDocument'
+        '400':
+          description: Bad Request - Invalid document data provided
+        '401':
+          description: Unauthorized - Bearer token is missing or invalid
+        '403':
+          description: Forbidden - Insufficient permissions to create documents
+        '404':
+          description: Memory not found
+      x-speakeasy-group: memoryStores
+      x-speakeasy-name-override: createDocument
+      x-cli-group: memory-stores
+      x-cli-name: createDocument
+  /v2/memory-stores/{memory_store_key}/memories/{memory_entity_id}/documents/{document_id}:
+    get:
+      tags:
+      - Memory Stores
+      summary: Retrieve a specific memory document
+      description: Retrieves details of a specific memory document by its ID.
+      operationId: RetrieveMemoryDocument
+      parameters:
+      - name: memory_store_key
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: memory_entity_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: document_id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Memory document successfully retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MemoryDocument'
+        '401':
+          description: Unauthorized - Bearer token is missing or invalid
+        '403':
+          description: Forbidden - Insufficient permissions to access document
+        '404':
+          description: Document not found
+      x-speakeasy-group: memoryStores
+      x-speakeasy-name-override: retrieveDocument
+      x-cli-group: memory-stores
+      x-cli-name: retrieveDocument
+    delete:
+      tags:
+      - Memory Stores
+      summary: Delete a specific memory document
+      description: 'Permanently deletes a specific memory document.
+
+
+        Use this endpoint to:
+
+        - Remove a document from a memory
+
+        - Clean up unused documents
+
+        - Manage document storage space'
+      operationId: DeleteMemoryDocument
+      parameters:
+      - name: memory_store_key
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: memory_entity_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: document_id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          description: Memory document successfully deleted.
+        '401':
+          description: Unauthorized - Bearer token is missing or invalid
+        '403':
+          description: Forbidden - Insufficient permissions to delete document
+        '404':
+          description: Document not found
+      x-speakeasy-group: memoryStores
+      x-speakeasy-name-override: deleteDocument
+      x-cli-group: memory-stores
+      x-cli-name: deleteDocument
+    patch:
+      tags:
+      - Memory Stores
+      summary: Update a specific memory document
+      description: Updates the details of a specific memory document.
+      operationId: UpdateMemoryDocument
+      parameters:
+      - name: memory_store_key
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: memory_entity_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: document_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateMemoryDocumentRequest'
+        required: true
+      responses:
+        '200':
+          description: Memory document successfully updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MemoryDocument'
+        '400':
+          description: Bad Request - Invalid update data provided
+        '401':
+          description: Unauthorized - Bearer token is missing or invalid
+        '403':
+          description: Forbidden - Insufficient permissions to update document
+        '404':
+          description: Document not found
+      x-speakeasy-group: memoryStores
+      x-speakeasy-name-override: updateDocument
+      x-cli-group: memory-stores
+      x-cli-name: updateDocument
+components:
+  schemas:
+    CreateMemoryStoreRequest:
+      required:
+      - key
+      - embedding_config
+      - description
+      - path
+      type: object
+      properties:
+        key:
+          maxLength: 255
+          minLength: 1
+          pattern: ^[A-Za-z]([A-Za-z0-9]*([._][A-Za-z0-9]+)*)?$
+          type: string
+          description: The unique key of the memory store. The key is unique and inmmutable and cannot be repeated within the same workspace.
+        embedding_config:
+          $ref: '#/components/schemas/MemoryStoreEmbeddingConfig'
+        description:
+          type: string
+        ttl:
+          type:
+          - number
+          - 'null'
+        path:
+          type: string
+          description: Entity storage path. With workspace-level API keys, the first element identifies the project. With project-level API keys, the path is relative to that project.
+    UpdateMemoryRequest:
+      required: []
+      type: object
+      properties:
+        metadata:
+          type: object
+          additionalProperties:
+            type: string
+    UpdateMemoryStoreRequest:
+      required: []
+      type: object
+      properties:
+        description:
+          type: string
+        ttl:
+          type:
+          - number
+          - 'null'
+        path:
+          type: string
+        project_id:
+          type: string
+          description: New containing project. Omit to keep the current project; `path` resolves inside it.
+    ListMemoriesResponse:
+      required:
+      - object
+      - data
+      - has_more
+      type: object
+      properties:
+        object:
+          enum:
+          - list
+          type: string
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Memory'
+        has_more:
+          type: boolean
+    Memory:
+      required:
+      - _id
+      - entity_id
+      - created
+      - updated
+      - store_id
+      - workspace_id
+      - documents_count
+      type: object
+      properties:
+        entity_id:
+          deprecated: true
+          maxLength: 64
+          minLength: 1
+          pattern: ^[A-Za-z0-9]+(?:[_-][A-Za-z0-9]+)*$
+          type: string
+          description: Customer provided entity ID for the memory. This is used to link the memory to a specific user/company/session/etc. Has to be unique within the memory store.
+        created:
+          type: string
+        updated:
+          type: string
+        created_by_id:
+          type:
+          - string
+          - 'null'
+        updated_by_id:
+          type:
+          - string
+          - 'null'
+        store_id:
+          type: string
+        workspace_id:
+          type: string
+        documents_count:
+          type: number
+          description: The number of documents in the entity
+          format: double
+        metadata:
+          type: object
+          additionalProperties:
+            type: string
+          description: Key-value metadata for the memory.
+        _id:
+          type: string
+          description: Unique identifier for the memory. This is automatically generated by the system.
+    CreateMemoryRequest:
+      required:
+      - entity_id
+      type: object
+      properties:
+        entity_id:
+          maxLength: 64
+          minLength: 1
+          pattern: ^[A-Za-z0-9]+(?:[_-][A-Za-z0-9]+)*$
+          type: string
+          description: Unique identifier for the entity this memory is associated with (e.g., user ID, session ID, conversation ID).
+    CreateMemoryDocumentRequest:
+      required:
+      - text
+      type: object
+      properties:
+        text:
+          minLength: 1
+          type: string
+          description: The content of the memory document (whitespace trimmed).
+        metadata:
+          type: object
+          additionalProperties:
+            type: string
+          description: Flexible key-value pairs for custom filtering and categorization. Clients can add arbitrary string metadata to enable future filtering of memory documents based on their specific needs.
+    HonoApiError:
+      type: object
+      properties:
+        code:
+          type: string
+          description: HTTP status code
+        message:
+          type: string
+          description: Error message
+      required:
+      - message
+    ListMemoryStoresResponse:
+      required:
+      - object
+      - data
+      - has_more
+      type: object
+      properties:
+        object:
+          enum:
+          - list
+          type: string
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/MemoryStore'
+        has_more:
+          type: boolean
+    MemoryStoreEmbeddingConfig:
+      required:
+      - model
+      type: object
+      properties:
+        model:
+          type: string
+          description: The embeddings model to use for the knowledge base in the format "provider/model" for public models or "workspaceKey@provider/model" for private workspace models. This model will be used to embed the chunks when they are added to the knowledge base. Refer to the [Supported models](/ai-gateway/supported-models) to browse available models.
+    MemoryStore:
+      required:
+      - _id
+      - key
+      - description
+      - created
+      - updated
+      - embedding_config
+      type: object
+      properties:
+        key:
+          maxLength: 255
+          minLength: 1
+          pattern: ^[A-Za-z]([A-Za-z0-9]*([._][A-Za-z0-9]+)*)?$
+          type: string
+          description: The unique key of the memory store. The key is unique and inmmutable and cannot be repeated within the same workspace.
+        description:
+          type: string
+          description: The description of the memory store. Be as precise as possible to help the AI to understand the purpose of the memory store.
+        created_by_id:
+          type:
+          - string
+          - 'null'
+          description: The user ID of the creator
+        updated_by_id:
+          type:
+          - string
+          - 'null'
+          description: The user ID of the last updater
+        created:
+          type: string
+          description: The creation date of the memory store
+        updated:
+          type: string
+          description: The last update date of the memory store
+        ttl:
+          type:
+          - number
+          - 'null'
+        embedding_config:
+          $ref: '#/components/schemas/MemoryStoreEmbeddingConfig'
+        _id:
+          type: string
+          description: The unique identifier of the memory store
+    ListMemoryDocumentsResponse:
+      required:
+      - object
+      - data
+      - has_more
+      type: object
+      properties:
+        object:
+          enum:
+          - list
+          type: string
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/MemoryDocument'
+        has_more:
+          type: boolean
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Human-readable error message.
+        code:
+          type: integer
+          description: gRPC status code, when the service reports one.
+        details:
+          type: array
+          items: {}
+          description: Additional error details, when the service reports any.
+      required:
+      - message
+    UpdateMemoryDocumentRequest:
+      required: []
+      type: object
+      properties:
+        text:
+          minLength: 1
+          type: string
+          description: The content of the memory document (whitespace trimmed).
+        metadata:
+          type: object
+          additionalProperties:
+            type: string
+          description: Flexible key-value pairs for custom filtering and categorization. Clients can add arbitrary string metadata to enable future filtering of memory documents based on their specific needs.
+    MemoryDocument:
+      required:
+      - _id
+      - memory_id
+      - store_id
+      - text
+      - created
+      - updated
+      - workspace_id
+      type: object
+      properties:
+        memory_id:
+          type: string
+        store_id:
+          type: string
+        text:
+          minLength: 1
+          type: string
+          description: The content of the memory document (whitespace trimmed).
+        created:
+          type: string
+        updated:
+          type: string
+        created_by_id:
+          type:
+          - string
+          - 'null'
+        updated_by_id:
+          type:
+          - string
+          - 'null'
+        workspace_id:
+          type: string
+        metadata:
+          type: object
+          additionalProperties:
+            type: string
+          description: Flexible key-value pairs for custom filtering and categorization. Clients can add arbitrary string metadata to enable future filtering of memory documents based on their specific needs (e.g., document type, source, topic, relevance score, or any custom taxonomy).
+          default: {}
+        _id:
+          type: string
+  securitySchemes:
+    ApiKey:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+externalDocs:
+  url: https://docs.orq.ai
+  description: orq.ai Documentation
+x-speakeasy-timeout: 600000

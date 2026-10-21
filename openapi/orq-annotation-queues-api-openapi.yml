@@ -1,0 +1,690 @@
+openapi: 3.2.0
+info:
+  title: orq.ai Annotation Queues API
+  version: '2.0'
+  description: orq.ai API documentation
+servers:
+- url: https://my.orq.ai
+security:
+- ApiKey: []
+tags:
+- name: Annotation Queues
+  description: Annotation queues collect spans for human review.
+paths:
+  /v2/annotation-queues:
+    get:
+      tags:
+      - Annotation Queues
+      summary: List annotation queues
+      description: Returns annotation queues in the workspace, newest first.
+      operationId: ListAnnotationQueues
+      parameters:
+      - name: limit
+        in: query
+        description: Optional. Number of annotation queues to return. Defaults to 10 and must be between 1 and 200.
+        schema:
+          type: integer
+          format: int32
+      - name: starting_after
+        in: query
+        description: Cursor for forward pagination. Set to the `_id` of the last item from the previous page.
+        schema:
+          type: string
+      - name: ending_before
+        in: query
+        description: Cursor for backward pagination. Set to the `_id` of the first item from the previous page.
+        schema:
+          type: string
+      - name: search
+        in: query
+        description: Optional. Case-insensitive substring match on the annotation queue display name.
+        schema:
+          type: string
+      - name: updated_by
+        in: query
+        description: Optional. Comma-separated account IDs; returns queues last updated by any of them.
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListAnnotationQueuesResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: annotationQueues
+      x-speakeasy-name-override: list
+      x-cli-group: annotation-queues
+      x-cli-name: list
+      x-code-samples:
+      - lang: curl
+        label: Core - List annotation queues
+        source: "curl --get 'https://my.orq.ai/v2/annotation-queues' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\" \\\n  --data-urlencode 'limit=50' \\\n  --data-urlencode 'search=support'\n"
+      - lang: python
+        label: Python - List annotation queues
+        source: "import os\nfrom orq_ai_sdk import Orq\n\nclient = Orq(api_key=os.environ[\"ORQ_API_KEY\"])\n\npage = client.annotation_queues.list(\n    limit=50,\n    search=\"support\",\n)\n\nfor queue in page.data:\n    print(queue.id, queue.display_name)\n"
+      - lang: typescript
+        label: Node.js - List annotation queues
+        source: "import { Orq } from '@orq-ai/node';\n\nconst client = new Orq({ apiKey: process.env.ORQ_API_KEY });\n\nconst page = await client.annotationQueues.list({\n  limit: 50,\n  search: 'support',\n});\n\nfor (const queue of page.data) {\n  console.log(queue.id, queue.displayName);\n}\n"
+    post:
+      tags:
+      - Annotation Queues
+      summary: Create an annotation queue
+      description: Creates an annotation queue in a project.
+      operationId: CreateAnnotationQueue
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAnnotationQueueRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnnotationQueue'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: annotationQueues
+      x-speakeasy-name-override: create
+      x-cli-group: annotation-queues
+      x-cli-name: create
+      x-code-samples:
+      - lang: curl
+        label: Core - Create an annotation queue
+        source: "curl --request POST \\\n  --url 'https://my.orq.ai/v2/annotation-queues' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\" \\\n  --header 'Content-Type: application/json' \\\n  --data '{\n    \"project_id\": \"01HXXXXXXXXXXXXXXXXXXXXXXX\",\n    \"display_name\": \"Support quality review\",\n    \"description\": \"Human review of support agent responses\"\n  }'\n"
+      - lang: python
+        label: Python - Create an annotation queue
+        source: "import os\nfrom orq_ai_sdk import Orq\n\nclient = Orq(api_key=os.environ[\"ORQ_API_KEY\"])\n\nqueue = client.annotation_queues.create(\n    project_id=\"01HXXXXXXXXXXXXXXXXXXXXXXX\",\n    display_name=\"Support quality review\",\n    description=\"Human review of support agent responses\",\n)\n\nprint(queue.id)\n"
+      - lang: typescript
+        label: Node.js - Create an annotation queue
+        source: "import { Orq } from '@orq-ai/node';\n\nconst client = new Orq({ apiKey: process.env.ORQ_API_KEY });\n\nconst queue = await client.annotationQueues.create({\n  projectId: '01HXXXXXXXXXXXXXXXXXXXXXXX',\n  displayName: 'Support quality review',\n  description: 'Human review of support agent responses',\n});\n\nconsole.log(queue.id);\n"
+  /v2/annotation-queues/{annotation_queue_id}:
+    get:
+      tags:
+      - Annotation Queues
+      summary: Retrieve an annotation queue
+      description: Retrieves an existing annotation queue by ID.
+      operationId: RetrieveAnnotationQueue
+      parameters:
+      - name: annotation_queue_id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnnotationQueue'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: The resource does not exist. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: annotationQueues
+      x-speakeasy-name-override: retrieve
+      x-cli-group: annotation-queues
+      x-cli-name: get
+      x-code-samples:
+      - lang: curl
+        label: Core - Retrieve an annotation queue
+        source: "curl --request GET \\\n  --url 'https://my.orq.ai/v2/annotation-queues/01HXXXXXXXXXXXXXXXXXXXXXXX' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\"\n"
+      - lang: python
+        label: Python - Retrieve an annotation queue
+        source: "import os\nfrom orq_ai_sdk import Orq\n\nclient = Orq(api_key=os.environ[\"ORQ_API_KEY\"])\n\nqueue = client.annotation_queues.retrieve(\n    annotation_queue_id=\"01HXXXXXXXXXXXXXXXXXXXXXXX\",\n)\n\nprint(queue.display_name, queue.metadata.items_count)\n"
+      - lang: typescript
+        label: Node.js - Retrieve an annotation queue
+        source: "import { Orq } from '@orq-ai/node';\n\nconst client = new Orq({ apiKey: process.env.ORQ_API_KEY });\n\nconst queue = await client.annotationQueues.retrieve({\n  annotationQueueId: '01HXXXXXXXXXXXXXXXXXXXXXXX',\n});\n\nconsole.log(queue.displayName, queue.metadata.itemsCount);\n"
+    delete:
+      tags:
+      - Annotation Queues
+      summary: Delete an annotation queue
+      description: Deletes an annotation queue, its items, and the queue references stored on the annotated spans.
+      operationId: DeleteAnnotationQueue
+      parameters:
+      - name: annotation_queue_id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          description: No content - Annotation queue successfully deleted
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: annotationQueues
+      x-speakeasy-name-override: delete
+      x-cli-group: annotation-queues
+      x-cli-name: delete
+      x-code-samples:
+      - lang: curl
+        label: Core - Delete an annotation queue
+        source: "curl --request DELETE \\\n  --url 'https://my.orq.ai/v2/annotation-queues/01HXXXXXXXXXXXXXXXXXXXXXXX' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\"\n"
+      - lang: python
+        label: Python - Delete an annotation queue
+        source: "import os\nfrom orq_ai_sdk import Orq\n\nclient = Orq(api_key=os.environ[\"ORQ_API_KEY\"])\n\nclient.annotation_queues.delete(\n    annotation_queue_id=\"01HXXXXXXXXXXXXXXXXXXXXXXX\",\n)\n"
+      - lang: typescript
+        label: Node.js - Delete an annotation queue
+        source: "import { Orq } from '@orq-ai/node';\n\nconst client = new Orq({ apiKey: process.env.ORQ_API_KEY });\n\nawait client.annotationQueues.delete({\n  annotationQueueId: '01HXXXXXXXXXXXXXXXXXXXXXXX',\n});\n"
+    patch:
+      tags:
+      - Annotation Queues
+      summary: Update an annotation queue
+      description: Partially updates an existing annotation queue. Setting `project_id` clears the legacy `human_review_ids` selection.
+      operationId: UpdateAnnotationQueue
+      parameters:
+      - name: annotation_queue_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateAnnotationQueueRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnnotationQueue'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: annotationQueues
+      x-speakeasy-name-override: update
+      x-cli-group: annotation-queues
+      x-cli-name: update
+      x-code-samples:
+      - lang: curl
+        label: Core - Update an annotation queue
+        source: "curl --request PATCH \\\n  --url 'https://my.orq.ai/v2/annotation-queues/01HXXXXXXXXXXXXXXXXXXXXXXX' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\" \\\n  --header 'Content-Type: application/json' \\\n  --data '{\n    \"display_name\": \"Support quality review (Q3)\",\n    \"description\": \"Updated review scope\"\n  }'\n"
+      - lang: python
+        label: Python - Update an annotation queue
+        source: "import os\nfrom orq_ai_sdk import Orq\n\nclient = Orq(api_key=os.environ[\"ORQ_API_KEY\"])\n\nqueue = client.annotation_queues.update(\n    annotation_queue_id=\"01HXXXXXXXXXXXXXXXXXXXXXXX\",\n    display_name=\"Support quality review (Q3)\",\n    description=\"Updated review scope\",\n)\n\nprint(queue.updated)\n"
+      - lang: typescript
+        label: Node.js - Update an annotation queue
+        source: "import { Orq } from '@orq-ai/node';\n\nconst client = new Orq({ apiKey: process.env.ORQ_API_KEY });\n\nconst queue = await client.annotationQueues.update({\n  annotationQueueId: '01HXXXXXXXXXXXXXXXXXXXXXXX',\n  displayName: 'Support quality review (Q3)',\n  description: 'Updated review scope',\n});\n\nconsole.log(queue.updated);\n"
+  /v2/annotation-queues/{annotation_queue_id}/clear:
+    delete:
+      tags:
+      - Annotation Queues
+      summary: Clear an annotation queue
+      description: Removes every item from the annotation queue without deleting the queue itself.
+      operationId: ClearAnnotationQueue
+      parameters:
+      - name: annotation_queue_id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          description: No content - successful operation
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: annotationQueues
+      x-speakeasy-name-override: clear
+      x-cli-group: annotation-queues
+      x-cli-name: clear
+      x-code-samples:
+      - lang: curl
+        label: Core - Remove all items from a queue
+        source: "curl --request DELETE \\\n  --url 'https://my.orq.ai/v2/annotation-queues/01HXXXXXXXXXXXXXXXXXXXXXXX/clear' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\"\n"
+      - lang: python
+        label: Python - Remove all items from a queue
+        source: "import os\nfrom orq_ai_sdk import Orq\n\nclient = Orq(api_key=os.environ[\"ORQ_API_KEY\"])\n\nclient.annotation_queues.clear(\n    annotation_queue_id=\"01HXXXXXXXXXXXXXXXXXXXXXXX\",\n)\n"
+      - lang: typescript
+        label: Node.js - Remove all items from a queue
+        source: "import { Orq } from '@orq-ai/node';\n\nconst client = new Orq({ apiKey: process.env.ORQ_API_KEY });\n\nawait client.annotationQueues.clear({\n  annotationQueueId: '01HXXXXXXXXXXXXXXXXXXXXXXX',\n});\n"
+  /v2/annotation-queues/{annotation_queue_id}/items:
+    get:
+      tags:
+      - Annotation Queues
+      summary: Query items from an annotation queue
+      description: Queries items from the specified annotation queue. Items whose span no longer exists are skipped.
+      operationId: ListAnnotationQueueItems
+      parameters:
+      - name: annotation_queue_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: limit
+        in: query
+        description: Optional. Number of items to return. Defaults to 10 and must be between 1 and 200.
+        schema:
+          type: integer
+          format: int32
+      - name: starting_after
+        in: query
+        description: Cursor for forward pagination. Set to the `_id` of the last item from the previous page.
+        schema:
+          type: string
+      - name: ending_before
+        in: query
+        description: Cursor for backward pagination. Set to the `_id` of the first item from the previous page.
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListAnnotationQueueItemsResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: annotationQueues
+      x-speakeasy-name-override: listItems
+      x-cli-group: annotation-queues
+      x-cli-name: queryItems
+      x-code-samples:
+      - lang: curl
+        label: Core - List items in a queue
+        source: "curl --get 'https://my.orq.ai/v2/annotation-queues/01HXXXXXXXXXXXXXXXXXXXXXXX/items' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\" \\\n  --data-urlencode 'limit=25'\n"
+      - lang: python
+        label: Python - List items in a queue
+        source: "import os\nfrom orq_ai_sdk import Orq\n\nclient = Orq(api_key=os.environ[\"ORQ_API_KEY\"])\n\npage = client.annotation_queues.list_items(\n    annotation_queue_id=\"01HXXXXXXXXXXXXXXXXXXXXXXX\",\n    limit=25,\n)\n\nfor item in page.data:\n    print(item.id, item.type)\n"
+      - lang: typescript
+        label: Node.js - List items in a queue
+        source: "import { Orq } from '@orq-ai/node';\n\nconst client = new Orq({ apiKey: process.env.ORQ_API_KEY });\n\nconst page = await client.annotationQueues.listItems({\n  annotationQueueId: '01HXXXXXXXXXXXXXXXXXXXXXXX',\n  limit: 25,\n});\n\nfor (const item of page.data) {\n  console.log(item.id, item.type);\n}\n"
+    post:
+      tags:
+      - Annotation Queues
+      summary: Add items to an annotation queue
+      description: Adds spans to the annotation queue. Spans already present are skipped; the response contains only the newly created items.
+      operationId: AddAnnotationQueueItems
+      parameters:
+      - name: annotation_queue_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddAnnotationQueueItemsRequest'
+        required: true
+      responses:
+        '200':
+          description: Annotation queue items added.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AnnotationQueueItem'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: annotationQueues
+      x-speakeasy-name-override: addItems
+      x-cli-group: annotation-queues
+      x-cli-name: addItems
+      x-code-samples:
+      - lang: curl
+        label: Core - Add span items to a queue
+        source: "curl --request POST \\\n  --url 'https://my.orq.ai/v2/annotation-queues/01HXXXXXXXXXXXXXXXXXXXXXXX/items' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\" \\\n  --header 'Content-Type: application/json' \\\n  --data '{\n    \"items\": [\n      { \"span_id\": \"span_01\", \"trace_id\": \"trace_01\" },\n      { \"span_id\": \"span_02\", \"trace_id\": \"trace_02\" }\n    ]\n  }'\n"
+      - lang: python
+        label: Python - Add span items to a queue
+        source: "import os\nfrom orq_ai_sdk import Orq\n\nclient = Orq(api_key=os.environ[\"ORQ_API_KEY\"])\n\nresult = client.annotation_queues.add_items(\n    annotation_queue_id=\"01HXXXXXXXXXXXXXXXXXXXXXXX\",\n    items=[\n        {\"span_id\": \"span_01\", \"trace_id\": \"trace_01\"},\n        {\"span_id\": \"span_02\", \"trace_id\": \"trace_02\"},\n    ],\n)\n\nprint(f\"added {len(result)} items\")\n"
+      - lang: typescript
+        label: Node.js - Add span items to a queue
+        source: "import { Orq } from '@orq-ai/node';\n\nconst client = new Orq({ apiKey: process.env.ORQ_API_KEY });\n\nconst result = await client.annotationQueues.addItems({\n  annotationQueueId: '01HXXXXXXXXXXXXXXXXXXXXXXX',\n  items: [\n    { spanId: 'span_01', traceId: 'trace_01' },\n    { spanId: 'span_02', traceId: 'trace_02' },\n  ],\n});\n\nconsole.log(`added ${result.length} items`);\n"
+  /v2/annotation-queues/{annotation_queue_id}/items/remove:
+    post:
+      tags:
+      - Annotation Queues
+      summary: Remove items from an annotation queue
+      description: Removes the referenced spans from the annotation queue.
+      operationId: RemoveAnnotationQueueItems
+      parameters:
+      - name: annotation_queue_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RemoveAnnotationQueueItemsRequest'
+        required: true
+      responses:
+        '204':
+          description: No content - Annotation queue items successfully removed
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: annotationQueues
+      x-speakeasy-name-override: removeItems
+      x-cli-group: annotation-queues
+      x-cli-name: removeItems
+      x-code-samples:
+      - lang: curl
+        label: Core - Remove span items from a queue
+        source: "curl --request POST \\\n  --url 'https://my.orq.ai/v2/annotation-queues/01HXXXXXXXXXXXXXXXXXXXXXXX/items/remove' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\" \\\n  --header 'Content-Type: application/json' \\\n  --data '{\n    \"span_ids\": [\"span_01\", \"span_02\"]\n  }'\n"
+      - lang: python
+        label: Python - Remove span items from a queue
+        source: "import os\nfrom orq_ai_sdk import Orq\n\nclient = Orq(api_key=os.environ[\"ORQ_API_KEY\"])\n\nclient.annotation_queues.remove_items(\n    annotation_queue_id=\"01HXXXXXXXXXXXXXXXXXXXXXXX\",\n    span_ids=[\"span_01\", \"span_02\"],\n)\n"
+      - lang: typescript
+        label: Node.js - Remove span items from a queue
+        source: "import { Orq } from '@orq-ai/node';\n\nconst client = new Orq({ apiKey: process.env.ORQ_API_KEY });\n\nawait client.annotationQueues.removeItems({\n  annotationQueueId: '01HXXXXXXXXXXXXXXXXXXXXXXX',\n  spanIds: ['span_01', 'span_02'],\n});\n"
+  /v2/annotation-queues/{annotation_queue_id}/items/{item_id}:
+    get:
+      tags:
+      - Annotation Queues
+      summary: Retrieve an annotation queue item
+      description: Retrieves an item from the specified annotation queue in its expanded form. An annotation queue item is a pointer to a span; this endpoint returns the fully resolved span the item references.
+      operationId: RetrieveAnnotationQueueItem
+      parameters:
+      - name: annotation_queue_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: item_id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: The resource does not exist. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: annotationQueues
+      x-speakeasy-name-override: retrieveItem
+      x-cli-group: annotation-queues
+      x-cli-name: getItem
+      x-code-samples:
+      - lang: curl
+        label: Core - Retrieve a queue item
+        source: "curl --request GET \\\n  --url 'https://my.orq.ai/v2/annotation-queues/01HXXXXXXXXXXXXXXXXXXXXXXX/items/item_01' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\"\n"
+      - lang: python
+        label: Python - Retrieve a queue item
+        source: "import os\nfrom orq_ai_sdk import Orq\n\nclient = Orq(api_key=os.environ[\"ORQ_API_KEY\"])\n\nitem = client.annotation_queues.retrieve_item(\n    annotation_queue_id=\"01HXXXXXXXXXXXXXXXXXXXXXXX\",\n    item_id=\"item_01\",\n)\n\nprint(item.span_id)\n"
+      - lang: typescript
+        label: Node.js - Retrieve a queue item
+        source: "import { Orq } from '@orq-ai/node';\n\nconst client = new Orq({ apiKey: process.env.ORQ_API_KEY });\n\nconst item = await client.annotationQueues.retrieveItem({\n  annotationQueueId: '01HXXXXXXXXXXXXXXXXXXXXXXX',\n  itemId: 'item_01',\n});\n\nconsole.log(item.spanId);\n"
+components:
+  schemas:
+    UpdateAnnotationQueueRequest:
+      required: []
+      type: object
+      properties:
+        display_name:
+          type: string
+          description: Optional. New display name.
+        description:
+          type: string
+          description: Optional. New description.
+        project_id:
+          type: string
+          description: Optional. New project. Setting this clears the legacy `human_review_ids` selection.
+        human_review_ids:
+          type: array
+          items:
+            type: string
+          description: 'Legacy: update manually selected human review IDs. Only applied when `project_id` is not set.'
+    CreateAnnotationQueueRequest:
+      required:
+      - display_name
+      - description
+      - project_id
+      type: object
+      properties:
+        display_name:
+          type: string
+          description: Required. The display name of the annotation queue.
+        description:
+          type: string
+          description: Required. The description of the annotation queue.
+        project_id:
+          type: string
+          description: Required. The project to link this annotation queue to.
+    AnnotationQueueItem:
+      required:
+      - _id
+      - annotation_queue_id
+      - workspace_id
+      - type
+      type: object
+      properties:
+        _id:
+          type: string
+          description: Unique annotation queue item identifier assigned by ORQ.
+        annotation_queue_id:
+          type: string
+          description: The unique identifier of the annotation queue.
+        workspace_id:
+          type: string
+          description: The unique identifier of the workspace it belongs to.
+        used_human_review_ids:
+          type: array
+          items:
+            type: string
+          description: The unique identifiers of the human reviews that have been used to annotate the item.
+        type:
+          type: string
+          description: The item type. Either `span` or `datapoint`.
+        span_id:
+          type: string
+          description: The span this item points to. Present when `type` is `span`.
+        trace_id:
+          type: string
+          description: The trace identifier this span belongs to.
+        datapoint_id:
+          type: string
+          description: The datapoint this item points to. Present when `type` is `datapoint`.
+    ListAnnotationQueueItemsResponse:
+      required:
+      - object
+      - data
+      - has_more
+      type: object
+      properties:
+        object:
+          type: string
+          description: Object discriminator for list responses; always `list`.
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/AnnotationQueueItem'
+          description: Page of annotation queue items.
+        has_more:
+          type: boolean
+          description: Whether more items are available in the selected pagination direction.
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Human-readable error message.
+        code:
+          type: integer
+          description: gRPC status code, when the service reports one.
+        details:
+          type: array
+          items: {}
+          description: Additional error details, when the service reports any.
+      required:
+      - message
+    AnnotationQueue:
+      required:
+      - _id
+      - display_name
+      - description
+      - workspace_id
+      - human_review_ids
+      - metadata
+      type: object
+      properties:
+        _id:
+          type: string
+          description: Unique annotation queue identifier assigned by ORQ.
+        display_name:
+          type: string
+          description: The display name of the annotation queue.
+        description:
+          type: string
+          description: The description of the annotation queue.
+        workspace_id:
+          type: string
+          description: The unique identifier of the workspace it belongs to.
+        project_id:
+          type: string
+          description: The project ID. When set, human reviews are resolved from the project automatically.
+        human_review_ids:
+          type: array
+          items:
+            type: string
+          description: 'Legacy: manually selected human review IDs. Used only when project_id is not set.'
+        metadata:
+          allOf:
+          - $ref: '#/components/schemas/AnnotationQueueMetadata'
+          description: Aggregate counters for the annotation queue.
+        created_by_id:
+          type: string
+          description: The account that created the annotation queue. Unset when created via API key authentication.
+        updated_by_id:
+          type: string
+          description: The account that last updated the annotation queue. Unset when updated via API key authentication.
+        created:
+          type: string
+          description: The date and time the annotation queue was created.
+          format: date-time
+        updated:
+          type: string
+          description: The date and time the annotation queue was last updated.
+          format: date-time
+    RemoveAnnotationQueueItemsRequest:
+      required:
+      - span_ids
+      type: object
+      properties:
+        span_ids:
+          type: array
+          items:
+            type: string
+          description: The unique identifiers of the spans to be removed from the annotation queue.
+    AnnotationQueueMetadata:
+      required:
+      - items_count
+      type: object
+      properties:
+        items_count:
+          type: integer
+          description: Number of items currently in the annotation queue.
+          format: int32
+      description: Aggregate counters maintained by the service as items are added and removed.
+    ListAnnotationQueuesResponse:
+      required:
+      - object
+      - data
+      - has_more
+      type: object
+      properties:
+        object:
+          type: string
+          description: Object discriminator for list responses; always `list`.
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/AnnotationQueue'
+          description: Page of annotation queues.
+        has_more:
+          type: boolean
+          description: Whether more annotation queues are available in the selected pagination direction.
+    AnnotationQueueItemRef:
+      required:
+      - span_id
+      - trace_id
+      type: object
+      properties:
+        span_id:
+          type: string
+        trace_id:
+          type: string
+      description: Span reference accepted by AddAnnotationQueueItems.
+    AddAnnotationQueueItemsRequest:
+      required:
+      - items
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/AnnotationQueueItemRef'
+          description: The spans to add to the annotation queue.
+  securitySchemes:
+    ApiKey:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+externalDocs:
+  url: https://docs.orq.ai
+  description: orq.ai Documentation
+x-speakeasy-timeout: 600000

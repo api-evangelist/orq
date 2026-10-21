@@ -1,0 +1,98 @@
+openapi: 3.2.0
+info:
+  title: orq.ai Agent Feedback API
+  version: '2.0'
+  description: orq.ai API documentation
+servers:
+- url: https://my.orq.ai
+security:
+- ApiKey: []
+tags:
+- name: Agent Feedback
+paths:
+  /v3/submit-feedback:
+    post:
+      tags:
+      - Agent Feedback
+      summary: Submit feedback
+      description: Report problems or request features for Orq.ai APIs, MCP tools, SDKs, and documentation.
+      operationId: SubmitFeedback
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubmitFeedbackRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubmitFeedbackResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: feedback
+      x-speakeasy-name-override: submit
+      x-code-samples:
+      - lang: TypeScript
+        source: 'import { Orq } from ''@orq-ai/node'';
+
+          const orq = new Orq({ apiKey: process.env.ORQ_API_KEY });
+
+          await orq.feedback.submit({ category: ''bug'', message: ''The MCP tool returned an unexpected error.'', requestId: ''req_example'' });
+
+          '
+components:
+  schemas:
+    SubmitFeedbackRequest:
+      required:
+      - message
+      - category
+      type: object
+      properties:
+        message:
+          type: string
+          description: What happened, what was expected, and steps to reproduce. Do not include secrets.
+        category:
+          type: string
+        request_id:
+          type: string
+        url:
+          type: string
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Human-readable error message.
+        code:
+          type: integer
+          description: gRPC status code, when the service reports one.
+        details:
+          type: array
+          items: {}
+          description: Additional error details, when the service reports any.
+      required:
+      - message
+    SubmitFeedbackResponse:
+      required:
+      - feedback_id
+      type: object
+      properties:
+        feedback_id:
+          type: string
+          description: Reference included in the support email.
+  securitySchemes:
+    ApiKey:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+externalDocs:
+  url: https://docs.orq.ai
+  description: orq.ai Documentation
+x-speakeasy-timeout: 600000

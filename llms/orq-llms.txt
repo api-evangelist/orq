@@ -1,0 +1,330 @@
+# Orq.ai Documentation
+
+## AI Gateway
+
+### Overview
+
+- [AI Gateway](https://docs.orq.ai/ai-gateway/get-started/introduction.md): A standalone routing layer for production LLM traffic. Reach 500+ models through one OpenAI-compatible endpoint with fallbacks and usage tracking.
+- [Migrate from OpenAI, Anthropic, OpenRouter, LiteLLM](https://docs.orq.ai/ai-gateway/get-started/migrate.md): Move existing LLM traffic to the Orq.ai AI Gateway from the OpenAI SDK, the Anthropic SDK, OpenRouter, or LiteLLM by changing the base URL, the API key, and the model name.
+- [API Keys and Management Keys](https://docs.orq.ai/ai-gateway/configuration/api-keys.md): Create and manage project-scoped API keys and workspace-scoped management keys in Orq.ai with granular permissions for users and service accounts.
+- [Budgets](https://docs.orq.ai/ai-gateway/budgets.md): Set spending limits on any scope (workspace, project, identity, API key, provider, or model) to control AI costs across the organization.
+- [Models](https://docs.orq.ai/ai-gateway/using-the-router.md): Browse available LLM models and enable them in the AI Gateway. Filter by provider, capability, and pricing to find the right model.
+- [Supported models in AI Gateway](https://docs.orq.ai/ai-gateway/supported-models.md): Browse LLM models available through the AI Gateway. Access GPT, Claude, Gemini, and 500+ models from top providers with unified API integration.
+- [Model Arena](https://docs.orq.ai/ai-gateway/model-arena.md): Rank models head-to-head on real prompts with orq-arena, the Orq.ai benchmarking CLI. Pairwise LLM jury, Bradley-Terry ratings, confidence intervals.
+- [Request metadata](https://docs.orq.ai/ai-gateway/request-metadata.md): Attach app name, identity, thread ID, and custom metadata to AI Gateway requests to segment cost, latency, and traces in observability.
+
+### APIs
+
+- [Responses API](https://docs.orq.ai/ai-gateway/features/responses-api.md): Create model responses with built-in tools, server-side conversation state, streaming, and multimodal input through the AI Gateway Responses API.
+- [OpenAI-compatible API](https://docs.orq.ai/ai-gateway/features/openai-compatible-api.md): Use Orq.ai as an OpenAI-compatible API proxy and access 500+ LLM models with the existing OpenAI SDK by changing only the base URL.
+- [Anthropic Messages API](https://docs.orq.ai/ai-gateway/features/anthropic-messages-api.md): Use the Anthropic SDK unmodified against the Orq.ai AI Gateway with prompt caching on Claude and access to 500+ models via one base URL change.
+- [Connect agents through the AI Gateway](https://docs.orq.ai/ai-gateway/features/agents-gateway.md): Connect external A2A agents to Orq.ai, invoke them through the Responses API, and expose internal Agents through A2A transports.
+
+### MCP Portal
+
+- [MCP Servers](https://docs.orq.ai/ai-gateway/mcp-portal/mcp-servers.md): Connect upstream MCP servers to Orq.ai with automatic tool discovery, and expose their tools to Agents and MCP Gateways with allow-lists.
+- [MCP Gateway](https://docs.orq.ai/ai-gateway/mcp-portal/mcp-gateways.md): Bundle multiple MCP servers behind a single MCP Gateway endpoint with a unified tool surface, aliases, and per-team tool access controls.
+
+### Routing
+
+- [BYOK](https://docs.orq.ai/ai-gateway/providers-overview.md): Connect OpenAI, Anthropic, Google, AWS, and 30+ providers to the AI Gateway with BYOK API keys to control billing, rate limits, and failover.
+- [Provider integrations](https://docs.orq.ai/ai-gateway/features/provider-integrations.md): Select a workspace provider integration per request with the x-orq-integration-<provider> header. Pass an integration id or its exact display name.
+- [Smart Router](https://docs.orq.ai/ai-gateway/smart-router.md): Automatically route each request to the optimal model in a pool based on task complexity and the chosen mode. Reduce costs without sacrificing quality.
+- [Session Affinity](https://docs.orq.ai/ai-gateway/session-affinity.md): Keep every turn of a conversation on the model the Smart Router chose for its first turn, so the provider prompt cache survives and later turns skip scoring on the request path.
+- [Fallbacks and retries in the AI Gateway](https://docs.orq.ai/ai-gateway/features/retries.md): Retry failed LLM requests with exponential backoff and configure fallback models in Orq.ai to handle rate limits, server errors, and network failures.
+- [Load balancing across providers](https://docs.orq.ai/ai-gateway/features/load-balancing.md): Distribute LLM requests across providers using latency-based, weight-based, or round-robin routing to optimize costs, run A/B tests, and ensure redundancy.
+- [Routing Rules](https://docs.orq.ai/ai-gateway/configuration/routing-rules.md): Use CEL-based routing rules to redirect AI Gateway requests to different models based on request attributes, evaluated in priority order.
+- [LLM response caching](https://docs.orq.ai/ai-gateway/features/cache.md): Cache identical LLM requests to reduce latency and cut API costs. Configure exact match response caching with TTL for repeated queries and FAQ lookups.
+- [Request timeouts](https://docs.orq.ai/ai-gateway/features/timeouts.md): Set a maximum LLM request duration with the timeout parameter on the AI Gateway to prevent hanging calls and trigger automatic fallback models.
+- [Rate limits and quotas](https://docs.orq.ai/ai-gateway/features/rate-limits.md): Understand how the AI Gateway enforces plan-based rate limits, budget limits, and provider quotas, and how to read 429 responses and headers.
+- [Service tiers](https://docs.orq.ai/ai-gateway/features/service-tiers.md): Request a premium or discounted provider processing tier with the service_tier parameter on the AI Gateway, and read back the tier that served the request.
+- [Response Healing](https://docs.orq.ai/ai-gateway/features/plugins/response-healing.md): Repair malformed JSON in LLM output with the response_healing plugin in the AI Gateway, fixing code fences, trailing commas, and missing brackets.
+- [Managed Prompts in router requests](https://docs.orq.ai/ai-gateway/features/using-prompts.md): Reference managed Prompts by ID with orq.prompt in Chat Completions requests to update prompt content in Orq.ai without a code deploy.
+- [Knowledge bases via AI Gateway](https://docs.orq.ai/ai-gateway/features/knowledge-bases.md): Integrate knowledge bases through the AI Gateway. Enable RAG retrieval in LLM calls with automatic context injection for enhanced AI responses.
+
+### Security & Privacy
+
+- [EU data residency and model routing](https://docs.orq.ai/enterprise/eu-regions-faq.md): Orq.ai is built in Europe. Platform data stays in the EU by default, GDPR-compliant by design, with VPC and sovereign deployment options for full control.
+- [Sovereign AI and zero data retention (ZDR)](https://docs.orq.ai/enterprise/sovereign-ai.md): How Orq.ai delivers AI sovereignty across business entity, investors, EU infrastructure, model routing, zero data retention, and data privacy controls.
+- [Guardrails](https://docs.orq.ai/ai-gateway/configuration/guardrails.md): Create LLM-as-a-Judge and Python guardrails in the AI Gateway to validate requests and responses and block non-compliant generations.
+- [Guardrail Rules](https://docs.orq.ai/ai-gateway/configuration/guardrail-rules.md): Configure guardrail rules in the AI Gateway to validate and control LLM requests and responses with evaluators triggered by CEL conditions.
+- [External Guardrails](https://docs.orq.ai/ai-gateway/configuration/external-guardrails.md): Call OPA, other policy engines, and third-party guardrail providers from a Python guardrail or evaluator.
+- [Mask sensitive content in traces](https://docs.orq.ai/ai-gateway/features/security.md): Control which request and response content gets written to stored traces with the security parameter on the AI Gateway, without changing live output.
+- [PII Redaction](https://docs.orq.ai/ai-gateway/features/plugins/pii-redaction.md): Redact personally identifiable information with the pii_redaction plugin before requests reach the LLM provider, then restore values in the response.
+- [Trace Scrubbing](https://docs.orq.ai/ai-gateway/features/plugins/trace-scrubbing.md): Mask selected fields in stored traces using the trace_scrubbing plugin in the AI Gateway.
+- [Bring Your Own Model](https://docs.orq.ai/ai-gateway/private-models.md): Connect fine-tuned, self-hosted, and privately deployed models from OpenAI-compatible endpoints, Azure AI Foundry, AWS Bedrock, or LiteLLM to the AI Gateway.
+
+### Model Capabilities
+
+- [LLM response streaming](https://docs.orq.ai/ai-gateway/features/streaming.md): Enable real-time streaming for LLM responses. Deliver incremental content for better UX with Server-Sent Events, React hooks, and error handling patterns.
+- [Structured outputs with JSON schema](https://docs.orq.ai/ai-gateway/features/structured-outputs.md): Generate type-safe JSON responses with guaranteed schema compliance. Use Zod or Pydantic for validated LLM outputs with full TypeScript/Python support.
+- [Image, PDF, and audio: multimodal inputs and generation](https://docs.orq.ai/ai-gateway/features/multimodal.md): Send images, PDFs, and audio to LLMs, and generate images and speech through the AI Gateway. One unified OpenAI-compatible API for all modalities.
+- [OCR via AI Gateway](https://docs.orq.ai/ai-gateway/features/ocr.md): Extract text and structure from PDFs, images, receipts, and invoices with the AI Gateway OCR endpoint, returning per-page markdown output.
+- [Sending files to models](https://docs.orq.ai/ai-gateway/features/files.md): Which models accept files, images, PDFs, and audio through the AI Gateway, how to shape each content part, and when to send a URL or base64.
+- [Prompt caching for reduced token costs](https://docs.orq.ai/ai-gateway/features/prompt-caching.md): Reduce input token costs by caching repeated prompt prefixes at the provider level. Save on long system prompts and reference documents with Anthropic, OpenAI, and Google Gemini.
+- [Context compaction for long conversations](https://docs.orq.ai/ai-gateway/features/context-compaction.md): Summarize the older turns of a Responses API conversation into a single compaction item so a long history stays inside the model's context window.
+- [Tool calling and function execution](https://docs.orq.ai/ai-gateway/features/tool-calling.md): Enable LLMs to call external functions with structured parameters. Build AI agents that interact with APIs, databases, and external services.
+- [Background Responses](https://docs.orq.ai/ai-gateway/features/background-responses.md): Run a Responses API request asynchronously with background mode on the AI Gateway and poll the response ID until processing completes.
+- [Reasoning models](https://docs.orq.ai/ai-gateway/features/reasoning.md): Use GPT-5.6 Sol, Claude Opus 5, and other reasoning models through the AI Gateway with reasoning_effort and thinking controls per provider.
+- [Web search in Responses API](https://docs.orq.ai/ai-gateway/features/web-search.md): Give models access to current web information via the Responses API with built-in web search across OpenAI, Anthropic, and Google.
+- [Dynamic inputs for runtime configuration](https://docs.orq.ai/ai-gateway/features/inputs.md): Pass dynamic inputs to LLM prompts at runtime. Configure variables, context, and parameters through the AI Gateway for flexible prompt execution.
+- [Embeddings](https://docs.orq.ai/ai-gateway/features/embeddings.md): Create vector embeddings through the AI Gateway with any supported embedding model. Generate embeddings for semantic search, clustering, and RAG ingestion.
+- [Rerank and Moderations](https://docs.orq.ai/ai-gateway/features/rerank-and-moderations.md): Rerank documents by relevance to a query and moderate text against safety categories through the AI Gateway rerank and moderations endpoints.
+- [Decisions](https://docs.orq.ai/ai-gateway/features/decisions.md): Answer yes/no, multiple-choice and scored questions about any text or JSON state with a classification model through the AI Gateway.
+- [Model FAQ](https://docs.orq.ai/ai-gateway/model-faq.md): Answers to common questions about models in Orq.ai, covering enabling models, model IDs, parameters, reasoning, context windows, and capabilities.
+
+### Server Tools
+
+- [Server tools](https://docs.orq.ai/ai-gateway/features/server-tools.md): Let models search the web, run code, query knowledge bases, consult other models, and complete other tasks through tools operated by the AI Gateway.
+- [Web search server tool](https://docs.orq.ai/ai-gateway/features/server-tools/web-search.md): Give a model access to current public web results through the orq:web_search server tool.
+- [Web fetch server tool](https://docs.orq.ai/ai-gateway/features/server-tools/web-fetch.md): Fetch text from public URLs during a model response with the orq:web_fetch server tool.
+- [Datetime server tool](https://docs.orq.ai/ai-gateway/features/server-tools/datetime.md): Give a model the current date and time in a chosen IANA timezone with the orq:datetime server tool.
+- [Image generation server tool](https://docs.orq.ai/ai-gateway/features/server-tools/image-generation.md): Let a model generate an image during a Responses API request with a configured image model.
+- [Code interpreter server tool](https://docs.orq.ai/ai-gateway/features/server-tools/code-interpreter.md): Run Python in an isolated sandbox during a model response with the orq:code_interpreter server tool.
+- [Shell server tool](https://docs.orq.ai/ai-gateway/features/server-tools/shell.md): Run shell commands in an isolated Linux sandbox during a model response with the orq:shell server tool.
+- [Apply patch server tool](https://docs.orq.ai/ai-gateway/features/server-tools/apply-patch.md): Let a model propose validated file changes while the application keeps control of filesystem writes.
+- [Knowledge-base server tools](https://docs.orq.ai/ai-gateway/features/server-tools/knowledge-bases.md): List and query knowledge bases during a response so a model can answer from workspace documents.
+- [Search models server tool](https://docs.orq.ai/ai-gateway/features/server-tools/search-models.md): Let a model search the Orq.ai catalog by provider, context length, capability, or input cost.
+- [Tool search server tool](https://docs.orq.ai/ai-gateway/features/server-tools/tool-search.md): Keep large tool libraries out of the prompt and let the model search for the tools it needs with the orq:tool_search server tool.
+- [Subagent server tool](https://docs.orq.ai/ai-gateway/features/server-tools/subagent.md): Delegate a self-contained task to a configured worker model during a response.
+- [Advisor server tool](https://docs.orq.ai/ai-gateway/features/server-tools/advisor.md): Let a model consult a configured secondary model for advice during a response.
+- [Fusion server tool](https://docs.orq.ai/ai-gateway/features/server-tools/fusion.md): Run a prompt across a model panel and return a structured comparison to the primary model.
+
+### Common Scenarios
+
+- [Multi-tenant setup](https://docs.orq.ai/ai-gateway/multi-tenant-setup.md): Isolate and scope AI Gateway usage per tenant with Identities or request metadata, and apply budgets, routing, and observability per tenant.
+
+## AI Observability
+
+### Overview
+
+- [Quick Start](https://docs.orq.ai/ai-studio/observability/quickstart.md): Instrument an app with OpenTelemetry for full trace visibility and cost tracking in Orq.ai. Framework-specific guides are in the Integrations section.
+- [Orq span attributes reference](https://docs.orq.ai/ai-studio/observability/span-attributes.md): Complete reference for orq.* OpenTelemetry span attributes. Find every attribute emitted by Orq.ai across traces, webhook payloads, and trace exports.
+- [Token and cost tracking](https://docs.orq.ai/ai-studio/observability/token-cost-tracking.md): Understand how Orq.ai captures token usage from OpenTelemetry attributes, computes cost per LLM request, and where to find cost breakdowns.
+
+### Instrument your app
+
+- [App tracking for AI requests](https://docs.orq.ai/ai-gateway/app-tracking.md): Track LLM usage by application with the name parameter on AI Gateway requests to segment cost, latency, and analytics per product or service.
+- [Thread management for grouped requests](https://docs.orq.ai/ai-gateway/thread-management.md): Group related AI Gateway requests into conversation threads for observability. Threads label related calls together without storing message history.
+- [Track usage by identity](https://docs.orq.ai/ai-studio/observability/identities.md): Group AI metrics by user, team, project, or client. Create identities via API to organize analytics and monitor usage patterns across your organization.
+
+### Explore
+
+- [LLM traces for debugging](https://docs.orq.ai/ai-studio/observability/traces.md): Explore step-by-step details of every LLM generation. Debug RAG pipelines, evaluators, guardrails, and caching with full workflow visibility and cost tracking.
+- [Agent Graphs](https://docs.orq.ai/ai-studio/observability/agent-graphs.md): Visualize multi-agent delegation paths, tool calls, and sub-agent invocations as a directed graph in the Orq.ai Traces UI, including LangGraph runs.
+- [Conversation threads in traces](https://docs.orq.ai/ai-studio/observability/threads.md): Group related LLM calls into threads for observability and analysis. Threads are a labeling mechanism and do not store or inject message history.
+- [Application logs](https://docs.orq.ai/ai-studio/observability/logs.md): Send OpenTelemetry log records to Orq.ai and search them in the Logs Explorer, filtered by trace ID.
+- [Trace and log selection with OQL](https://docs.orq.ai/ai-studio/observability/oql.md): Write one pipeline query for traces and logs, with fetch, filter, sort and limit stages, and run it from the API, the CLI, or AI Studio.
+- [Views API](https://docs.orq.ai/ai-studio/observability/views-api.md): Save and manage filters and columns for observability pages through the public Views API.
+- [Trace evaluations](https://docs.orq.ai/ai-studio/observability/trace-evaluations.md): Attach evaluators to Deployments and Agents in Orq.ai to score sampled production traces asynchronously for continuous quality monitoring.
+- [MCP Tracing](https://docs.orq.ai/ai-studio/observability/mcp-tracing.md): Observe MCP tool calls in traces. See server hostnames, tool names, arguments, results, latency, and errors for every Model Context Protocol call.
+
+### Monitor
+
+- [Alerts](https://docs.orq.ai/ai-studio/observability/alerts.md): Set up alerts in Orq.ai to get notified when LLM cost, latency, errors, or guardrail results cross a threshold, without watching a dashboard.
+- [Notifiers for alert destinations](https://docs.orq.ai/ai-studio/observability/notifiers.md): Point Alerts and budget alerts at email, Slack, or a generic webhook by creating one reusable Notifier per destination.
+- [Monitors](https://docs.orq.ai/ai-studio/observability/monitors.md): Build custom dashboards that chart cost, latency, errors, and evaluator results from Traces, Metrics, and Logs.
+- [Trace Automations](https://docs.orq.ai/ai-studio/observability/automations.md): Automatically act on LLM trace data with rule-based automations. Add traces to datasets, trigger reviews, and scale quality monitoring without manual work.
+
+### Export
+
+- [Reporting API](https://docs.orq.ai/ai-studio/observability/reporting-api.md): Use the Orq.ai Reporting API for programmatic access to AI usage, cost, latency, token, evaluator, and guardrail analytics, broken down by any dimension.
+- [Telemetry API](https://docs.orq.ai/ai-studio/observability/telemetry-api.md): Query traces, logs, and usage metrics through one endpoint: one request shape, one filter dialect, and one response shape per source.
+
+### Review
+
+- [Annotations](https://docs.orq.ai/ai-studio/observability/annotations.md): Define annotation schemas and apply structured human feedback to LLM traces and spans in AI Studio, through the API and SDK, or from the CLI.
+- [Annotations API](https://docs.orq.ai/ai-studio/observability/annotations-api.md): Apply structured feedback to traces and spans via the Annotations API. Add ratings, defect tags, corrections, and evaluator overrides programmatically.
+- [Annotation Queues](https://docs.orq.ai/ai-studio/observability/annotation-queues.md): Organize production traces into annotation queues in AI Studio to review LLM outputs and apply human feedback annotations in bulk.
+
+### Data privacy & security
+
+- [Data privacy and security](https://docs.orq.ai/ai-studio/observability/data-privacy.md): Control what Orq.ai stores from traces, how long observability data is kept, and which compliance, secret and access controls apply to a workspace.
+
+## Managed agents
+
+### Overview
+
+- [Build an AI agent with Orq.ai](https://docs.orq.ai/ai-studio/ai-engineering/quickstart.md): Build an AI agent with Orq.ai: set up a coding agent or the CLI, connect a model, add tools, and call it from code. Beginner-friendly, no AI experience needed.
+- [Cookbooks and tutorials](https://docs.orq.ai/ai-studio/cookbooks/cookbooks.md): Step-by-step tutorials for building AI applications with Orq.ai. Covers RAG chatbots, text-to-SQL, PDF extraction, and multi-agent systems.
+- [Marketplace](https://docs.orq.ai/ai-studio/marketplace.md): Browse and import pre-built evaluators from the Orq.ai Marketplace. Add them to your projects and use them in Experiments, Deployments, and Agents.
+
+### Managed Agents
+
+- [Build Agents](https://docs.orq.ai/ai-studio/ai-engineering/build-agents.md): Build AI agents in Orq.ai: set instructions, pick models, and attach tools, knowledge bases, memory, and guardrails via AI Studio, the API, or Orq MCP.
+- [Run Agents](https://docs.orq.ai/ai-studio/ai-engineering/run-agents.md): Run AI agents in Orq.ai via the API, AI Studio, or MCP. Send messages, stream responses, attach files, manage task state, and trace every execution.
+- [Schedule Agents](https://docs.orq.ai/ai-studio/ai-engineering/schedule-agents.md): Run an agent on a recurring cadence without holding open an HTTP connection, with support for secret variables. Create, list, pause, resume, trigger, and delete agent schedules.
+- [Create Tools](https://docs.orq.ai/ai-studio/ai-engineering/create-tools.md): Add function calling to LLM applications with tools. Create HTTP, Python, or JSON Schema tools to integrate AI models with external APIs and services.
+- [Skills](https://docs.orq.ai/ai-studio/ai-engineering/skills.md): Skills are reusable, instruction-driven capabilities in Orq.ai. Define a task once and plug it into any agent, prompt, or Jinja template that needs it.
+- [Prompts](https://docs.orq.ai/ai-studio/prompts/prompts.md): Build, version, and manage prompts for LLM applications. Configure models, variables, and structured outputs through AI Studio or the API.
+- [Create a Deployment](https://docs.orq.ai/ai-studio/ai-engineering/deployments.md): Create Orq.ai Deployments to ship LLM use cases to production. Configure model routing, invoke them via API or SDK, and monitor calls in real time.
+
+### Context Management
+
+- [Knowledge Bases](https://docs.orq.ai/ai-studio/ai-engineering/knowledge-bases.md): Build knowledge bases in Orq.ai to ground AI agents with RAG: upload documents, manage chunking and embeddings, and configure retrieval settings.
+- [External Knowledge Bases](https://docs.orq.ai/ai-studio/ai-engineering/external-knowledge-bases.md): Connect an existing vector database to Orq.ai as an external knowledge base via a standard search API, keeping data on your own infrastructure.
+- [Chunking](https://docs.orq.ai/ai-studio/ai-engineering/chunking.md): Split text into chunks for RAG ingestion with seven strategies, and decide between the Chunking API and Knowledge Base-managed chunking.
+- [Memory Stores](https://docs.orq.ai/ai-studio/ai-engineering/memory-stores.md): Give AI agents entity-scoped long-term memory with Memory Stores in Orq.ai, persisting user context across sessions for personalized recall.
+- [Files API](https://docs.orq.ai/ai-studio/ai-engineering/files.md): Upload, download, and manage files via the /v2/files API. Reuse files as knowledge base datasources, batch job inputs, or code interpreter documents.
+
+### Test & Evaluate
+
+- [Create Playgrounds](https://docs.orq.ai/ai-studio/prompts/playgrounds.md): Test LLM prompts in an interactive environment. Compare models side-by-side, adjust parameters, and iterate on prompts before deploying to production.
+- [Build Datasets](https://docs.orq.ai/ai-studio/optimize/datasets.md): Create datasets to test LLM models at scale. Define inputs, messages, and expected outputs for experiments. Manage datasets via the AI Studio, API, or Orq MCP.
+- [Build Experiments](https://docs.orq.ai/ai-studio/optimize/experiments.md): Test prompts and models at scale. Compare performance metrics, evaluate outputs, and iterate on configurations via the AI Studio, API, or Orq MCP.
+- [Create Evaluators](https://docs.orq.ai/ai-studio/optimize/evaluators.md): Build LLM-as-a-Judge and Python evaluators in Orq.ai to automatically score model outputs from AI Studio, the API, or the Orq MCP server.
+- [Red Teaming](https://docs.orq.ai/ai-studio/optimize/red-teaming.md): Probe AI agents and models for OWASP LLM Top 10 security vulnerabilities with evaluatorq, the Orq.ai red teaming CLI and Python SDK.
+- [Agent Simulation](https://docs.orq.ai/ai-studio/optimize/agent-simulations.md): Test AI agents in realistic multi-turn conversations with evaluatorq, using generated personas, scenarios, and an LLM judge to score results.
+
+### Chat
+
+- [Chat](https://docs.orq.ai/ai-studio/ai-chat/using-chat.md): Chat and test AI models in real time directly in Orq.ai, with full conversation history, file attachments, and access to configured agents.
+
+## Administration
+
+### Workspace & Projects
+
+- [General Settings](https://docs.orq.ai/ai-studio/organization/workspace-settings.md): Configure the workspace display name, avatar, URL, and model enforcement, and delete a workspace or account from General Settings.
+- [Projects in Orq.ai](https://docs.orq.ai/ai-studio/get-started/projects.md): Organize AI resources with projects. Group prompts, deployments, agents, and knowledge bases. Manage team access and permissions for isolated environments.
+- [Favorites](https://docs.orq.ai/ai-studio/get-started/favorites.md): Pin frequently used entities to the sidebar for quick access. Favorites are personal, can be organized into folders, and follow the active project.
+- [Chat](https://docs.orq.ai/ai-studio/ai-chat/using-chat.md): Chat and test AI models in real time directly in Orq.ai, with full conversation history, file attachments, and access to configured agents.
+
+### Identity & Access
+
+- [Members and teams](https://docs.orq.ai/ai-studio/organization/members-teams.md): Manage team members, roles, and project access in Orq.ai. Configure Admin, Developer, and Researcher roles and organize members into teams.
+- [API Keys](https://docs.orq.ai/ai-studio/organization/api-keys.md): Create and manage project-scoped Orq.ai API keys, choosing user or service account keys with granular permissions for secure API access.
+- [Management Keys](https://docs.orq.ai/ai-studio/organization/management-keys.md): Create workspace-scoped management keys in Orq.ai to authenticate admin operations on API keys, budgets, projects, and workspace settings.
+- [Workspace Audit Logs](https://docs.orq.ai/ai-studio/organization/audit-logs.md): Monitor organization activities and changes. Track who did what, when they did it, and what was affected for compliance and security.
+- [Enterprise SSO authentication](https://docs.orq.ai/ai-studio/organization/sso.md): Configure enterprise Single Sign-On for Orq.ai using any OIDC or SAML provider, and provision members and teams from the provider with SCIM.
+- [Workload federation](https://docs.orq.ai/ai-studio/organization/workload-federation.md): Exchange an OIDC token from a CI pipeline or service for a short-lived Orq.ai API key, so no Orq.ai secret is stored in the workload.
+- [Environments for dev, staging, and production](https://docs.orq.ai/ai-studio/organization/environments.md): Manage environments in Orq.ai workspaces to tag Agent and Evaluator versions and route invocations by environment instead of pinning a version number.
+- [Webhooks for real-time notifications](https://docs.orq.ai/ai-studio/organization/webhooks.md): Subscribe to Orq.ai events and receive real-time HTTP POST notifications when agents, deployments, prompts, and other resources change.
+
+### Billing & Usage
+
+- [AI Gateway credits and spending](https://docs.orq.ai/ai-studio/organization/credits.md): Manage AI Gateway credits in Orq.ai: top up the balance, configure automatic top-ups, add a payment method, and view transaction history.
+- [Billing and usage tracking](https://docs.orq.ai/ai-studio/organization/billing-usage.md): Monitor LLM usage, retrievals, cache events, storage, and seats across billing cycles in Orq.ai, and manage the workspace subscription.
+- [Budgets](https://docs.orq.ai/ai-gateway/budgets.md): Set spending limits on any scope (workspace, project, identity, API key, provider, or model) to control AI costs across the organization.
+
+### Security & Compliance
+
+- [Secrets management](https://docs.orq.ai/ai-studio/organization/secrets.md): Where Orq.ai stores API Keys, provider credentials, secret variables, and signing secrets, who can read each one, and how to rotate it.
+- [Workspace security controls](https://docs.orq.ai/ai-studio/organization/workspace-security.md): Verify workspace domain ownership with DNS TXT records and restrict Orq.ai workspace access with an IP allowlist on the Enterprise plan.
+- [Data compliance and privacy](https://docs.orq.ai/ai-studio/organization/data-compliance.md): Understand Orq.ai data handling, privacy practices, and compliance measures. GDPR, SOC 2 Type 2, and enterprise security standards for AI application data.
+- [Data retention](https://docs.orq.ai/ai-studio/organization/data-retention.md): Understand how long Orq.ai retains observability data per subscription plan, what the retention policy covers, and how automatic deletion works.
+- [Trust center and compliance](https://docs.orq.ai/enterprise/trust.md): Orq.ai Trust Center: request the SOC 2 Type II report, ISO 27001 status, penetration test reports, HIPAA BAA, DPA, and sub-processor list.
+- [Governing Shadow AI](https://docs.orq.ai/enterprise/shadow-ai.md): Govern Shadow AI in the enterprise. Use Orq.ai's AI Gateway and observability to detect and prevent unauthorized AI usage across teams.
+
+### Enterprise Deployment
+
+- [Deployment Options](https://docs.orq.ai/enterprise/deployment-options.md): Compare Orq.ai hosting options from managed cloud to self-hosted on-premise, with VPC and sovereign deployment for enterprise compliance.
+- [VPC deployment on AWS or Azure](https://docs.orq.ai/enterprise/vpc-deployment.md): Deploy Orq.ai within your Virtual Private Cloud on AWS or Azure for enhanced security, compliance, data residency, and network isolation.
+- [On-premise deployment requirements](https://docs.orq.ai/enterprise/on-prem-requirements.md): Infrastructure requirements for deploying Orq.ai on-premise with Helm: Kubernetes cluster sizing, Gateway API, external data stores, and network access.
+- [Agent sandbox for on-premise](https://docs.orq.ai/enterprise/agent-sandbox.md): Run customer Python code such as evaluators and agent tools in isolated on-premise sandbox pods with Kubernetes sandbox templates and runtime images.
+
+- [Integrations (95 pages)](https://docs.orq.ai/_llms/integrations.txt): Documentation for Integrations.
+- [API Reference (406 pages)](https://docs.orq.ai/_llms/api-reference.txt): Documentation for API Reference.
+
+## Cookbooks
+
+### Overview
+
+- [Cookbooks and tutorials](https://docs.orq.ai/ai-studio/cookbooks/cookbooks.md): Step-by-step tutorials for building AI applications with Orq.ai. Covers RAG chatbots, text-to-SQL, PDF extraction, and multi-agent systems.
+
+### Common Architectures
+
+- [Simple deployment pattern](https://docs.orq.ai/ai-studio/cookbooks/common-architecture/simple-deployment.md): Implement simple deployment architecture for LLM applications. Quick-start pattern for straightforward AI integration with minimal configuration overhead.
+- [Customer support chatbot pattern](https://docs.orq.ai/ai-studio/cookbooks/common-architecture/chatbot.md): Build customer support chatbots with Orq.ai. Create conversational AI with memory, context awareness, and intelligent escalation to human agents.
+- [Simple RAG pattern](https://docs.orq.ai/ai-studio/cookbooks/common-architecture/simple-rag.md): Build a simple RAG system with Orq.ai. Combine knowledge bases with LLMs for accurate, document-grounded responses. Step-by-step implementation guide.
+- [Advanced RAG with multi-source retrieval](https://docs.orq.ai/ai-studio/cookbooks/common-architecture/advanced-rag.md): Build enterprise RAG systems with multi-source retrieval, agentic query enhancement, and quality validation using Ragas evaluation.
+- [AI agent lead qualification pattern](https://docs.orq.ai/ai-studio/cookbooks/common-architecture/ai-agent.md): Build multi-agent systems with Orq.ai. Create specialized Agents for lead qualification, CRM integration, and automated workflows through the Responses API.
+- [Agents Framework & API Guide](https://docs.orq.ai/ai-studio/cookbooks/common-architecture/agents-framework-guide.md): Step-by-step guide to building agents with the Orq.ai Agents Framework and API. Covers tools, memory, knowledge bases, and multi-agent patterns.
+- [Advisor and Sidekick: second model delegation](https://docs.orq.ai/ai-studio/cookbooks/common-architecture/advisor-and-sidekick.md): Run an Agent on a cheap model and pay for a stronger one only at the step that needs it, then read the cost split in the trace.
+- [AI gateway vs config management](https://docs.orq.ai/ai-studio/cookbooks/common-architecture/gateway-vs-config.md): Compare AI Gateway and Configuration Management integration patterns. Choose the right Orq.ai architecture for your LLM application deployment strategy.
+
+### Chatbots & AI Apps
+
+- [Maintain chat history with a model](https://docs.orq.ai/ai-studio/cookbooks/chatbots/maintaining-history-with-a-model.md): Maintain conversation history with Orq.ai deployments. Build stateful chatbots that remember context across messages with Python and TypeScript examples.
+- [Build a multilingual FAQ bot with RAG](https://docs.orq.ai/ai-studio/cookbooks/chatbots/multilingual-faq-bot.md): Build a multilingual FAQ chatbot with RAG. Use Orq.ai's Routing Engine to serve multiple languages dynamically without hardcoded logic.
+- [Build an intent classification chatbot](https://docs.orq.ai/ai-studio/cookbooks/chatbots/intent-classification.md): Build and evaluate an intent classification system with Orq.ai. Categorize user queries for chatbots, customer support, and task automation with Python.
+- [Build AI chatbots with Lovable and Orq.ai](https://docs.orq.ai/ai-studio/cookbooks/chatbots/lovable-integration.md): Build AI chatbots with Lovable and Orq.ai by adding an AGENTS.md snippet, keeping the API key in a Supabase edge function, and grounding answers in a knowledge base.
+- [Build a multi-agent HR system](https://docs.orq.ai/ai-studio/cookbooks/chatbots/agents-API.md): Build a multi-agent HR system with Python. Create specialized agents for benefits, PTO, and policy questions using memory and knowledge.
+- [Compare insurance claims agents built with MCP](https://docs.orq.ai/ai-studio/cookbooks/chatbots/insurance-claims-mcp-cookbook.md): Build single-agent and multi-agent insurance claims systems via Orq.ai MCP, then compare them with evaluators and a 15-case dataset.
+- [Build a customer support chatbot in Node.js](https://docs.orq.ai/ai-studio/cookbooks/chatbots/buildingcustomersupportchatwithaigateway.md): Build a production-ready Node.js customer support chatbot via AI Gateway with streaming, fallbacks, caching, and RAG knowledge base integration.
+- [Build a voice loop with transcription and text-to-speech](https://docs.orq.ai/ai-studio/cookbooks/chatbots/voice-loop-transcription-and-speech.md): Compose transcription and text-to-speech around a model call to build a voice-in, voice-out loop.
+
+### Data & Extraction
+
+- [Extract data from PDFs with LLMs](https://docs.orq.ai/ai-studio/cookbooks/data-extraction/pdf-extraction.md): Extract structured data from PDF invoices with AI. Transform unstructured documents into actionable JSON using Orq.ai's vision models and deployment features.
+- [Extract data from receipts with OCR](https://docs.orq.ai/ai-studio/cookbooks/data-extraction/receipt-extraction.md): Extract data from receipt images with AI. Process JPG and PNG files to structured JSON with vendor names, amounts, and dates using Orq.ai vision models.
+- [Convert natural language to SQL queries](https://docs.orq.ai/ai-studio/cookbooks/data-extraction/text-to-sql.md): Transform natural language into SQL queries with AI. Build a text-to-SQL application that lets non-technical users query databases using plain English.
+
+### Evaluation & Safety
+
+- [Running evaluations in parallel with Evaluatorq](https://docs.orq.ai/ai-studio/cookbooks/evaluation-safety/evaluator-q.md): Run AI experiments from code using Evaluatorq to detect hallucination and measure faithfulness. Compare deployments and agents side-by-side with custom evaluators across any framework.
+- [Test an Agent with Agent Simulation](https://docs.orq.ai/ai-studio/cookbooks/evaluation-safety/agent-simulations.md): Put an Agent in front of a simulated user, fix the instructions, replay the same conversations, then generate edge cases the fix was never aimed at.
+- [Automate evals and observability in Claude Code](https://docs.orq.ai/ai-studio/cookbooks/evaluation-safety/automate-evals-and-observability-with-claude-code.md): Build, run, and analyze evaluations with Claude Code and Orq.ai MCP. Query observability data and automate eval workflows from your terminal.
+- [Align an Evaluator with Human Judgement](https://docs.orq.ai/ai-studio/cookbooks/evaluation-safety/align-evaluators.md): Find where an LLM-as-a-judge Evaluator disagrees with human reviewers, and rewrite its prompt so its verdicts match.
+- [Benchmark models head-to-head with Model Arena](https://docs.orq.ai/ai-studio/cookbooks/evaluation-safety/model-arena.md): Run a real head-to-head model benchmark on real prompts with orq-arena, and read a statistically defensible ranking instead of trusting a public leaderboard.
+- [Improve an Agent with Red Teaming](https://docs.orq.ai/ai-studio/cookbooks/evaluation-safety/improve-agent-with-red-teaming.md): Attack an Agent with generated attacks, read the finding, fix the instructions, then replay the same attacks to check the leak is closed.
+
+### Integrations & Tooling
+
+- [Prompt management tutorial](https://docs.orq.ai/ai-studio/cookbooks/integrations-tooling/prompt-manager.md): Use Orq.ai as a prompt manager for your LLM calls. Fetch deployment configurations at runtime while keeping control over your infrastructure.
+- [Capture user feedback on LLM responses](https://docs.orq.ai/ai-studio/cookbooks/integrations-tooling/capturing-feedback-with-orq.md): Implement structured user feedback to improve an LLM chatbot. Capture ratings, log defects, and create a continuous learning loop for better AI responses.
+- [Integrate LangGraph with Orq.ai](https://docs.orq.ai/ai-studio/cookbooks/integrations-tooling/integrate-langgraph-with-orq.md): Add Orq.ai to an existing LangGraph agent: route models through the AI Gateway, ground responses with a Knowledge Base, and capture Traces.
+- [Chain deployments for multi-step workflows](https://docs.orq.ai/ai-studio/cookbooks/integrations-tooling/chaining-deployments.md): Chain multiple LLM deployments for complex workflows with evaluators and step-by-step guidance.
+- [Use Pinecone and custom vector databases](https://docs.orq.ai/ai-studio/cookbooks/integrations-tooling/using-thirdparty-vectordbs-with-orq.md): Connect Pinecone or other vector databases to Orq.ai for custom RAG. Use external embeddings and retrieval while leveraging Orq.ai's Deployment features.
+
+### Learn
+
+- [LLM and AI terminology glossary](https://docs.orq.ai/ai-studio/cookbooks/learn/llm-glossary.md): Complete glossary of LLM, LLMOps, and prompt engineering terms covering 200+ AI concepts.
+- [Prompt engineering guide](https://docs.orq.ai/ai-studio/prompts/prompt-engineering-guide.md): Master prompt engineering with best practices for LLM optimization and consistent outputs.
+- [Prompt templating with Jinja and Mustache](https://docs.orq.ai/ai-studio/prompts/prompt-templating.md): Reference for Jinja and Mustache template engines in Orq.ai deployments. Covers variables, conditionals, loops, and filters.
+
+## Changelog
+
+### Release Notes
+
+- [Release 4.16](https://docs.orq.ai/changelog/release-4-16.md): Release 4.16 adds custom Monitors built from Traces, Metrics, and Logs, rebuilds the Traces page around search and filters, and adds dark mode.
+- [Release 4.15](https://docs.orq.ai/changelog/release-4-15.md): Release 4.15 adds OAuth and egress controls to the MCP Gateway, a Python editor for Evaluators, and a Beta Telemetry API for platform usage.
+- [Release 4.14](https://docs.orq.ai/changelog/release-4-14.md): Release 4.14 introduces the MCP Gateway for governing agent tool access, adds caching and tracing to Routing rules, and new Evaluator variables.
+- [Release 4.13](https://docs.orq.ai/changelog/release-4-13.md): Release 4.13 adds metric Alerts on traces, JSON response healing in the Router, a redesigned Smart Router page, and Advisor and Sidekick tools.
+- [Release 4.12](https://docs.orq.ai/changelog/release-4-12.md): Release 4.12 alerts admins on budget spend, lets admins set which models each project can use, brings Eval corrections to Traces, and adds the Orq.ai CLI.
+- [Release 4.11](https://docs.orq.ai/changelog/release-4-11.md): Release 4.11 introduces project-scoped navigation, Budgets with cost and token limits, PII redaction on the router, and Management API keys.
+- [Release 4.10](https://docs.orq.ai/changelog/release-4-10.md): Release 4.10 rebuilds the Model Garden, unifies API key management with restricted keys, and adds the Reporting API for usage and cost analytics.
+- [Release 4.9](https://docs.orq.ai/changelog/release-4-9.md): Release 4.9 introduces native Skills, an Errors view in Traces, LangGraph trace visualization, and improved Azure Foundry model onboarding.
+- [Release 4.8](https://docs.orq.ai/changelog/release-4-8.md): Orq.ai 4.8 release notes: Router Policies, Guardrail Rules, categorical evaluators, redesigned homescreen, and predefined MCP servers.
+- [Release 4.7](https://docs.orq.ai/changelog/release-4-7.md): Release 4.7 introduces Orq Skills, reusable coding agent workflows for observability setup, agent building, experiments, and trace analysis.
+- [Release 4.6](https://docs.orq.ai/changelog/release-4-6.md): Release 4.6 launches AI Chat for a unified model interface with agent exposure and workspace configuration, plus webhook integrations.
+- [Release 4.5](https://docs.orq.ai/changelog/release-4-5.md): Release 4.5 adds Jinja2 and Mustache template engines for advanced prompt templating, plus version control for evaluators and tools.
+- [Release 4.4](https://docs.orq.ai/changelog/release-4-4.md): Release 4.4 introduces the Orq MCP Server with 23 tools for managing agents, datasets, experiments, and traces from any MCP-compatible client.
+- [Release 4.3](https://docs.orq.ai/changelog/release-4-3.md): Release 4.3 adds AI Router credits with auto top-up and unified billing across 500+ models, plus agent version control and environment support.
+- [Release 4.2](https://docs.orq.ai/changelog/release-4-2.md): Release 4.2 launches the sovereign AI Router with EU data residency, single-key access to 500+ models, VPC deployment, and enterprise audit logs.
+- [Release 4.1](https://docs.orq.ai/changelog/release-4-1.md): Release 4.1 introduces the Evaluatorq Python SDK for running experiments from code and a Command Bar for universal search and navigation.
+- [Release 4.0](https://docs.orq.ai/changelog/release-4.md): Release 4.0 introduces Gemini 3 Flash Preview with 1M token context window and GPT Image 1.5 support for AI-powered image generation workflows.
+- [Release 3.14](https://docs.orq.ai/changelog/release-314.md): Release 3.14 adds Google Gemini 3 Pro Preview with 1M+ context window and Anthropic structured outputs with JSON schema validation.
+- [Release 3.13](https://docs.orq.ai/changelog/release-313.md): Release 3.13 adds Claude Haiku 4.5 to the AI Router and introduces a verified n8n integration for workflow automation with 1,000+ apps.
+- [Release 3.12](https://docs.orq.ai/changelog/release-312.md): Release 3.12 introduces human-in-the-loop reviews, response caching for cost optimization, faster root cause analysis, and OpenTelemetry support.
+- [Past Updates](https://docs.orq.ai/changelog/past-product-updates.md): Archive of past Orq.ai product updates and announcements, including Evaluatorq, platform improvements, and earlier feature releases.
+
+## Other
+
+- [Plugins](https://docs.orq.ai/ai-gateway/features/plugins/overview.md): Plugins transform the request, the response, or stored traces in the AI Gateway, such as PII redaction, response healing, and trace scrubbing.
+- [AI Gateway traces](https://docs.orq.ai/ai-gateway/traces.md): Inspect every AI Gateway request as a detailed trace. View latency, token usage, cache hits, and provider responses for each routed call.
+- [Conversation Insights for production analysis](https://docs.orq.ai/ai-studio/observability/insights.md): Analyze production conversations, discover recurring patterns, and turn trace evidence into prioritized actions.
+- [List models](https://docs.orq.ai/reference/models/list-models-1.md): Lists all models available through the AI Router. Returns each model in OpenAI-compatible shape with its provider, ID, and creation timestamp.
+
+## OpenAPI Specs
+
+- [openapi](/openapi.json)
+
+> The links below point to documentation indexes. Follow each `/_llms/` index recursively until you reach documentation pages.
+
+## Indexes
+
+- [Integrations (95 pages)](https://docs.orq.ai/_llms/integrations.txt): Documentation for Integrations.
+- [API Reference (406 pages)](https://docs.orq.ai/_llms/api-reference.txt): Documentation for API Reference.
+
+
+This documentation is built and hosted on [Mintlify](https://mintlify.com), a developer documentation platform.

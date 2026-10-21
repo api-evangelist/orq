@@ -1,0 +1,3085 @@
+openapi: 3.2.0
+info:
+  title: orq.ai Tools API
+  version: '2.0'
+  description: orq.ai API documentation
+servers:
+- url: https://my.orq.ai
+security:
+- ApiKey: []
+tags:
+- name: Tools
+paths:
+  /v2/tools:
+    get:
+      tags:
+      - Tools
+      x-speakeasy-group: tools
+      x-speakeasy-name-override: list
+      x-cli-group: tools
+      x-cli-name: list
+      operationId: GetAllTools
+      summary: List tools
+      description: List all workspace tools. By default returns all tools in one response. Set `limit` for cursor-based pagination.
+      parameters:
+      - schema:
+          type: number
+          minimum: 1
+          maximum: 200
+          description: Maximum number of tools per page (1-200). Omit to return all tools.
+        required: false
+        description: Maximum number of tools per page (1-200). Omit to return all tools.
+        name: limit
+        in: query
+      - schema:
+          type: string
+          description: A cursor for use in pagination. `starting_after` is an object ID that defines your place in the list. For instance, if you make a list request and receive 20 objects, ending with `01JJ1HDHN79XAS7A01WB3HYSDB`, your subsequent call can include `starting_after=01JJ1HDHN79XAS7A01WB3HYSDB` in order to fetch the next page of the list.
+        required: false
+        description: A cursor for use in pagination. `starting_after` is an object ID that defines your place in the list. For instance, if you make a list request and receive 20 objects, ending with `01JJ1HDHN79XAS7A01WB3HYSDB`, your subsequent call can include `starting_after=01JJ1HDHN79XAS7A01WB3HYSDB` in order to fetch the next page of the list.
+        name: starting_after
+        in: query
+      - schema:
+          type: string
+          description: A cursor for use in pagination. `ending_before` is an object ID that defines your place in the list. For instance, if you make a list request and receive 20 objects, starting with `01JJ1HDHN79XAS7A01WB3HYSDB`, your subsequent call can include `ending_before=01JJ1HDHN79XAS7A01WB3HYSDB` in order to fetch the previous page of the list.
+        required: false
+        description: A cursor for use in pagination. `ending_before` is an object ID that defines your place in the list. For instance, if you make a list request and receive 20 objects, starting with `01JJ1HDHN79XAS7A01WB3HYSDB`, your subsequent call can include `ending_before=01JJ1HDHN79XAS7A01WB3HYSDB` in order to fetch the previous page of the list.
+        name: ending_before
+        in: query
+      responses:
+        '200':
+          description: Successfully retrieved the list of tools.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  object:
+                    type: string
+                    enum:
+                    - list
+                  data:
+                    type: array
+                    items:
+                      oneOf:
+                      - type: object
+                        properties:
+                          _id:
+                            type: string
+                            default: tool_01M2K22M8N5MHH4W09SEQB9MYC
+                          path:
+                            type: string
+                            description: 'Entity storage path.
+
+
+                              With workspace-level API keys, use the format `project/folder/subfolder/...`. The first element must be the display name of an existing project, followed by nested folders (auto-created as needed). Example: `Default Project/agents`.
+
+
+                              With project-level API keys, the project is predetermined by the API key, so the path is relative to that project. Example: `agents`. For backward compatibility, a leading project name is ignored when it matches the scoped project.'
+                            example: Default Project
+                          key:
+                            type: string
+                            minLength: 1
+                            maxLength: 64
+                            pattern: ^[A-Za-z]([A-Za-z0-9]*([_-][A-Za-z0-9]+)*)?$
+                            description: Unique key of the tool as it will be displayed in the UI
+                          display_name:
+                            type: string
+                            description: The name of the tool as it will be displayed in the UI. This is optional and if not provided, the `key` will be used.
+                          description:
+                            type: string
+                            description: A description of the tool, used by the model to choose when and how to call the tool. We do recommend using the `description` field as accurate as possible to give enough context to the model to make the right decision.
+                          created_by_id:
+                            type:
+                            - string
+                            - 'null'
+                            description: The id of the user that created the tool
+                          updated_by_id:
+                            type:
+                            - string
+                            - 'null'
+                            description: The id of the user that last updated the tool
+                          project_id:
+                            type: string
+                          workspace_id:
+                            type: string
+                          created:
+                            type: string
+                          updated:
+                            type: string
+                          status:
+                            type: string
+                            enum:
+                            - live
+                            - draft
+                            - pending
+                            - published
+                            default: live
+                            description: The status of the tool. `Live` is the latest version of the tool. `Draft` is a version that is not yet published. `Pending` is a version that is pending approval. `Published` is a version that was live and has been replaced by a new version.
+                          type:
+                            type: string
+                            enum:
+                            - function
+                          function:
+                            type: object
+                            properties:
+                              name:
+                                type: string
+                                description: The name of the function to be called. Must be a-z, A-Z, 0-9, or contain underscores and dashes, with a maximum length of 64.
+                              description:
+                                type: string
+                                description: A description of what the function does, used by the model to choose when and how to call the function.
+                              strict:
+                                type: boolean
+                                description: Whether to enable strict schema adherence when generating the function call. If set to true, the model will follow the exact schema defined in the `parameters` field. Only a subset of JSON Schema is supported when `strict` is `true`. Currently only compatible with `OpenAI` models.
+                              parameters:
+                                type: object
+                                properties:
+                                  type:
+                                    type: string
+                                    enum:
+                                    - object
+                                    description: The type must be "object"
+                                  properties:
+                                    type: object
+                                    additionalProperties: {}
+                                    description: The properties of the function parameters
+                                  required:
+                                    type: array
+                                    items:
+                                      type: string
+                                    description: Array of required parameter names
+                                required:
+                                - type
+                                - properties
+                                - required
+                                additionalProperties: {}
+                                description: The parameters the functions accepts, described as a JSON Schema object. See the `OpenAI` [guide](https://platform.openai.com/docs/guides/function-calling) for examples, and the [JSON Schema reference](https://json-schema.org/understanding-json-schema/) for documentation about the format.
+                            required:
+                            - name
+                        required:
+                        - path
+                        - key
+                        - description
+                        - project_id
+                        - workspace_id
+                        - created
+                        - updated
+                        - type
+                        - function
+                        title: Function Tool
+                        description: A custom function tool that allows the model to call predefined functions with structured parameters.
+                      - type: object
+                        properties:
+                          _id:
+                            type: string
+                            default: tool_01M2K22M8NBBN6QVY74KWFNR5G
+                          path:
+                            type: string
+                            description: 'Entity storage path.
+
+
+                              With workspace-level API keys, use the format `project/folder/subfolder/...`. The first element must be the display name of an existing project, followed by nested folders (auto-created as needed). Example: `Default Project/agents`.
+
+
+                              With project-level API keys, the project is predetermined by the API key, so the path is relative to that project. Example: `agents`. For backward compatibility, a leading project name is ignored when it matches the scoped project.'
+                            example: Default Project
+                          key:
+                            type: string
+                            minLength: 1
+                            maxLength: 64
+                            pattern: ^[A-Za-z]([A-Za-z0-9]*([_-][A-Za-z0-9]+)*)?$
+                            description: Unique key of the tool as it will be displayed in the UI
+                          display_name:
+                            type: string
+                            description: The name of the tool as it will be displayed in the UI. This is optional and if not provided, the `key` will be used.
+                          description:
+                            type: string
+                            description: A description of the tool, used by the model to choose when and how to call the tool. We do recommend using the `description` field as accurate as possible to give enough context to the model to make the right decision.
+                          created_by_id:
+                            type:
+                            - string
+                            - 'null'
+                            description: The id of the user that created the tool
+                          updated_by_id:
+                            type:
+                            - string
+                            - 'null'
+                            description: The id of the user that last updated the tool
+                          project_id:
+                            type: string
+                          workspace_id:
+                            type: string
+                          created:
+                            type: string
+                          updated:
+                            type: string
+                          status:
+                            type: string
+                            enum:
+                            - live
+                            - draft
+                            - pending
+                            - published
+                            default: live
+                            description: The status of the tool. `Live` is the latest version of the tool. `Draft` is a version that is not yet published. `Pending` is a version that is pending approval. `Published` is a version that was live and has been replaced by a new version.
+                          type:
+                            type: string
+                            enum:
+                            - json_schema
+                          json_schema:
+                            type: object
+                            properties:
+                              name:
+                                type: string
+                                minLength: 1
+                                maxLength: 64
+                                description: The name of the response format. Must be a-z, A-Z, 0-9, or contain underscores and dashes, with a maximum length of 64.
+                              description:
+                                type: string
+                                description: A description of what the response format is for. This will be shown to the user.
+                              schema:
+                                type: object
+                                properties:
+                                  type:
+                                    type: string
+                                    description: The JSON Schema type
+                                  properties:
+                                    type: object
+                                    additionalProperties: {}
+                                    description: The properties of the JSON Schema object
+                                  required:
+                                    type: array
+                                    items:
+                                      type: string
+                                    description: Array of required property names
+                                required:
+                                - type
+                                - properties
+                                - required
+                                additionalProperties: {}
+                                description: The schema for the response format, described as a JSON Schema object. See the [JSON Schema reference](https://json-schema.org/understanding-json-schema/) for documentation about the format.
+                              strict:
+                                type: boolean
+                                description: Whether to enable strict schema adherence when generating the output. If set to true, the model will always follow the exact schema defined in the `schema` field. Only a subset of JSON Schema is supported when `strict` is `true`. Only compatible with `OpenAI` models.
+                            required:
+                            - name
+                            - description
+                            - schema
+                        required:
+                        - path
+                        - key
+                        - description
+                        - project_id
+                        - workspace_id
+                        - created
+                        - updated
+                        - type
+                        - json_schema
+                        title: JSON Schema Tool
+                        description: A tool that enforces structured output format using JSON Schema for consistent response formatting.
+                      - type: object
+                        properties:
+                          _id:
+                            type: string
+                            default: tool_01M2K22M8PJSCH5VGR50VAQVZZ
+                          path:
+                            type: string
+                            description: 'Entity storage path.
+
+
+                              With workspace-level API keys, use the format `project/folder/subfolder/...`. The first element must be the display name of an existing project, followed by nested folders (auto-created as needed). Example: `Default Project/agents`.
+
+
+                              With project-level API keys, the project is predetermined by the API key, so the path is relative to that project. Example: `agents`. For backward compatibility, a leading project name is ignored when it matches the scoped project.'
+                            example: Default Project
+                          key:
+                            type: string
+                            minLength: 1
+                            maxLength: 64
+                            pattern: ^[A-Za-z]([A-Za-z0-9]*([_-][A-Za-z0-9]+)*)?$
+                            description: Unique key of the tool as it will be displayed in the UI
+                          display_name:
+                            type: string
+                            description: The name of the tool as it will be displayed in the UI. This is optional and if not provided, the `key` will be used.
+                          description:
+                            type: string
+                            description: A description of the tool, used by the model to choose when and how to call the tool. We do recommend using the `description` field as accurate as possible to give enough context to the model to make the right decision.
+                          created_by_id:
+                            type:
+                            - string
+                            - 'null'
+                            description: The id of the user that created the tool
+                          updated_by_id:
+                            type:
+                            - string
+                            - 'null'
+                            description: The id of the user that last updated the tool
+                          project_id:
+                            type: string
+                          workspace_id:
+                            type: string
+                          created:
+                            type: string
+                          updated:
+                            type: string
+                          status:
+                            type: string
+                            enum:
+                            - live
+                            - draft
+                            - pending
+                            - published
+                            default: live
+                            description: The status of the tool. `Live` is the latest version of the tool. `Draft` is a version that is not yet published. `Pending` is a version that is pending approval. `Published` is a version that was live and has been replaced by a new version.
+                          type:
+                            type: string
+                            enum:
+                            - http
+                          http:
+                            type: object
+                            properties:
+                              blueprint:
+                                type: object
+                                properties:
+                                  url:
+                                    type: string
+                                    description: The URL to send the request to.
+                                  method:
+                                    type: string
+                                    enum:
+                                    - GET
+                                    - POST
+                                    - PUT
+                                    - DELETE
+                                    description: The HTTP method to use.
+                                  headers:
+                                    type: object
+                                    additionalProperties:
+                                      anyOf:
+                                      - type: string
+                                      - type: object
+                                        properties:
+                                          value:
+                                            type: string
+                                          encrypted:
+                                            type: boolean
+                                            default: false
+                                        required:
+                                        - value
+                                    default:
+                                      Content-Type:
+                                        value: application/json
+                                        encrypted: false
+                                    description: The headers to send with the request. Can be a string value or an object with value and encrypted properties.
+                                  body:
+                                    type: object
+                                    additionalProperties: {}
+                                    description: The body to send with the request.
+                                  timeout:
+                                    type: number
+                                    minimum: 1
+                                    maximum: 600
+                                    description: The request timeout in seconds. Defaults to 60 seconds when not set. When used in an agent, tool executions are also bound by the agent run `limits.tool_timeout` (default 5 minutes), so raise that limit for longer-running tools.
+                                required:
+                                - url
+                                - method
+                                description: The blueprint for the HTTP request. The `arguments` field will be used to replace the placeholders in the `url`, `headers`, `body`, and `arguments` fields.
+                              arguments:
+                                type: object
+                                additionalProperties:
+                                  type: object
+                                  properties:
+                                    type:
+                                      type: string
+                                      enum:
+                                      - string
+                                      - number
+                                      - boolean
+                                      description: The type of the argument.
+                                    description:
+                                      type: string
+                                      description: A description of the argument.
+                                    send_to_model:
+                                      type: boolean
+                                      default: true
+                                      description: Whether to send the argument to the model. If set to false, the argument will not be sent to the model and needs to be provided by the user or it will be left blank.
+                                    default_value:
+                                      anyOf:
+                                      - type: string
+                                      - type: number
+                                      - type: boolean
+                                      description: The default value of the argument.
+                                  required:
+                                  - type
+                                  - description
+                                description: The arguments to send with the request. The keys will be used to replace the placeholders in the `blueprint` field.
+                            required:
+                            - blueprint
+                        required:
+                        - path
+                        - key
+                        - description
+                        - project_id
+                        - workspace_id
+                        - created
+                        - updated
+                        - type
+                        - http
+                        title: HTTP Tool
+                        description: Executes HTTP requests to interact with external APIs and web services using customizable blueprints.
+                      - type: object
+                        properties:
+                          _id:
+                            type: string
+                            default: tool_01M2K22M8PNZC3V81VM74AMD7F
+                          path:
+                            type: string
+                            description: 'Entity storage path.
+
+
+                              With workspace-level API keys, use the format `project/folder/subfolder/...`. The first element must be the display name of an existing project, followed by nested folders (auto-created as needed). Example: `Default Project/agents`.
+
+
+                              With project-level API keys, the project is predetermined by the API key, so the path is relative to that project. Example: `agents`. For backward compatibility, a leading project name is ignored when it matches the scoped project.'
+                            example: Default Project
+                          key:
+                            type: string
+                            minLength: 1
+                            maxLength: 64
+                            pattern: ^[A-Za-z]([A-Za-z0-9]*([_-][A-Za-z0-9]+)*)?$
+                            description: Unique key of the tool as it will be displayed in the UI
+                          display_name:
+                            type: string
+                            description: The name of the tool as it will be displayed in the UI. This is optional and if not provided, the `key` will be used.
+                          description:
+                            type: string
+                            description: A description of the tool, used by the model to choose when and how to call the tool. We do recommend using the `description` field as accurate as possible to give enough context to the model to make the right decision.
+                          created_by_id:
+                            type:
+                            - string
+                            - 'null'
+                            description: The id of the user that created the tool
+                          updated_by_id:
+                            type:
+                            - string
+                            - 'null'
+                            description: The id of the user that last updated the tool
+                          project_id:
+                            type: string
+                          workspace_id:
+                            type: string
+                          created:
+                            type: string
+                          updated:
+                            type: string
+                          status:
+                            type: string
+                            enum:
+                            - live
+                            - draft
+                            - pending
+                            - published
+                            default: live
+                            description: The status of the tool. `Live` is the latest version of the tool. `Draft` is a version that is not yet published. `Pending` is a version that is pending approval. `Published` is a version that was live and has been replaced by a new version.
+                          type:
+                            type: string
+                            enum:
+                            - code
+                          code_tool:
+                            type: object
+                            properties:
+                              parameters:
+                                type: object
+                                properties:
+                                  type:
+                                    type: string
+                                    enum:
+                                    - object
+                                    description: The type must be "object"
+                                  properties:
+                                    type: object
+                                    additionalProperties: {}
+                                    description: The properties of the function parameters
+                                  required:
+                                    type: array
+                                    items:
+                                      type: string
+                                    description: Array of required parameter names
+                                required:
+                                - type
+                                - properties
+                                - required
+                                additionalProperties: {}
+                                description: The parameters the functions accepts, described as a JSON Schema object. See the `OpenAI` [guide](https://platform.openai.com/docs/guides/function-calling) for examples, and the [JSON Schema reference](https://json-schema.org/understanding-json-schema/) for documentation about the format.
+                              language:
+                                type: string
+                                enum:
+                                - python
+                              code:
+                                type: string
+                                minLength: 1
+                                description: The code to execute.
+                            required:
+                            - language
+                            - code
+                        required:
+                        - path
+                        - key
+                        - description
+                        - project_id
+                        - workspace_id
+                        - created
+                        - updated
+                        - type
+                        - code_tool
+                        title: Code Execution Tool
+                        description: Executes code snippets in a sandboxed environment, currently supporting Python.
+                  has_more:
+                    type: boolean
+                required:
+                - object
+                - data
+                - has_more
+        '401':
+          description: Unauthorized - Bearer token is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HonoApiError'
+    post:
+      tags:
+      - Tools
+      x-speakeasy-group: tools
+      x-speakeasy-name-override: create
+      x-cli-group: tools
+      x-cli-name: create
+      operationId: CreateTool
+      summary: Create tool
+      description: Creates a new tool in the workspace.
+      requestBody:
+        description: The tool to create
+        content:
+          application/json:
+            schema:
+              oneOf:
+              - type: object
+                properties:
+                  path:
+                    type: string
+                    description: 'Entity storage path.
+
+
+                      With workspace-level API keys, use the format `project/folder/subfolder/...`. The first element must be the display name of an existing project, followed by nested folders (auto-created as needed). Example: `Default Project/agents`.
+
+
+                      With project-level API keys, the project is predetermined by the API key, so the path is relative to that project. Example: `agents`. For backward compatibility, a leading project name is ignored when it matches the scoped project.'
+                    example: Default Project
+                  key:
+                    type: string
+                    minLength: 1
+                    maxLength: 64
+                    pattern: ^[A-Za-z]([A-Za-z0-9]*([_-][A-Za-z0-9]+)*)?$
+                    description: Unique key of the tool as it will be displayed in the UI
+                  display_name:
+                    type: string
+                    description: The name of the tool as it will be displayed in the UI. This is optional and if not provided, the `key` will be used.
+                  description:
+                    type: string
+                    description: A description of the tool, used by the model to choose when and how to call the tool. We do recommend using the `description` field as accurate as possible to give enough context to the model to make the right decision.
+                  status:
+                    type: string
+                    enum:
+                    - live
+                    - draft
+                    - pending
+                    - published
+                    default: live
+                    description: The status of the tool. `Live` is the latest version of the tool. `Draft` is a version that is not yet published. `Pending` is a version that is pending approval. `Published` is a version that was live and has been replaced by a new version.
+                  type:
+                    type: string
+                    enum:
+                    - function
+                  function:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                        description: The name of the function to be called. Must be a-z, A-Z, 0-9, or contain underscores and dashes, with a maximum length of 64.
+                      description:
+                        type: string
+                        description: A description of what the function does, used by the model to choose when and how to call the function.
+                      strict:
+                        type: boolean
+                        description: Whether to enable strict schema adherence when generating the function call. If set to true, the model will follow the exact schema defined in the `parameters` field. Only a subset of JSON Schema is supported when `strict` is `true`. Currently only compatible with `OpenAI` models.
+                      parameters:
+                        type: object
+                        properties:
+                          type:
+                            type: string
+                            enum:
+                            - object
+                            description: The type must be "object"
+                          properties:
+                            type: object
+                            additionalProperties: {}
+                            description: The properties of the function parameters
+                          required:
+                            type: array
+                            items:
+                              type: string
+                            description: Array of required parameter names
+                        required:
+                        - type
+                        - properties
+                        - required
+                        additionalProperties: {}
+                        description: The parameters the functions accepts, described as a JSON Schema object. See the `OpenAI` [guide](https://platform.openai.com/docs/guides/function-calling) for examples, and the [JSON Schema reference](https://json-schema.org/understanding-json-schema/) for documentation about the format.
+                    required:
+                    - name
+                required:
+                - path
+                - key
+                - description
+                - type
+                - function
+                title: Function Tool
+                description: A custom function tool that allows the model to call predefined functions with structured parameters.
+              - type: object
+                properties:
+                  path:
+                    type: string
+                    description: 'Entity storage path.
+
+
+                      With workspace-level API keys, use the format `project/folder/subfolder/...`. The first element must be the display name of an existing project, followed by nested folders (auto-created as needed). Example: `Default Project/agents`.
+
+
+                      With project-level API keys, the project is predetermined by the API key, so the path is relative to that project. Example: `agents`. For backward compatibility, a leading project name is ignored when it matches the scoped project.'
+                    example: Default Project
+                  key:
+                    type: string
+                    minLength: 1
+                    maxLength: 64
+                    pattern: ^[A-Za-z]([A-Za-z0-9]*([_-][A-Za-z0-9]+)*)?$
+                    description: Unique key of the tool as it will be displayed in the UI
+                  display_name:
+                    type: string
+                    description: The name of the tool as it will be displayed in the UI. This is optional and if not provided, the `key` will be used.
+                  description:
+                    type: string
+                    description: A description of the tool, used by the model to choose when and how to call the tool. We do recommend using the `description` field as accurate as possible to give enough context to the model to make the right decision.
+                  status:
+                    type: string
+                    enum:
+                    - live
+                    - draft
+                    - pending
+                    - published
+                    default: live
+                    description: The status of the tool. `Live` is the latest version of the tool. `Draft` is a version that is not yet published. `Pending` is a version that is pending approval. `Published` is a version that was live and has been replaced by a new version.
+                  type:
+                    type: string
+                    enum:
+                    - json_schema
+                  json_schema:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                        minLength: 1
+                        maxLength: 64
+                        description: The name of the response format. Must be a-z, A-Z, 0-9, or contain underscores and dashes, with a maximum length of 64.
+                      description:
+                        type: string
+                        description: A description of what the response format is for. This will be shown to the user.
+                      schema:
+                        type: object
+                        properties:
+                          type:
+                            type: string
+                            description: The JSON Schema type
+                          properties:
+                            type: object
+                            additionalProperties: {}
+                            description: The properties of the JSON Schema object
+                          required:
+                            type: array
+                            items:
+                              type: string
+                            description: Array of required property names
+                        required:
+                        - type
+                        - properties
+                        - required
+                        additionalProperties: {}
+                        description: The schema for the response format, described as a JSON Schema object. See the [JSON Schema reference](https://json-schema.org/understanding-json-schema/) for documentation about the format.
+                      strict:
+                        type: boolean
+                        description: Whether to enable strict schema adherence when generating the output. If set to true, the model will always follow the exact schema defined in the `schema` field. Only a subset of JSON Schema is supported when `strict` is `true`. Only compatible with `OpenAI` models.
+                    required:
+                    - name
+                    - description
+                    - schema
+                required:
+                - path
+                - key
+                - description
+                - type
+                - json_schema
+                title: JSON Schema Tool
+                description: A tool that enforces structured output format using JSON Schema for consistent response formatting.
+              - type: object
+                properties:
+                  path:
+                    type: string
+                    description: 'Entity storage path.
+
+
+                      With workspace-level API keys, use the format `project/folder/subfolder/...`. The first element must be the display name of an existing project, followed by nested folders (auto-created as needed). Example: `Default Project/agents`.
+
+
+                      With project-level API keys, the project is predetermined by the API key, so the path is relative to that project. Example: `agents`. For backward compatibility, a leading project name is ignored when it matches the scoped project.'
+                    example: Default Project
+                  key:
+                    type: string
+                    minLength: 1
+                    maxLength: 64
+                    pattern: ^[A-Za-z]([A-Za-z0-9]*([_-][A-Za-z0-9]+)*)?$
+                    description: Unique key of the tool as it will be displayed in the UI
+                  display_name:
+                    type: string
+                    description: The name of the tool as it will be displayed in the UI. This is optional and if not provided, the `key` will be used.
+                  description:
+                    type: string
+                    description: A description of the tool, used by the model to choose when and how to call the tool. We do recommend using the `description` field as accurate as possible to give enough context to the model to make the right decision.
+                  status:
+                    type: string
+                    enum:
+                    - live
+                    - draft
+                    - pending
+                    - published
+                    default: live
+                    description: The status of the tool. `Live` is the latest version of the tool. `Draft` is a version that is not yet published. `Pending` is a version that is pending approval. `Published` is a version that was live and has been replaced by a new version.
+                  type:
+                    type: string
+                    enum:
+                    - http
+                  http:
+                    type: object
+                    properties:
+                      blueprint:
+                        type: object
+                        properties:
+                          url:
+                            type: string
+                            description: The URL to send the request to.
+                          method:
+                            type: string
+                            enum:
+                            - GET
+                            - POST
+                            - PUT
+                            - DELETE
+                            description: The HTTP method to use.
+                          headers:
+                            type: object
+                            additionalProperties:
+                              anyOf:
+                              - type: string
+                              - type: object
+                                properties:
+                                  value:
+                                    type: string
+                                  encrypted:
+                                    type: boolean
+                                    default: false
+                                required:
+                                - value
+                            default:
+                              Content-Type:
+                                value: application/json
+                                encrypted: false
+                            description: The headers to send with the request. Can be a string value or an object with value and encrypted properties.
+                          body:
+                            type: object
+                            additionalProperties: {}
+                            description: The body to send with the request.
+                          timeout:
+                            type: number
+                            minimum: 1
+                            maximum: 600
+                            description: The request timeout in seconds. Defaults to 60 seconds when not set. When used in an agent, tool executions are also bound by the agent run `limits.tool_timeout` (default 5 minutes), so raise that limit for longer-running tools.
+                        required:
+                        - url
+                        - method
+                        description: The blueprint for the HTTP request. The `arguments` field will be used to replace the placeholders in the `url`, `headers`, `body`, and `arguments` fields.
+                      arguments:
+                        type: object
+                        additionalProperties:
+                          type: object
+                          properties:
+                            type:
+                              type: string
+                              enum:
+                              - string
+                              - number
+                              - boolean
+                              description: The type of the argument.
+                            description:
+                              type: string
+                              description: A description of the argument.
+                            send_to_model:
+                              type: boolean
+                              default: true
+                              description: Whether to send the argument to the model. If set to false, the argument will not be sent to the model and needs to be provided by the user or it will be left blank.
+                            default_value:
+                              anyOf:
+                              - type: string
+                              - type: number
+                              - type: boolean
+                              description: The default value of the argument.
+                          required:
+                          - type
+                          - description
+                        description: The arguments to send with the request. The keys will be used to replace the placeholders in the `blueprint` field.
+                    required:
+                    - blueprint
+                required:
+                - path
+                - key
+                - description
+                - type
+                - http
+                title: HTTP Tool
+                description: Executes HTTP requests to interact with external APIs and web services using customizable blueprints.
+              - type: object
+                properties:
+                  path:
+                    type: string
+                    description: 'Entity storage path.
+
+
+                      With workspace-level API keys, use the format `project/folder/subfolder/...`. The first element must be the display name of an existing project, followed by nested folders (auto-created as needed). Example: `Default Project/agents`.
+
+
+                      With project-level API keys, the project is predetermined by the API key, so the path is relative to that project. Example: `agents`. For backward compatibility, a leading project name is ignored when it matches the scoped project.'
+                    example: Default Project
+                  key:
+                    type: string
+                    minLength: 1
+                    maxLength: 64
+                    pattern: ^[A-Za-z]([A-Za-z0-9]*([_-][A-Za-z0-9]+)*)?$
+                    description: Unique key of the tool as it will be displayed in the UI
+                  display_name:
+                    type: string
+                    description: The name of the tool as it will be displayed in the UI. This is optional and if not provided, the `key` will be used.
+                  description:
+                    type: string
+                    description: A description of the tool, used by the model to choose when and how to call the tool. We do recommend using the `description` field as accurate as possible to give enough context to the model to make the right decision.
+                  status:
+                    type: string
+                    enum:
+                    - live
+                    - draft
+                    - pending
+                    - published
+                    default: live
+                    description: The status of the tool. `Live` is the latest version of the tool. `Draft` is a version that is not yet published. `Pending` is a version that is pending approval. `Published` is a version that was live and has been replaced by a new version.
+                  type:
+                    type: string
+                    enum:
+                    - code
+                  code_tool:
+                    type: object
+                    properties:
+                      parameters:
+                        type: object
+                        properties:
+                          type:
+                            type: string
+                            enum:
+                            - object
+                            description: The type must be "object"
+                          properties:
+                            type: object
+                            additionalProperties: {}
+                            description: The properties of the function parameters
+                          required:
+                            type: array
+                            items:
+                              type: string
+                            description: Array of required parameter names
+                        required:
+                        - type
+                        - properties
+                        - required
+                        additionalProperties: {}
+                        description: The parameters the functions accepts, described as a JSON Schema object. See the `OpenAI` [guide](https://platform.openai.com/docs/guides/function-calling) for examples, and the [JSON Schema reference](https://json-schema.org/understanding-json-schema/) for documentation about the format.
+                      language:
+                        type: string
+                        enum:
+                        - python
+                      code:
+                        type: string
+                        minLength: 1
+                        description: The code to execute.
+                    required:
+                    - language
+                    - code
+                required:
+                - path
+                - key
+                - description
+                - type
+                - code_tool
+                title: Code Execution Tool
+                description: Executes code snippets in a sandboxed environment, currently supporting Python.
+      responses:
+        '200':
+          description: Successfully created the tool.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - type: object
+                  properties:
+                    _id:
+                      type: string
+                      default: tool_01M2K22M8RKB4A27CK4TP3JV4E
+                    path:
+                      type: string
+                      description: 'Entity storage path.
+
+
+                        With workspace-level API keys, use the format `project/folder/subfolder/...`. The first element must be the display name of an existing project, followed by nested folders (auto-created as needed). Example: `Default Project/agents`.
+
+
+                        With project-level API keys, the project is predetermined by the API key, so the path is relative to that project. Example: `agents`. For backward compatibility, a leading project name is ignored when it matches the scoped project.'
+                      example: Default Project
+                    key:
+                      type: string
+                      minLength: 1
+                      maxLength: 64
+                      pattern: ^[A-Za-z]([A-Za-z0-9]*([_-][A-Za-z0-9]+)*)?$
+                      description: Unique key of the tool as it will be displayed in the UI
+                    display_name:
+                      type: string
+                      description: The name of the tool as it will be displayed in the UI. This is optional and if not provided, the `key` will be used.
+                    description:
+                      type: string
+                      description: A description of the tool, used by the model to choose when and how to call the tool. We do recommend using the `description` field as accurate as possible to give enough context to the model to make the right decision.
+                    created_by_id:
+                      type:
+                      - string
+                      - 'null'
+                      description: The id of the user that created the tool
+                    updated_by_id:
+                      type:
+                      - string
+                      - 'null'
+                      description: The id of the user that last updated the tool
+                    project_id:
+                      type: string
+                    workspace_id:
+                      type: string
+                    created:
+                      type: string
+                    updated:
+                      type: string
+                    status:
+                      type: string
+                      enum:
+                      - live
+                      - draft
+                      - pending
+                      - published
+                      default: live
+                      description: The status of the tool. `Live` is the latest version of the tool. `Draft` is a version that is not yet published. `Pending` is a version that is pending approval. `Published` is a version that was live and has been replaced by a new version.
+                    type:
+                      type: string
+                      enum:
+                      - function
+                    function:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                          description: The name of the function to be called. Must be a-z, A-Z, 0-9, or contain underscores and dashes, with a maximum length of 64.
+                        description:
+                          type: string
+                          description: A description of what the function does, used by the model to choose when and how to call the function.
+                        strict:
+                          type: boolean
+                          description: Whether to enable strict schema adherence when generating the function call. If set to true, the model will follow the exact schema defined in the `parameters` field. Only a subset of JSON Schema is supported when `strict` is `true`. Currently only compatible with `OpenAI` models.
+                        parameters:
+                          type: object
+                          properties:
+                            type:
+                              type: string
+                              enum:
+                              - object
+                              description: The type must be "object"
+                            properties:
+                              type: object
+                              additionalProperties: {}
+                              description: The properties of the function parameters
+                            required:
+                              type: array
+                              items:
+                                type: string
+                              description: Array of required parameter names
+                          required:
+                          - type
+                          - properties
+                          - required
+                          additionalProperties: {}
+                          description: The parameters the functions accepts, described as a JSON Schema object. See the `OpenAI` [guide](https://platform.openai.com/docs/guides/function-calling) for examples, and the [JSON Schema reference](https://json-schema.org/understanding-json-schema/) for documentation about the format.
+                      required:
+                      - name
+                  required:
+                  - path
+                  - key
+                  - description
+                  - project_id
+                  - workspace_id
+                  - created
+                  - updated
+                  - type
+                  - function
+                  title: Function Tool
+                  description: A custom function tool that allows the model to call predefined functions with structured parameters.
+                - type: object
+                  properties:
+                    _id:
+                      type: string
+                      default: tool_01M2K22M8R0ZGNG877AMS14XDM
+                    path:
+                      type: string
+                      description: 'Entity storage path.
+
+
+                        With workspace-level API keys, use the format `project/folder/subfolder/...`. The first element must be the display name of an existing project, followed by nested folders (auto-created as needed). Example: `Default Project/agents`.
+
+
+                        With project-level API keys, the project is predetermined by the API key, so the path is relative to that project. Example: `agents`. For backward compatibility, a leading project name is ignored when it matches the scoped project.'
+                      example: Default Project
+                    key:
+                      type: string
+                      minLength: 1
+                      maxLength: 64
+                      pattern: ^[A-Za-z]([A-Za-z0-9]*([_-][A-Za-z0-9]+)*)?$
+                      description: Unique key of the tool as it will be displayed in the UI
+                    display_name:
+                      type: string
+                      description: The name of the tool as it will be displayed in the UI. This is optional and if not provided, the `key` will be used.
+                    description:
+                      type: string
+                      description: A description of the tool, used by the model to choose when and how to call the tool. We do recommend using the `description` field as accurate as possible to give enough context to the model to make the right decision.
+                    created_by_id:
+                      type:
+                      - string
+                      - 'null'
+                      description: The id of the user that created the tool
+                    updated_by_id:
+                      type:
+                      - string
+                      - 'null'
+                      description: The id of the user that last updated the tool
+                    project_id:
+                      type: string
+                    workspace_id:
+                      type: string
+                    created:
+                      type: string
+                    updated:
+                      type: string
+                    status:
+                      type: string
+                      enum:
+                      - live
+                      - draft
+                      - pending
+                      - published
+                      default: live
+                      description: The status of the tool. `Live` is the latest version of the tool. `Draft` is a version that is not yet published. `Pending` is a version that is pending approval. `Published` is a version that was live and has been replaced by a new version.
+                    type:
+                      type: string
+                      enum:
+                      - json_schema
+                    json_schema:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                          minLength: 1
+                          maxLength: 64
+                          description: The name of the response format. Must be a-z, A-Z, 0-9, or contain underscores and dashes, with a maximum length of 64.
+                        description:
+                          type: string
+                          description: A description of what the response format is for. This will be shown to the user.
+                        schema:
+                          type: object
+                          properties:
+                            type:
+                              type: string
+                              description: The JSON Schema type
+                            properties:
+                              type: object
+                              additionalProperties: {}
+                              description: The properties of the JSON Schema object
+                            required:
+                              type: array
+                              items:
+                                type: string
+                              description: Array of required property names
+                          required:
+                          - type
+                          - properties
+                          - required
+                          additionalProperties: {}
+                          description: The schema for the response format, described as a JSON Schema object. See the [JSON Schema reference](https://json-schema.org/understanding-json-schema/) for documentation about the format.
+                        strict:
+                          type: boolean
+                          description: Whether to enable strict schema adherence when generating the output. If set to true, the model will always follow the exact schema defined in the `schema` field. Only a subset of JSON Schema is supported when `strict` is `true`. Only compatible with `OpenAI` models.
+                      required:
+                      - name
+                      - description
+                      - schema
+                  required:
+                  - path
+                  - key
+                  - description
+                  - project_id
+                  - workspace_id
+                  - created
+                  - updated
+                  - type
+                  - json_schema
+                  title: JSON Schema Tool
+                  description: A tool that enforces structured output format using JSON Schema for consistent response formatting.
+                - type: object
+                  properties:
+                    _id:
+                      type: string
+                      default: tool_01M2K22M8S9A7A5F17AZBCZYXC
+                    path:
+                      type: string
+                      description: 'Entity storage path.
+
+
+                        With workspace-level API keys, use the format `project/folder/subfolder/...`. The first element must be the display name of an existing project, followed by nested folders (auto-created as needed). Example: `Default Project/agents`.
+
+
+                        With project-level API keys, the project is predetermined by the API key, so the path is relative to that project. Example: `agents`. For backward compatibility, a leading project name is ignored when it matches the scoped project.'
+                      example: Default Project
+                    key:
+                      type: string
+                      minLength: 1
+                      maxLength: 64
+                      pattern: ^[A-Za-z]([A-Za-z0-9]*([_-][A-Za-z0-9]+)*)?$
+                      description: Unique key of the tool as it will be displayed in the UI
+                    display_name:
+                      type: string
+                      description: The name of the tool as it will be displayed in the UI. This is optional and if not provided, the `key` will be used.
+                    description:
+                      type: string
+                      description: A description of the tool, used by the model to choose when and how to call the tool. We do recommend using the `description` field as accurate as possible to give enough context to the model to make the right decision.
+                    created_by_id:
+                      type:
+                      - string
+                      - 'null'
+                      description: The id of the user that created the tool
+                    updated_by_id:
+                      type:
+                      - string
+                      - 'null'
+                      description: The id of the user that last updated the tool
+                    project_id:
+                      type: string
+                    workspace_id:
+                      type: string
+                    created:
+                      type: string
+                    updated:
+                      type: string
+                    status:
+                      type: string
+                      enum:
+                      - live
+                      - draft
+                      - pending
+                      - published
+                      default: live
+                      description: The status of the tool. `Live` is the latest version of the tool. `Draft` is a version that is not yet published. `Pending` is a version that is pending approval. `Published` is a version that was live and has been replaced by a new version.
+                    type:
+                      type: string
+                      enum:
+                      - http
+                    http:
+                      type: object
+                      properties:
+                        blueprint:
+                          type: object
+                          properties:
+                            url:
+                              type: string
+                              description: The URL to send the request to.
+                            method:
+                              type: string
+                              enum:
+                              - GET
+                              - POST
+                              - PUT
+                              - DELETE
+                              description: The HTTP method to use.
+                            headers:
+                              type: object
+                              additionalProperties:
+                                anyOf:
+                                - type: string
+                                - type: object
+                                  properties:
+                                    value:
+                                      type: string
+                                    encrypted:
+                                      type: boolean
+                                      default: false
+                                  required:
+                                  - value
+                              default:
+                                Content-Type:
+                                  value: application/json
+                                  encrypted: false
+                              description: The headers to send with the request. Can be a string value or an object with value and encrypted properties.
+                            body:
+                              type: object
+                              additionalProperties: {}
+                              description: The body to send with the request.
+                            timeout:
+                              type: number
+                              minimum: 1
+                              maximum: 600
+                              description: The request timeout in seconds. Defaults to 60 seconds when not set. When used in an agent, tool executions are also bound by the agent run `limits.tool_timeout` (default 5 minutes), so raise that limit for longer-running tools.
+                          required:
+                          - url
+                          - method
+                          description: The blueprint for the HTTP request. The `arguments` field will be used to replace the placeholders in the `url`, `headers`, `body`, and `arguments` fields.
+                        arguments:
+                          type: object
+                          additionalProperties:
+                            type: object
+                            properties:
+                              type:
+                                type: string
+                                enum:
+                                - string
+                                - number
+                                - boolean
+                                description: The type of the argument.
+                              description:
+                                type: string
+                                description: A description of the argument.
+                              send_to_model:
+                                type: boolean
+                                default: true
+                                description: Whether to send the argument to the model. If set to false, the argument will not be sent to the model and needs to be provided by the user or it will be left blank.
+                              default_value:
+                                anyOf:
+                                - type: string
+                                - type: number
+                                - type: boolean
+                                description: The default value of the argument.
+                            required:
+                            - type
+                            - description
+                          description: The arguments to send with the request. The keys will be used to replace the placeholders in the `blueprint` field.
+                      required:
+                      - blueprint
+                  required:
+                  - path
+                  - key
+                  - description
+                  - project_id
+                  - workspace_id
+                  - created
+                  - updated
+                  - type
+                  - http
+                  title: HTTP Tool
+                  description: Executes HTTP requests to interact with external APIs and web services using customizable blueprints.
+                - type: object
+                  properties:
+                    _id:
+                      type: string
+                      default: tool_01M2K22M8SBPQFX6TZEVDKR0QC
+                    path:
+                      type: string
+                      description: 'Entity storage path.
+
+
+                        With workspace-level API keys, use the format `project/folder/subfolder/...`. The first element must be the display name of an existing project, followed by nested folders (auto-created as needed). Example: `Default Project/agents`.
+
+
+                        With project-level API keys, the project is predetermined by the API key, so the path is relative to that project. Example: `agents`. For backward compatibility, a leading project name is ignored when it matches the scoped project.'
+                      example: Default Project
+                    key:
+                      type: string
+                      minLength: 1
+                      maxLength: 64
+                      pattern: ^[A-Za-z]([A-Za-z0-9]*([_-][A-Za-z0-9]+)*)?$
+                      description: Unique key of the tool as it will be displayed in the UI
+                    display_name:
+                      type: string
+                      description: The name of the tool as it will be displayed in the UI. This is optional and if not provided, the `key` will be used.
+                    description:
+                      type: string
+                      description: A description of the tool, used by the model to choose when and how to call the tool. We do recommend using the `description` field as accurate as possible to give enough context to the model to make the right decision.
+                    created_by_id:
+                      type:
+                      - string
+                      - 'null'
+                      description: The id of the user that created the tool
+                    updated_by_id:
+                      type:
+                      - string
+                      - 'null'
+                      description: The id of the user that last updated the tool
+                    project_id:
+                      type: string
+                    workspace_id:
+                      type: string
+                    created:
+                      type: string
+                    updated:
+                      type: string
+                    status:
+                      type: string
+                      enum:
+                      - live
+                      - draft
+                      - pending
+                      - published
+                      default: live
+                      description: The status of the tool. `Live` is the latest version of the tool. `Draft` is a version that is not yet published. `Pending` is a version that is pending approval. `Published` is a version that was live and has been replaced by a new version.
+                    type:
+                      type: string
+                      enum:
+                      - code
+                    code_tool:
+                      type: object
+                      properties:
+                        parameters:
+                          type: object
+                          properties:
+                            type:
+                              type: string
+                              enum:
+                              - object
+                              description: The type must be "object"
+                            properties:
+                              type: object
+                              additionalProperties: {}
+                              description: The properties of the function parameters
+                            required:
+                              type: array
+                              items:
+                                type: string
+                              description: Array of required parameter names
+                          required:
+                          - type
+                          - properties
+                          - required
+                          additionalProperties: {}
+                          description: The parameters the functions accepts, described as a JSON Schema object. See the `OpenAI` [guide](https://platform.openai.com/docs/guides/function-calling) for examples, and the [JSON Schema reference](https://json-schema.org/understanding-json-schema/) for documentation about the format.
+                        language:
+                          type: string
+                          enum:
+                          - python
+                        code:
+                          type: string
+                          minLength: 1
+                          description: The code to execute.
+                      required:
+                      - language
+                      - code
+                  required:
+                  - path
+                  - key
+                  - description
+                  - project_id
+                  - workspace_id
+                  - created
+                  - updated
+                  - type
+                  - code_tool
+                  title: Code Execution Tool
+                  description: Executes code snippets in a sandboxed environment, currently supporting Python.
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /v2/tools/{tool_id}:
+    patch:
+      tags:
+      - Tools
+      x-speakeasy-group: tools
+      x-speakeasy-name-override: update
+      x-cli-group: tools
+      x-cli-name: update
+      operationId: UpdateTool
+      summary: Update tool
+      description: Updates a tool in the workspace.
+      parameters:
+      - schema:
+          type: string
+        required: true
+        name: tool_id
+        in: path
+      requestBody:
+        description: The tool to update
+        content:
+          application/json:
+            schema:
+              oneOf:
+              - type: object
+                properties:
+                  path:
+                    type: string
+                    description: 'Entity storage path.
+
+
+                      With workspace-level API keys, use the format `project/folder/subfolder/...`. The first element must be the display name of an existing project, followed by nested folders (auto-created as needed). Example: `Default Project/agents`.
+
+
+                      With project-level API keys, the project is predetermined by the API key, so the path is relative to that project. Example: `agents`. For backward compatibility, a leading project name is ignored when it matches the scoped project.'
+                    example: Default Project
+                  key:
+                    type: string
+                    minLength: 1
+                    maxLength: 64
+                    pattern: ^[A-Za-z]([A-Za-z0-9]*([_-][A-Za-z0-9]+)*)?$
+                    description: Unique key of the tool as it will be displayed in the UI
+                  display_name:
+                    type: string
+                    description: The name of the tool as it will be displayed in the UI. This is optional and if not provided, the `key` will be used.
+                  description:
+                    type: string
+                    description: A description of the tool, used by the model to choose when and how to call the tool. We do recommend using the `description` field as accurate as possible to give enough context to the model to make the right decision.
+                  status:
+                    type: string
+                    enum:
+                    - live
+                    - draft
+                    - pending
+                    - published
+                    default: live
+                    description: The status of the tool. `Live` is the latest version of the tool. `Draft` is a version that is not yet published. `Pending` is a version that is pending approval. `Published` is a version that was live and has been replaced by a new version.
+                  type:
+                    type: string
+                    enum:
+                    - function
+                  function:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                        description: The name of the function to be called. Must be a-z, A-Z, 0-9, or contain underscores and dashes, with a maximum length of 64.
+                      description:
+                        type: string
+                        description: A description of what the function does, used by the model to choose when and how to call the function.
+                      strict:
+                        type: boolean
+                        description: Whether to enable strict schema adherence when generating the function call. If set to true, the model will follow the exact schema defined in the `parameters` field. Only a subset of JSON Schema is supported when `strict` is `true`. Currently only compatible with `OpenAI` models.
+                      parameters:
+                        type: object
+                        properties:
+                          type:
+                            type: string
+                            enum:
+                            - object
+                            description: The type must be "object"
+                          properties:
+                            type: object
+                            additionalProperties: {}
+                            description: The properties of the function parameters
+                          required:
+                            type: array
+                            items:
+                              type: string
+                            description: Array of required parameter names
+                        required:
+                        - type
+                        - properties
+                        - required
+                        additionalProperties: {}
+                        description: The parameters the functions accepts, described as a JSON Schema object. See the `OpenAI` [guide](https://platform.openai.com/docs/guides/function-calling) for examples, and the [JSON Schema reference](https://json-schema.org/understanding-json-schema/) for documentation about the format.
+                    required:
+                    - name
+                  versionIncrement:
+                    type: string
+                    enum:
+                    - major
+                    - minor
+                    - patch
+                  versionDescription:
+                    type: string
+                required:
+                - type
+                title: Update Function Tool
+                description: Updates an existing function tool configuration.
+              - type: object
+                properties:
+                  path:
+                    type: string
+                    description: 'Entity storage path.
+
+
+                      With workspace-level API keys, use the format `project/folder/subfolder/...`. The first element must be the display name of an existing project, followed by nested folders (auto-created as needed). Example: `Default Project/agents`.
+
+
+                      With project-level API keys, the project is predetermined by the API key, so the path is relative to that project. Example: `agents`. For backward compatibility, a leading project name is ignored when it matches the scoped project.'
+                    example: Default Project
+                  key:
+                    type: string
+                    minLength: 1
+                    maxLength: 64
+                    pattern: ^[A-Za-z]([A-Za-z0-9]*([_-][A-Za-z0-9]+)*)?$
+                    description: Unique key of the tool as it will be displayed in the UI
+                  display_name:
+                    type: string
+                    description: The name of the tool as it will be displayed in the UI. This is optional and if not provided, the `key` will be used.
+                  description:
+                    type: string
+                    description: A description of the tool, used by the model to choose when and how to call the tool. We do recommend using the `description` field as accurate as possible to give enough context to the model to make the right decision.
+                  status:
+                    type: string
+                    enum:
+                    - live
+                    - draft
+                    - pending
+                    - published
+                    default: live
+                    description: The status of the tool. `Live` is the latest version of the tool. `Draft` is a version that is not yet published. `Pending` is a version that is pending approval. `Published` is a version that was live and has been replaced by a new version.
+                  type:
+                    type: string
+                    enum:
+                    - json_schema
+                  json_schema:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                        minLength: 1
+                        maxLength: 64
+                        description: The name of the response format. Must be a-z, A-Z, 0-9, or contain underscores and dashes, with a maximum length of 64.
+                      description:
+                        type: string
+                        description: A description of what the response format is for. This will be shown to the user.
+                      schema:
+                        type: object
+                        properties:
+                          type:
+                            type: string
+                            description: The JSON Schema type
+                          properties:
+                            type: object
+                            additionalProperties: {}
+                            description: The properties of the JSON Schema object
+                          required:
+                            type: array
+                            items:
+                              type: string
+                            description: Array of required property names
+                        required:
+                        - type
+                        - properties
+                        - required
+                        additionalProperties: {}
+                        description: The schema for the response format, described as a JSON Schema object. See the [JSON Schema reference](https://json-schema.org/understanding-json-schema/) for documentation about the format.
+                      strict:
+                        type: boolean
+                        description: Whether to enable strict schema adherence when generating the output. If set to true, the model will always follow the exact schema defined in the `schema` field. Only a subset of JSON Schema is supported when `strict` is `true`. Only compatible with `OpenAI` models.
+                    required:
+                    - name
+                    - description
+                    - schema
+                  versionIncrement:
+                    type: string
+                    enum:
+                    - major
+                    - minor
+                    - patch
+                  versionDescription:
+                    type: string
+                required:
+                - type
+                title: Update JSON Schema Tool
+                description: Updates an existing JSON Schema tool configuration.
+              - type: object
+                properties:
+                  path:
+                    type: string
+                    description: 'Entity storage path.
+
+
+                      With workspace-level API keys, use the format `project/folder/subfolder/...`. The first element must be the display name of an existing project, followed by nested folders (auto-created as needed). Example: `Default Project/agents`.
+
+
+                      With project-level API keys, the project is predetermined by the API key, so the path is relative to that project. Example: `agents`. For backward compatibility, a leading project name is ignored when it matches the scoped project.'
+                    example: Default Project
+                  key:
+                    type: string
+                    minLength: 1
+                    maxLength: 64
+                    pattern: ^[A-Za-z]([A-Za-z0-9]*([_-][A-Za-z0-9]+)*)?$
+                    description: Unique key of the tool as it will be displayed in the UI
+                  display_name:
+                    type: string
+                    description: The name of the tool as it will be displayed in the UI. This is optional and if not provided, the `key` will be used.
+                  description:
+                    type: string
+                    description: A description of the tool, used by the model to choose when and how to call the tool. We do recommend using the `description` field as accurate as possible to give enough context to the model to make the right decision.
+                  status:
+                    type: string
+                    enum:
+                    - live
+                    - draft
+                    - pending
+                    - published
+                    default: live
+                    description: The status of the tool. `Live` is the latest version of the tool. `Draft` is a version that is not yet published. `Pending` is a version that is pending approval. `Published` is a version that was live and has been replaced by a new version.
+                  type:
+                    type: string
+                    enum:
+                    - http
+                  http:
+                    type: object
+                    properties:
+                      blueprint:
+                        type: object
+                        properties:
+                          url:
+                            type: string
+                            description: The URL to send the request to.
+                          method:
+                            type: string
+                            enum:
+                            - GET
+                            - POST
+                            - PUT
+                            - DELETE
+                            description: The HTTP method to use.
+                          headers:
+                            type: object
+                            additionalProperties:
+                              anyOf:
+                              - type: string
+                              - type: object
+                                properties:
+                                  value:
+                                    type: string
+                                  encrypted:
+                                    type: boolean
+                                    default: false
+                                required:
+                                - value
+                            default:
+                              Content-Type:
+                                value: application/json
+                                encrypted: false
+                            description: The headers to send with the request. Can be a string value or an object with value and encrypted properties.
+                          body:
+                            type: object
+                            additionalProperties: {}
+                            description: The body to send with the request.
+                          timeout:
+                            type: number
+                            minimum: 1
+                            maximum: 600
+                            description: The request timeout in seconds. Defaults to 60 seconds when not set. When used in an agent, tool executions are also bound by the agent run `limits.tool_timeout` (default 5 minutes), so raise that limit for longer-running tools.
+                        required:
+                        - url
+                        - method
+                        description: The blueprint for the HTTP request. The `arguments` field will be used to replace the placeholders in the `url`, `headers`, `body`, and `arguments` fields.
+                      arguments:
+                        type: object
+                        additionalProperties:
+                          type: object
+                          properties:
+                            type:
+                              type: string
+                              enum:
+                              - string
+                              - number
+                              - boolean
+                              description: The type of the argument.
+                            description:
+                              type: string
+                              description: A description of the argument.
+                            send_to_model:
+                              type: boolean
+                              default: true
+                              description: Whether to send the argument to the model. If set to false, the argument will not be sent to the model and needs to be provided by the user or it will be left blank.
+                            default_value:
+                              anyOf:
+                              - type: string
+                              - type: number
+                              - type: boolean
+                              description: The default value of the argument.
+                          required:
+                          - type
+                          - description
+                        description: The arguments to send with the request. The keys will be used to replace the placeholders in the `blueprint` field.
+                    required:
+                    - blueprint
+                  versionIncrement:
+                    type: string
+                    enum:
+                    - major
+                    - minor
+                    - patch
+                  versionDescription:
+                    type: string
+                required:
+                - type
+                title: Update HTTP Tool
+                description: Updates an existing HTTP tool configuration.
+              - type: object
+                properties:
+                  path:
+                    type: string
+                    description: 'Entity storage path.
+
+
+                      With workspace-level API keys, use the format `project/folder/subfolder/...`. The first element must be the display name of an existing project, followed by nested folders (auto-created as needed). Example: `Default Project/agents`.
+
+
+                      With project-level API keys, the project is predetermined by the API key, so the path is relative to that project. Example: `agents`. For backward compatibility, a leading project name is ignored when it matches the scoped project.'
+                    example: Default Project
+                  key:
+                    type: string
+                    minLength: 1
+                    maxLength: 64
+                    pattern: ^[A-Za-z]([A-Za-z0-9]*([_-][A-Za-z0-9]+)*)?$
+                    description: Unique key of the tool as it will be displayed in the UI
+                  display_name:
+                    type: string
+                    description: The name of the tool as it will be displayed in the UI. This is optional and if not provided, the `key` will be used.
+                  description:
+                    type: string
+                    description: A description of the tool, used by the model to choose when and how to call the tool. We do recommend using the `description` field as accurate as possible to give enough context to the model to make the right decision.
+                  status:
+                    type: string
+                    enum:
+                    - live
+                    - draft
+                    - pending
+                    - published
+                    default: live
+                    description: The status of the tool. `Live` is the latest version of the tool. `Draft` is a version that is not yet published. `Pending` is a version that is pending approval. `Published` is a version that was live and has been replaced by a new version.
+                  type:
+                    type: string
+                    enum:
+                    - code
+                  code_tool:
+                    type: object
+                    properties:
+                      parameters:
+                        type: object
+                        properties:
+                          type:
+                            type: string
+                            enum:
+                            - object
+                            description: The type must be "object"
+                          properties:
+                            type: object
+                            additionalProperties: {}
+                            description: The properties of the function parameters
+                          required:
+                            type: array
+                            items:
+                              type: string
+                            description: Array of required parameter names
+                        required:
+                        - type
+                        - properties
+                        - required
+                        additionalProperties: {}
+                        description: The parameters the functions accepts, described as a JSON Schema object. See the `OpenAI` [guide](https://platform.openai.com/docs/guides/function-calling) for examples, and the [JSON Schema reference](https://json-schema.org/understanding-json-schema/) for documentation about the format.
+                      language:
+                        type: string
+                        enum:
+                        - python
+                      code:
+                        type: string
+                        minLength: 1
+                        description: The code to execute.
+                    required:
+                    - language
+                    - code
+                  versionIncrement:
+                    type: string
+                    enum:
+                    - major
+                    - minor
+                    - patch
+                  versionDescription:
+                    type: string
+                required:
+                - type
+                title: Update Code Execution Tool
+                description: Updates an existing code execution tool configuration.
+      responses:
+        '200':
+          description: Successfully updated the tool.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - type: object
+                  properties:
+                    _id:
+                      type: string
+                      default: tool_01M2K22M8V4XED13K5PK8A0EW9
+                    path:
+                      type: string
+                      description: 'Entity storage path.
+
+
+                        With workspace-level API keys, use the format `project/folder/subfolder/...`. The first element must be the display name of an existing project, followed by nested folders (auto-created as needed). Example: `Default Project/agents`.
+
+
+                        With project-level API keys, the project is predetermined by the API key, so the path is relative to that project. Example: `agents`. For backward compatibility, a leading project name is ignored when it matches the scoped project.'
+                      example: Default Project
+                    key:
+                      type: string
+                      minLength: 1
+                      maxLength: 64
+                      pattern: ^[A-Za-z]([A-Za-z0-9]*([_-][A-Za-z0-9]+)*)?$
+                      description: Unique key of the tool as it will be displayed in the UI
+                    display_name:
+                      type: string
+                      description: The name of the tool as it will be displayed in the UI. This is optional and if not provided, the `key` will be used.
+                    description:
+                      type: string
+                      description: A description of the tool, used by the model to choose when and how to call the tool. We do recommend using the `description` field as accurate as possible to give enough context to the model to make the right decision.
+                    created_by_id:
+                      type:
+                      - string
+                      - 'null'
+                      description: The id of the user that created the tool
+                    updated_by_id:
+                      type:
+                      - string
+                      - 'null'
+                      description: The id of the user that last updated the tool
+                    project_id:
+                      type: string
+                    workspace_id:
+                      type: string
+                    created:
+                      type: string
+                    updated:
+                      type: string
+                    status:
+                      type: string
+                      enum:
+                      - live
+                      - draft
+                      - pending
+                      - published
+                      default: live
+                      description: The status of the tool. `Live` is the latest version of the tool. `Draft` is a version that is not yet published. `Pending` is a version that is pending approval. `Published` is a version that was live and has been replaced by a new version.
+                    type:
+                      type: string
+                      enum:
+                      - function
+                    function:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                          description: The name of the function to be called. Must be a-z, A-Z, 0-9, or contain underscores and dashes, with a maximum length of 64.
+                        description:
+                          type: string
+                          description: A description of what the function does, used by the model to choose when and how to call the function.
+                        strict:
+                          type: boolean
+                          description: Whether to enable strict schema adherence when generating the function call. If set to true, the model will follow the exact schema defined in the `parameters` field. Only a subset of JSON Schema is supported when `strict` is `true`. Currently only compatible with `OpenAI` models.
+                        parameters:
+                          type: object
+                          properties:
+                            type:
+                              type: string
+                              enum:
+                              - object
+                              description: The type must be "object"
+                            properties:
+                              type: object
+                              additionalProperties: {}
+                              description: The properties of the function parameters
+                            required:
+                              type: array
+                              items:
+                                type: string
+                              description: Array of required parameter names
+                          required:
+                          - type
+                          - properties
+                          - required
+                          additionalProperties: {}
+                          description: The parameters the functions accepts, described as a JSON Schema object. See the `OpenAI` [guide](https://platform.openai.com/docs/guides/function-calling) for examples, and the [JSON Schema reference](https://json-schema.org/understanding-json-schema/) for documentation about the format.
+                      required:
+                      - name
+                  required:
+                  - path
+                  - key
+                  - description
+                  - project_id
+                  - workspace_id
+                  - created
+                  - updated
+                  - type
+                  - function
+                  title: Function Tool
+                  description: A custom function tool that allows the model to call predefined functions with structured parameters.
+                - type: object
+                  properties:
+                    _id:
+                      type: string
+                      default: tool_01M2K22M8W8D0K32B1D1HT5MKY
+                    path:
+                      type: string
+                      description: 'Entity storage path.
+
+
+                        With workspace-level API keys, use the format `project/folder/subfolder/...`. The first element must be the display name of an existing project, followed by nested folders (auto-created as needed). Example: `Default Project/agents`.
+
+
+                        With project-level API keys, the project is predetermined by the API key, so the path is relative to that project. Example: `agents`. For backward compatibility, a leading project name is ignored when it matches the scoped project.'
+                      example: Default Project
+                    key:
+                      type: string
+                      minLength: 1
+                      maxLength: 64
+                      pattern: ^[A-Za-z]([A-Za-z0-9]*([_-][A-Za-z0-9]+)*)?$
+                      description: Unique key of the tool as it will be displayed in the UI
+                    display_name:
+                      type: string
+                      description: The name of the tool as it will be displayed in the UI. This is optional and if not provided, the `key` will be used.
+                    description:
+                      type: string
+                      description: A description of the tool, used by the model to choose when and how to call the tool. We do recommend using the `description` field as accurate as possible to give enough context to the model to make the right decision.
+                    created_by_id:
+                      type:
+                      - string
+                      - 'null'
+                      description: The id of the user that created the tool
+                    updated_by_id:
+                      type:
+                      - string
+                      - 'null'
+                      description: The id of the user that last updated the tool
+                    project_id:
+                      type: string
+                    workspace_id:
+                      type: string
+                    created:
+                      type: string
+                    updated:
+                      type: string
+                    status:
+                      type: string
+                      enum:
+                      - live
+                      - draft
+                      - pending
+                      - published
+                      default: live
+                      description: The status of the tool. `Live` is the latest version of the tool. `Draft` is a version that is not yet published. `Pending` is a version that is pending approval. `Published` is a version that was live and has been replaced by a new version.
+                    type:
+                      type: string
+                      enum:
+                      - json_schema
+                    json_schema:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                          minLength: 1
+                          maxLength: 64
+                          description: The name of the response format. Must be a-z, A-Z, 0-9, or contain underscores and dashes, with a maximum length of 64.
+                        description:
+                          type: string
+                          description: A description of what the response format is for. This will be shown to the user.
+                        schema:
+                          type: object
+                          properties:
+                            type:
+                              type: string
+                              description: The JSON Schema type
+                            properties:
+                              type: object
+                              additionalProperties: {}
+                              description: The properties of the JSON Schema object
+                            required:
+                              type: array
+                              items:
+                                type: string
+                              description: Array of required property names
+                          required:
+                          - type
+                          - properties
+                          - required
+                          additionalProperties: {}
+                          description: The schema for the response format, described as a JSON Schema object. See the [JSON Schema reference](https://json-schema.org/understanding-json-schema/) for documentation about the format.
+                        strict:
+                          type: boolean
+                          description: Whether to enable strict schema adherence when generating the output. If set to true, the model will always follow the exact schema defined in the `schema` field. Only a subset of JSON Schema is supported when `strict` is `true`. Only compatible with `OpenAI` models.
+                      required:
+                      - name
+                      - description
+                      - schema
+                  required:
+                  - path
+                  - key
+                  - description
+                  - project_id
+                  - workspace_id
+                  - created
+                  - updated
+                  - type
+                  - json_schema
+                  title: JSON Schema Tool
+                  description: A tool that enforces structured output format using JSON Schema for consistent response formatting.
+                - type: object
+                  properties:
+                    _id:
+                      type: string
+                      default: tool_01M2K22M8WNWWDSCEET0VV6VVA
+                    path:
+                      type: string
+                      description: 'Entity storage path.
+
+
+                        With workspace-level API keys, use the format `project/folder/subfolder/...`. The first element must be the display name of an existing project, followed by nested folders (auto-created as needed). Example: `Default Project/agents`.
+
+
+                        With project-level API keys, the project is predetermined by the API key, so the path is relative to that project. Example: `agents`. For backward compatibility, a leading project name is ignored when it matches the scoped project.'
+                      example: Default Project
+                    key:
+                      type: string
+                      minLength: 1
+                      maxLength: 64
+                      pattern: ^[A-Za-z]([A-Za-z0-9]*([_-][A-Za-z0-9]+)*)?$
+                      description: Unique key of the tool as it will be displayed in the UI
+                    display_name:
+                      type: string
+                      description: The name of the tool as it will be displayed in the UI. This is optional and if not provided, the `key` will be used.
+                    description:
+                      type: string
+                      description: A description of the tool, used by the model to choose when and how to call the tool. We do recommend using the `description` field as accurate as possible to give enough context to the model to make the right decision.
+                    created_by_id:
+                      type:
+                      - string
+                      - 'null'
+                      description: The id of the user that created the tool
+                    updated_by_id:
+                      type:
+                      - string
+                      - 'null'
+                      description: The id of the user that last updated the tool
+                    project_id:
+                      type: string
+                    workspace_id:
+                      type: string
+                    created:
+                      type: string
+                    updated:
+                      type: string
+                    status:
+                      type: string
+                      enum:
+                      - live
+                      - draft
+                      - pending
+                      - published
+                      default: live
+                      description: The status of the tool. `Live` is the latest version of the tool. `Draft` is a version that is not yet published. `Pending` is a version that is pending approval. `Published` is a version that was live and has been replaced by a new version.
+                    type:
+                      type: string
+                      enum:
+                      - http
+                    http:
+                      type: object
+                      properties:
+                        blueprint:
+                          type: object
+                          properties:
+                            url:
+                              type: string
+                              description: The URL to send the request to.
+                            method:
+                              type: string
+                              enum:
+                              - GET
+                              - POST
+                              - PUT
+                              - DELETE
+                              description: The HTTP method to use.
+                            headers:
+                              type: object
+                              additionalProperties:
+                                anyOf:
+                                - type: string
+                                - type: object
+                                  properties:
+                                    value:
+                                      type: string
+                                    encrypted:
+                                      type: boolean
+                                      default: false
+                                  required:
+                                  - value
+                              default:
+                                Content-Type:
+                                  value: application/json
+                                  encrypted: false
+                              description: The headers to send with the request. Can be a string value or an object with value and encrypted properties.
+                            body:
+                              type: object
+                              additionalProperties: {}
+                              description: The body to send with the request.
+                            timeout:
+                              type: number
+                              minimum: 1
+                              maximum: 600
+                              description: The request timeout in seconds. Defaults to 60 seconds when not set. When used in an agent, tool executions are also bound by the agent run `limits.tool_timeout` (default 5 minutes), so raise that limit for longer-running tools.
+                          required:
+                          - url
+                          - method
+                          description: The blueprint for the HTTP request. The `arguments` field will be used to replace the placeholders in the `url`, `headers`, `body`, and `arguments` fields.
+                        arguments:
+                          type: object
+                          additionalProperties:
+                            type: object
+                            properties:
+                              type:
+                                type: string
+                                enum:
+                                - string
+                                - number
+                                - boolean
+                                description: The type of the argument.
+                              description:
+                                type: string
+                                description: A description of the argument.
+                              send_to_model:
+                                type: boolean
+                                default: true
+                                description: Whether to send the argument to the model. If set to false, the argument will not be sent to the model and needs to be provided by the user or it will be left blank.
+                              default_value:
+                                anyOf:
+                                - type: string
+                                - type: number
+                                - type: boolean
+                                description: The default value of the argument.
+                            required:
+                            - type
+                            - description
+                          description: The arguments to send with the request. The keys will be used to replace the placeholders in the `blueprint` field.
+                      required:
+                      - blueprint
+                  required:
+                  - path
+                  - key
+                  - description
+                  - project_id
+                  - workspace_id
+                  - created
+                  - updated
+                  - type
+                  - http
+                  title: HTTP Tool
+                  description: Executes HTTP requests to interact with external APIs and web services using customizable blueprints.
+                - type: object
+                  properties:
+                    _id:
+                      type: string
+                      default: tool_01M2K22M8XXHJ4N48MKXPDDV5P
+                    path:
+                      type: string
+                      description: 'Entity storage path.
+
+
+                        With workspace-level API keys, use the format `project/folder/subfolder/...`. The first element must be the display name of an existing project, followed by nested folders (auto-created as needed). Example: `Default Project/agents`.
+
+
+                        With project-level API keys, the project is predetermined by the API key, so the path is relative to that project. Example: `agents`. For backward compatibility, a leading project name is ignored when it matches the scoped project.'
+                      example: Default Project
+                    key:
+                      type: string
+                      minLength: 1
+                      maxLength: 64
+                      pattern: ^[A-Za-z]([A-Za-z0-9]*([_-][A-Za-z0-9]+)*)?$
+                      description: Unique key of the tool as it will be displayed in the UI
+                    display_name:
+                      type: string
+                      description: The name of the tool as it will be displayed in the UI. This is optional and if not provided, the `key` will be used.
+                    description:
+                      type: string
+                      description: A description of the tool, used by the model to choose when and how to call the tool. We do recommend using the `description` field as accurate as possible to give enough context to the model to make the right decision.
+                    created_by_id:
+                      type:
+                      - string
+                      - 'null'
+                      description: The id of the user that created the tool
+                    updated_by_id:
+                      type:
+                      - string
+                      - 'null'
+                      description: The id of the user that last updated the tool
+                    project_id:
+                      type: string
+                    workspace_id:
+                      type: string
+                    created:
+                      type: string
+                    updated:
+                      type: string
+                    status:
+                      type: string
+                      enum:
+                      - live
+                      - draft
+                      - pending
+                      - published
+                      default: live
+                      description: The status of the tool. `Live` is the latest version of the tool. `Draft` is a version that is not yet published. `Pending` is a version that is pending approval. `Published` is a version that was live and has been replaced by a new version.
+                    type:
+                      type: string
+                      enum:
+                      - code
+                    code_tool:
+                      type: object
+                      properties:
+                        parameters:
+                          type: object
+                          properties:
+                            type:
+                              type: string
+                              enum:
+                              - object
+                              description: The type must be "object"
+                            properties:
+                              type: object
+                              additionalProperties: {}
+                              description: The properties of the function parameters
+                            required:
+                              type: array
+                              items:
+                                type: string
+                              description: Array of required parameter names
+                          required:
+                          - type
+                          - properties
+                          - required
+                          additionalProperties: {}
+                          description: The parameters the functions accepts, described as a JSON Schema object. See the `OpenAI` [guide](https://platform.openai.com/docs/guides/function-calling) for examples, and the [JSON Schema reference](https://json-schema.org/understanding-json-schema/) for documentation about the format.
+                        language:
+                          type: string
+                          enum:
+                          - python
+                        code:
+                          type: string
+                          minLength: 1
+                          description: The code to execute.
+                      required:
+                      - language
+                      - code
+                  required:
+                  - path
+                  - key
+                  - description
+                  - project_id
+                  - workspace_id
+                  - created
+                  - updated
+                  - type
+                  - code_tool
+                  title: Code Execution Tool
+                  description: Executes code snippets in a sandboxed environment, currently supporting Python.
+        '404':
+          description: Tool not found.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message
+                required:
+                - error
+              example:
+                error: Tool with id my_tool not found
+    delete:
+      tags:
+      - Tools
+      x-speakeasy-group: tools
+      x-speakeasy-name-override: delete
+      x-cli-group: tools
+      x-cli-name: delete
+      operationId: DeleteTool
+      summary: Delete tool
+      description: Deletes a tool by key.
+      parameters:
+      - schema:
+          type: string
+        required: true
+        name: tool_id
+        in: path
+      responses:
+        '200':
+          description: Successfully deleted the tool.
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    get:
+      tags:
+      - Tools
+      x-speakeasy-group: tools
+      x-speakeasy-name-override: retrieve
+      x-cli-group: tools
+      x-cli-name: retrieve
+      operationId: RetrieveTool
+      summary: Retrieve tool
+      description: Retrieves a tool by id.
+      parameters:
+      - schema:
+          type: string
+        required: true
+        name: tool_id
+        in: path
+      responses:
+        '200':
+          description: Successfully retrieved the tool.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - type: object
+                  properties:
+                    _id:
+                      type: string
+                      default: tool_01M2K22M91TQ8S6FD4X7T9X7GC
+                    path:
+                      type: string
+                      description: 'Entity storage path.
+
+
+                        With workspace-level API keys, use the format `project/folder/subfolder/...`. The first element must be the display name of an existing project, followed by nested folders (auto-created as needed). Example: `Default Project/agents`.
+
+
+                        With project-level API keys, the project is predetermined by the API key, so the path is relative to that project. Example: `agents`. For backward compatibility, a leading project name is ignored when it matches the scoped project.'
+                      example: Default Project
+                    key:
+                      type: string
+                      minLength: 1
+                      maxLength: 64
+                      pattern: ^[A-Za-z]([A-Za-z0-9]*([_-][A-Za-z0-9]+)*)?$
+                      description: Unique key of the tool as it will be displayed in the UI
+                    display_name:
+                      type: string
+                      description: The name of the tool as it will be displayed in the UI. This is optional and if not provided, the `key` will be used.
+                    description:
+                      type: string
+                      description: A description of the tool, used by the model to choose when and how to call the tool. We do recommend using the `description` field as accurate as possible to give enough context to the model to make the right decision.
+                    created_by_id:
+                      type:
+                      - string
+                      - 'null'
+                      description: The id of the user that created the tool
+                    updated_by_id:
+                      type:
+                      - string
+                      - 'null'
+                      description: The id of the user that last updated the tool
+                    project_id:
+                      type: string
+                    workspace_id:
+                      type: string
+                    created:
+                      type: string
+                    updated:
+                      type: string
+                    status:
+                      type: string
+                      enum:
+                      - live
+                      - draft
+                      - pending
+                      - published
+                      default: live
+                      description: The status of the tool. `Live` is the latest version of the tool. `Draft` is a version that is not yet published. `Pending` is a version that is pending approval. `Published` is a version that was live and has been replaced by a new version.
+                    type:
+                      type: string
+                      enum:
+                      - function
+                    function:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                          description: The name of the function to be called. Must be a-z, A-Z, 0-9, or contain underscores and dashes, with a maximum length of 64.
+                        description:
+                          type: string
+                          description: A description of what the function does, used by the model to choose when and how to call the function.
+                        strict:
+                          type: boolean
+                          description: Whether to enable strict schema adherence when generating the function call. If set to true, the model will follow the exact schema defined in the `parameters` field. Only a subset of JSON Schema is supported when `strict` is `true`. Currently only compatible with `OpenAI` models.
+                        parameters:
+                          type: object
+                          properties:
+                            type:
+                              type: string
+                              enum:
+                              - object
+                              description: The type must be "object"
+                            properties:
+                              type: object
+                              additionalProperties: {}
+                              description: The properties of the function parameters
+                            required:
+                              type: array
+                              items:
+                                type: string
+                              description: Array of required parameter names
+                          required:
+                          - type
+                          - properties
+                          - required
+                          additionalProperties: {}
+                          description: The parameters the functions accepts, described as a JSON Schema object. See the `OpenAI` [guide](https://platform.openai.com/docs/guides/function-calling) for examples, and the [JSON Schema reference](https://json-schema.org/understanding-json-schema/) for documentation about the format.
+                      required:
+                      - name
+                  required:
+                  - path
+                  - key
+                  - description
+                  - project_id
+                  - workspace_id
+                  - created
+                  - updated
+                  - type
+                  - function
+                  title: Function Tool
+                  description: A custom function tool that allows the model to call predefined functions with structured parameters.
+                - type: object
+                  properties:
+                    _id:
+                      type: string
+                      default: tool_01M2K22M91E09SKB768NHHC608
+                    path:
+                      type: string
+                      description: 'Entity storage path.
+
+
+                        With workspace-level API keys, use the format `project/folder/subfolder/...`. The first element must be the display name of an existing project, followed by nested folders (auto-created as needed). Example: `Default Project/agents`.
+
+
+                        With project-level API keys, the project is predetermined by the API key, so the path is relative to that project. Example: `agents`. For backward compatibility, a leading project name is ignored when it matches the scoped project.'
+                      example: Default Project
+                    key:
+                      type: string
+                      minLength: 1
+                      maxLength: 64
+                      pattern: ^[A-Za-z]([A-Za-z0-9]*([_-][A-Za-z0-9]+)*)?$
+                      description: Unique key of the tool as it will be displayed in the UI
+                    display_name:
+                      type: string
+                      description: The name of the tool as it will be displayed in the UI. This is optional and if not provided, the `key` will be used.
+                    description:
+                      type: string
+                      description: A description of the tool, used by the model to choose when and how to call the tool. We do recommend using the `description` field as accurate as possible to give enough context to the model to make the right decision.
+                    created_by_id:
+                      type:
+                      - string
+                      - 'null'
+                      description: The id of the user that created the tool
+                    updated_by_id:
+                      type:
+                      - string
+                      - 'null'
+                      description: The id of the user that last updated the tool
+                    project_id:
+                      type: string
+                    workspace_id:
+                      type: string
+                    created:
+                      type: string
+                    updated:
+                      type: string
+                    status:
+                      type: string
+                      enum:
+                      - live
+                      - draft
+                      - pending
+                      - published
+                      default: live
+                      description: The status of the tool. `Live` is the latest version of the tool. `Draft` is a version that is not yet published. `Pending` is a version that is pending approval. `Published` is a version that was live and has been replaced by a new version.
+                    type:
+                      type: string
+                      enum:
+                      - json_schema
+                    json_schema:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                          minLength: 1
+                          maxLength: 64
+                          description: The name of the response format. Must be a-z, A-Z, 0-9, or contain underscores and dashes, with a maximum length of 64.
+                        description:
+                          type: string
+                          description: A description of what the response format is for. This will be shown to the user.
+                        schema:
+                          type: object
+                          properties:
+                            type:
+                              type: string
+                              description: The JSON Schema type
+                            properties:
+                              type: object
+                              additionalProperties: {}
+                              description: The properties of the JSON Schema object
+                            required:
+                              type: array
+                              items:
+                                type: string
+                              description: Array of required property names
+                          required:
+                          - type
+                          - properties
+                          - required
+                          additionalProperties: {}
+                          description: The schema for the response format, described as a JSON Schema object. See the [JSON Schema reference](https://json-schema.org/understanding-json-schema/) for documentation about the format.
+                        strict:
+                          type: boolean
+                          description: Whether to enable strict schema adherence when generating the output. If set to true, the model will always follow the exact schema defined in the `schema` field. Only a subset of JSON Schema is supported when `strict` is `true`. Only compatible with `OpenAI` models.
+                      required:
+                      - name
+                      - description
+                      - schema
+                  required:
+                  - path
+                  - key
+                  - description
+                  - project_id
+                  - workspace_id
+                  - created
+                  - updated
+                  - type
+                  - json_schema
+                  title: JSON Schema Tool
+                  description: A tool that enforces structured output format using JSON Schema for consistent response formatting.
+                - type: object
+                  properties:
+                    _id:
+                      type: string
+                      default: tool_01M2K22M92EGDQZB200XTZ6WSY
+                    path:
+                      type: string
+                      description: 'Entity storage path.
+
+
+                        With workspace-level API keys, use the format `project/folder/subfolder/...`. The first element must be the display name of an existing project, followed by nested folders (auto-created as needed). Example: `Default Project/agents`.
+
+
+                        With project-level API keys, the project is predetermined by the API key, so the path is relative to that project. Example: `agents`. For backward compatibility, a leading project name is ignored when it matches the scoped project.'
+                      example: Default Project
+                    key:
+                      type: string
+                      minLength: 1
+                      maxLength: 64
+                      pattern: ^[A-Za-z]([A-Za-z0-9]*([_-][A-Za-z0-9]+)*)?$
+                      description: Unique key of the tool as it will be displayed in the UI
+                    display_name:
+                      type: string
+                      description: The name of the tool as it will be displayed in the UI. This is optional and if not provided, the `key` will be used.
+                    description:
+                      type: string
+                      description: A description of the tool, used by the model to choose when and how to call the tool. We do recommend using the `description` field as accurate as possible to give enough context to the model to make the right decision.
+                    created_by_id:
+                      type:
+                      - string
+                      - 'null'
+                      description: The id of the user that created the tool
+                    updated_by_id:
+                      type:
+                      - string
+                      - 'null'
+                      description: The id of the user that last updated the tool
+                    project_id:
+                      type: string
+                    workspace_id:
+                      type: string
+                    created:
+                      type: string
+                    updated:
+                      type: string
+                    status:
+                      type: string
+                      enum:
+                      - live
+                      - draft
+                      - pending
+                      - published
+                      default: live
+                      description: The status of the tool. `Live` is the latest version of the tool. `Draft` is a version that is not yet published. `Pending` is a version that is pending approval. `Published` is a version that was live and has been replaced by a new version.
+                    type:
+                      type: string
+                      enum:
+                      - http
+                    http:
+                      type: object
+                      properties:
+                        blueprint:
+                          type: object
+                          properties:
+                            url:
+                              type: string
+                              description: The URL to send the request to.
+                            method:
+                              type: string
+                              enum:
+                              - GET
+                              - POST
+                              - PUT
+                              - DELETE
+                              description: The HTTP method to use.
+                            headers:
+                              type: object
+                              additionalProperties:
+                                anyOf:
+                                - type: string
+                                - type: object
+                                  properties:
+                                    value:
+                                      type: string
+                                    encrypted:
+                                      type: boolean
+                                      default: false
+                                  required:
+                                  - value
+                              default:
+                                Content-Type:
+                                  value: application/json
+                                  encrypted: false
+                              description: The headers to send with the request. Can be a string value or an object with value and encrypted properties.
+                            body:
+                              type: object
+                              additionalProperties: {}
+                              description: The body to send with the request.
+                            timeout:
+                              type: number
+                              minimum: 1
+                              maximum: 600
+                              description: The request timeout in seconds. Defaults to 60 seconds when not set. When used in an agent, tool executions are also bound by the agent run `limits.tool_timeout` (default 5 minutes), so raise that limit for longer-running tools.
+                          required:
+                          - url
+                          - method
+                          description: The blueprint for the HTTP request. The `arguments` field will be used to replace the placeholders in the `url`, `headers`, `body`, and `arguments` fields.
+                        arguments:
+                          type: object
+                          additionalProperties:
+                            type: object
+                            properties:
+                              type:
+                                type: string
+                                enum:
+                                - string
+                                - number
+                                - boolean
+                                description: The type of the argument.
+                              description:
+                                type: string
+                                description: A description of the argument.
+                              send_to_model:
+                                type: boolean
+                                default: true
+                                description: Whether to send the argument to the model. If set to false, the argument will not be sent to the model and needs to be provided by the user or it will be left blank.
+                              default_value:
+                                anyOf:
+                                - type: string
+                                - type: number
+                                - type: boolean
+                                description: The default value of the argument.
+                            required:
+                            - type
+                            - description
+                          description: The arguments to send with the request. The keys will be used to replace the placeholders in the `blueprint` field.
+                      required:
+                      - blueprint
+                  required:
+                  - path
+                  - key
+                  - description
+                  - project_id
+                  - workspace_id
+                  - created
+                  - updated
+                  - type
+                  - http
+                  title: HTTP Tool
+                  description: Executes HTTP requests to interact with external APIs and web services using customizable blueprints.
+                - type: object
+                  properties:
+                    _id:
+                      type: string
+                      default: tool_01M2K22M922KRVFZWEA25YEGN8
+                    path:
+                      type: string
+                      description: 'Entity storage path.
+
+
+                        With workspace-level API keys, use the format `project/folder/subfolder/...`. The first element must be the display name of an existing project, followed by nested folders (auto-created as needed). Example: `Default Project/agents`.
+
+
+                        With project-level API keys, the project is predetermined by the API key, so the path is relative to that project. Example: `agents`. For backward compatibility, a leading project name is ignored when it matches the scoped project.'
+                      example: Default Project
+                    key:
+                      type: string
+                      minLength: 1
+                      maxLength: 64
+                      pattern: ^[A-Za-z]([A-Za-z0-9]*([_-][A-Za-z0-9]+)*)?$
+                      description: Unique key of the tool as it will be displayed in the UI
+                    display_name:
+                      type: string
+                      description: The name of the tool as it will be displayed in the UI. This is optional and if not provided, the `key` will be used.
+                    description:
+                      type: string
+                      description: A description of the tool, used by the model to choose when and how to call the tool. We do recommend using the `description` field as accurate as possible to give enough context to the model to make the right decision.
+                    created_by_id:
+                      type:
+                      - string
+                      - 'null'
+                      description: The id of the user that created the tool
+                    updated_by_id:
+                      type:
+                      - string
+                      - 'null'
+                      description: The id of the user that last updated the tool
+                    project_id:
+                      type: string
+                    workspace_id:
+                      type: string
+                    created:
+                      type: string
+                    updated:
+                      type: string
+                    status:
+                      type: string
+                      enum:
+                      - live
+                      - draft
+                      - pending
+                      - published
+                      default: live
+                      description: The status of the tool. `Live` is the latest version of the tool. `Draft` is a version that is not yet published. `Pending` is a version that is pending approval. `Published` is a version that was live and has been replaced by a new version.
+                    type:
+                      type: string
+                      enum:
+                      - code
+                    code_tool:
+                      type: object
+                      properties:
+                        parameters:
+                          type: object
+                          properties:
+                            type:
+                              type: string
+                              enum:
+                              - object
+                              description: The type must be "object"
+                            properties:
+                              type: object
+                              additionalProperties: {}
+                              description: The properties of the function parameters
+                            required:
+                              type: array
+                              items:
+                                type: string
+                              description: Array of required parameter names
+                          required:
+                          - type
+                          - properties
+                          - required
+                          additionalProperties: {}
+                          description: The parameters the functions accepts, described as a JSON Schema object. See the `OpenAI` [guide](https://platform.openai.com/docs/guides/function-calling) for examples, and the [JSON Schema reference](https://json-schema.org/understanding-json-schema/) for documentation about the format.
+                        language:
+                          type: string
+                          enum:
+                          - python
+                        code:
+                          type: string
+                          minLength: 1
+                          description: The code to execute.
+                      required:
+                      - language
+                      - code
+                  required:
+                  - path
+                  - key
+                  - description
+                  - project_id
+                  - workspace_id
+                  - created
+                  - updated
+                  - type
+                  - code_tool
+                  title: Code Execution Tool
+                  description: Executes code snippets in a sandboxed environment, currently supporting Python.
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: The resource does not exist. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /v2/tools/{tool_id}/versions:
+    get:
+      tags:
+      - Tools
+      x-cli-group: tools
+      x-cli-name: listVersions
+      x-speakeasy-name-override: listVersions
+      summary: List tool versions
+      description: Returns version history for a specific tool
+      parameters:
+      - schema:
+          type: string
+        required: true
+        name: tool_id
+        in: path
+      - schema:
+          type: integer
+          minimum: 1
+          maximum: 200
+          default: 10
+          description: A limit on the number of objects to be returned. Limit can range between 1 and 200, and the default is 10
+        required: false
+        description: A limit on the number of objects to be returned. Limit can range between 1 and 200, and the default is 10
+        name: limit
+        in: query
+      - schema:
+          type: string
+          description: A cursor for use in pagination. `starting_after` is an object ID that defines your place in the list. For instance, if you make a list request and receive 20 objects, ending with `01JJ1HDHN79XAS7A01WB3HYSDB`, your subsequent call can include `starting_after=01JJ1HDHN79XAS7A01WB3HYSDB` in order to fetch the next page of the list.
+        required: false
+        description: A cursor for use in pagination. `starting_after` is an object ID that defines your place in the list. For instance, if you make a list request and receive 20 objects, ending with `01JJ1HDHN79XAS7A01WB3HYSDB`, your subsequent call can include `starting_after=01JJ1HDHN79XAS7A01WB3HYSDB` in order to fetch the next page of the list.
+        name: starting_after
+        in: query
+      - schema:
+          type: string
+          description: A cursor for use in pagination. `ending_before` is an object ID that defines your place in the list. For instance, if you make a list request and receive 20 objects, starting with `01JJ1HDHN79XAS7A01WB3HYSDB`, your subsequent call can include `ending_before=01JJ1HDHN79XAS7A01WB3HYSDB` in order to fetch the previous page of the list.
+        required: false
+        description: A cursor for use in pagination. `ending_before` is an object ID that defines your place in the list. For instance, if you make a list request and receive 20 objects, starting with `01JJ1HDHN79XAS7A01WB3HYSDB`, your subsequent call can include `ending_before=01JJ1HDHN79XAS7A01WB3HYSDB` in order to fetch the previous page of the list.
+        name: ending_before
+        in: query
+      responses:
+        '200':
+          description: Tool versions retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  object:
+                    type: string
+                    enum:
+                    - list
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        _id:
+                          type: string
+                        created_at:
+                          type: string
+                        updated_at:
+                          type: string
+                        created_by_id:
+                          type: string
+                        updated_by_id:
+                          type: string
+                        version:
+                          type: string
+                        description:
+                          type: string
+                        checksum:
+                          type: string
+                        entityType:
+                          type: string
+                        entityId:
+                          type: string
+                        data:
+                          type: object
+                          additionalProperties: {}
+                        workspace_id:
+                          type: string
+                      required:
+                      - _id
+                      - created_at
+                      - updated_at
+                      - version
+                      - checksum
+                      - entityType
+                      - entityId
+                      - data
+                      - workspace_id
+                  has_more:
+                    type: boolean
+                required:
+                - object
+                - data
+                - has_more
+        '404':
+          description: Tool not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                required:
+                - message
+      operationId: getV2ToolsByToolIdVersions
+      x-operation-id-source: derived
+  /v2/tools/{tool_id}/versions/{version_id}:
+    get:
+      tags:
+      - Tools
+      x-cli-group: tools
+      x-cli-name: getVersion
+      x-speakeasy-name-override: getVersion
+      summary: Get tool version
+      description: Returns a specific version of a tool
+      parameters:
+      - schema:
+          type: string
+        required: true
+        name: tool_id
+        in: path
+      - schema:
+          type: string
+        required: true
+        name: version_id
+        in: path
+      responses:
+        '200':
+          description: Tool version retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  _id:
+                    type: string
+                  created_at:
+                    type: string
+                  updated_at:
+                    type: string
+                  created_by_id:
+                    type: string
+                  updated_by_id:
+                    type: string
+                  version:
+                    type: string
+                  description:
+                    type: string
+                  checksum:
+                    type: string
+                  entityType:
+                    type: string
+                  entityId:
+                    type: string
+                  data:
+                    type: object
+                    additionalProperties: {}
+                  workspace_id:
+                    type: string
+                required:
+                - _id
+                - created_at
+                - updated_at
+                - version
+                - checksum
+                - entityType
+                - entityId
+                - data
+                - workspace_id
+        '404':
+          description: Tool or version not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                required:
+                - message
+      operationId: getV2ToolsByToolIdVersionsByVersionId
+      x-operation-id-source: derived
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Human-readable error message.
+        code:
+          type: integer
+          description: gRPC status code, when the service reports one.
+        details:
+          type: array
+          items: {}
+          description: Additional error details, when the service reports any.
+      required:
+      - message
+    HonoApiError:
+      type: object
+      properties:
+        code:
+          type: string
+          description: HTTP status code
+        message:
+          type: string
+          description: Error message
+      required:
+      - message
+  securitySchemes:
+    ApiKey:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+externalDocs:
+  url: https://docs.orq.ai
+  description: orq.ai Documentation
+x-speakeasy-timeout: 600000

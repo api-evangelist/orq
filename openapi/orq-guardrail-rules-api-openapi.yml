@@ -1,0 +1,491 @@
+openapi: 3.2.0
+info:
+  title: orq.ai Guardrail Rules API
+  version: '2.0'
+  description: orq.ai API documentation
+servers:
+- url: https://my.orq.ai
+security:
+- ApiKey: []
+tags:
+- name: Guardrail Rules
+  description: Guardrail Rules conditionally enforce evaluators and plugins for AI Gateway traffic. Rules may be scoped to a project or the whole workspace.
+paths:
+  /v2/guardrail-rules:
+    get:
+      tags:
+      - Guardrail Rules
+      summary: List guardrail rules
+      description: Returns guardrail rules with cursor pagination, search, status, project, sort, and referenced-guardrail filters.
+      operationId: GuardrailRuleList
+      parameters:
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          format: int32
+      - name: starting_after
+        in: query
+        schema:
+          type: string
+      - name: ending_before
+        in: query
+        schema:
+          type: string
+      - name: project_id
+        in: query
+        schema:
+          type: string
+      - name: search
+        in: query
+        schema:
+          type: string
+      - name: sort_by
+        in: query
+        schema:
+          type: string
+      - name: enabled
+        in: query
+        schema:
+          type: boolean
+      - name: guardrail_id
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListGuardrailRulesResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: guardrailRules
+      x-speakeasy-name-override: list
+      x-cli-hidden: true
+      x-cli-group: guardrailRules
+      x-cli-name: list
+      x-code-samples:
+      - lang: curl
+        label: Core - List guardrail rules
+        source: "curl --get 'https://my.orq.ai/v2/guardrail-rules' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\" \\\n  --data-urlencode 'limit=25'\n"
+    post:
+      tags:
+      - Guardrail Rules
+      summary: Create a guardrail rule
+      description: Creates a guardrail rule with metadata and optional evaluator, plugin, and matching configuration. Rules default to disabled when `enabled` is omitted.
+      operationId: GuardrailRuleCreate
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateGuardrailRuleRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateGuardrailRuleResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: guardrailRules
+      x-speakeasy-name-override: create
+      x-cli-hidden: true
+      x-cli-group: guardrailRules
+      x-cli-name: create
+      x-code-samples:
+      - lang: curl
+        label: Core - Create guardrail rule
+        source: "curl --request POST \\\n  --url 'https://my.orq.ai/v2/guardrail-rules' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\" \\\n  --header 'Content-Type: application/json' \\\n  --data '{\n    \"display_name\": \"Protect customer data\",\n    \"description\": \"Blocks sensitive customer data from model output.\",\n    \"enabled\": true,\n    \"guardrails\": [{\n      \"id\": \"orq_pii_detection\",\n      \"execute_on\": \"output\",\n      \"sample_rate\": 1,\n      \"is_guardrail\": true\n    }]\n  }'\n"
+      - lang: python
+        label: Python - Create guardrail rule
+        source: "import os\nfrom orq_ai_sdk import Orq\n\nclient = Orq(api_key=os.environ[\"ORQ_API_KEY\"])\nrule = client.guardrail_rules.create(\n    display_name=\"Protect customer data\",\n    description=\"Blocks sensitive customer data from model output.\",\n    enabled=True,\n    guardrails=[{\n        \"id\": \"orq_pii_detection\",\n        \"execute_on\": \"output\",\n        \"sample_rate\": 1,\n        \"is_guardrail\": True,\n    }],\n)\n\nprint(rule._id)\n"
+      - lang: typescript
+        label: Node.js - Create guardrail rule
+        source: "import { Orq } from '@orq-ai/node';\n\nconst client = new Orq({ apiKey: process.env.ORQ_API_KEY });\nconst rule = await client.guardrailRules.create({\n  displayName: 'Protect customer data',\n  description: 'Blocks sensitive customer data from model output.',\n  enabled: true,\n  guardrails: [{\n    id: 'orq_pii_detection',\n    executeOn: 'output',\n    sampleRate: 1,\n    isGuardrail: true,\n  }],\n});\n\nconsole.log(rule._id);\n"
+  /v2/guardrail-rules/used-guardrails:
+    get:
+      tags:
+      - Guardrail Rules
+      summary: List guardrails used by guardrail rules
+      description: Returns the distinct guardrail identifiers used by guardrail rules in the requested scope.
+      operationId: GuardrailRuleListUsedGuardrails
+      parameters:
+      - name: project_id
+        in: query
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListGuardrailRuleUsedGuardrailsResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: guardrailRules
+      x-speakeasy-name-override: listUsedGuardrails
+      x-cli-hidden: true
+      x-cli-group: guardrailRules
+      x-cli-name: listUsedGuardrails
+      x-code-samples:
+      - lang: curl
+        label: Core - List guardrails used by rules
+        source: "curl --request GET \\\n  --url 'https://my.orq.ai/v2/guardrail-rules/used-guardrails' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\"\n"
+  /v2/guardrail-rules/{guardrail_rule_id}:
+    get:
+      tags:
+      - Guardrail Rules
+      summary: Retrieve a guardrail rule
+      description: Retrieves a guardrail rule by its unique identifier.
+      operationId: GuardrailRuleGet
+      parameters:
+      - name: guardrail_rule_id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetGuardrailRuleResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Not permitted for this key, project or workspace. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: guardrailRules
+      x-speakeasy-name-override: retrieve
+      x-cli-hidden: true
+      x-cli-group: guardrailRules
+      x-cli-name: retrieve
+      x-code-samples:
+      - lang: curl
+        label: Core - Retrieve guardrail rule
+        source: "curl --request GET \\\n  --url 'https://my.orq.ai/v2/guardrail-rules/grl_01HZXW2K7Y8Q9M0N1P2R3S4T5V' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\"\n"
+    delete:
+      tags:
+      - Guardrail Rules
+      summary: Delete a guardrail rule
+      description: Permanently deletes a guardrail rule.
+      operationId: GuardrailRuleDelete
+      parameters:
+      - name: guardrail_rule_id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteGuardrailRuleResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: guardrailRules
+      x-speakeasy-name-override: delete
+      x-cli-hidden: true
+      x-cli-group: guardrailRules
+      x-cli-name: delete
+      x-code-samples:
+      - lang: curl
+        label: Core - Delete guardrail rule
+        source: "curl --request DELETE \\\n  --url 'https://my.orq.ai/v2/guardrail-rules/grl_01HZXW2K7Y8Q9M0N1P2R3S4T5V' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\"\n"
+    patch:
+      tags:
+      - Guardrail Rules
+      summary: Update a guardrail rule
+      description: Partially updates guardrail-rule metadata or configuration. Project scope is immutable.
+      operationId: GuardrailRuleUpdate
+      parameters:
+      - name: guardrail_rule_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateGuardrailRuleRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateGuardrailRuleResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: guardrailRules
+      x-speakeasy-name-override: update
+      x-cli-hidden: true
+      x-cli-group: guardrailRules
+      x-cli-name: update
+      x-code-samples:
+      - lang: curl
+        label: Core - Configure guardrail rule
+        source: "curl --request PATCH \\\n  --url 'https://my.orq.ai/v2/guardrail-rules/grl_01HZXW2K7Y8Q9M0N1P2R3S4T5V' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\" \\\n  --header 'Content-Type: application/json' \\\n  --data '{\n    \"enabled\": true,\n    \"expression\": {\"cel\": \"model == '\\''openai/gpt-5'\\''\"},\n    \"guardrails\": [{\n      \"id\": \"orq_pii_detection\",\n      \"execute_on\": \"output\",\n      \"sample_rate\": 1,\n      \"is_guardrail\": true\n    }]\n  }'\n"
+components:
+  schemas:
+    UpdateGuardrailRuleRequest:
+      required: []
+      type: object
+      properties:
+        display_name:
+          type: string
+        description:
+          type: string
+        enabled:
+          type: boolean
+        expression:
+          $ref: '#/components/schemas/GuardrailRuleExpression'
+        guardrails:
+          type: array
+          items:
+            $ref: '#/components/schemas/GuardrailRuleGuardrail'
+        plugins:
+          type: array
+          items:
+            $ref: '#/components/schemas/GuardrailRulePlugin'
+    GuardrailRuleGuardrail:
+      required:
+      - id
+      - execute_on
+      type: object
+      properties:
+        id:
+          type: string
+        execute_on:
+          type: string
+        sample_rate:
+          type: number
+          format: double
+        is_guardrail:
+          type: boolean
+        options:
+          type: object
+    GuardrailRuleExpression:
+      type: object
+      properties:
+        config:
+          type: object
+        cel:
+          type: string
+          description: CEL expression used to match requests. Empty means the rule always matches.
+    GuardrailRulePlugin:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Plugin discriminator.
+        language:
+          type: string
+          description: "Languages, regions and entity types are checked against the live\n pii-detection capabilities catalog when the rule is saved, not pinned\n here, so a language or region the detector gains becomes writable without\n a future update."
+        entities:
+          type: array
+          items:
+            type: string
+          description: Entity types to redact. On their own a strict allowlist; alongside regions they add to the region coverage.
+        on_failure:
+          type: string
+        threshold:
+          type: number
+          format: double
+        regions:
+          type: array
+          items:
+            type: string
+          description: 'Regions of coverage by ISO 3166-1 alpha-2 code, or ["all"]. Combines with entities: the two selections are unioned.'
+        entity_thresholds:
+          type: object
+          additionalProperties:
+            type: number
+            format: double
+          description: Per-entity-type confidence cutoff. Every key must also appear in entities.
+    GetGuardrailRuleResponse:
+      required:
+      - guardrail_rule
+      type: object
+      properties:
+        guardrail_rule:
+          $ref: '#/components/schemas/GuardrailRule'
+    DeleteGuardrailRuleResponse:
+      type: object
+      properties: {}
+    ListGuardrailRuleUsedGuardrailsResponse:
+      required:
+      - object
+      - guardrail_ids
+      type: object
+      properties:
+        object:
+          type: string
+        guardrail_ids:
+          type: array
+          items:
+            type: string
+    CreateGuardrailRuleRequest:
+      required:
+      - display_name
+      type: object
+      properties:
+        display_name:
+          type: string
+        description:
+          type: string
+        project_id:
+          type: string
+          description: Optional project scope. Omit for a workspace-wide rule.
+        enabled:
+          type: boolean
+          description: Whether the rule is active. Defaults to false when omitted.
+        expression:
+          $ref: '#/components/schemas/GuardrailRuleExpression'
+        guardrails:
+          type: array
+          items:
+            $ref: '#/components/schemas/GuardrailRuleGuardrail'
+        plugins:
+          type: array
+          items:
+            $ref: '#/components/schemas/GuardrailRulePlugin'
+    ListGuardrailRulesResponse:
+      required:
+      - object
+      - data
+      - has_more
+      type: object
+      properties:
+        object:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/GuardrailRule'
+        has_more:
+          type: boolean
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Human-readable error message.
+        code:
+          type: integer
+          description: gRPC status code, when the service reports one.
+        details:
+          type: array
+          items: {}
+          description: Additional error details, when the service reports any.
+      required:
+      - message
+    UpdateGuardrailRuleResponse:
+      required:
+      - guardrail_rule
+      type: object
+      properties:
+        guardrail_rule:
+          $ref: '#/components/schemas/GuardrailRule'
+    GuardrailRule:
+      required:
+      - id
+      - created_at
+      - updated_at
+      - created_by_id
+      - updated_by_id
+      - project_id
+      - display_name
+      - description
+      - enabled
+      - guardrails
+      - plugins
+      type: object
+      properties:
+        id:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        created_by_id:
+          type: string
+        updated_by_id:
+          type: string
+        project_id:
+          type: string
+          description: Project that contains the rule. Empty for workspace-wide rules.
+        display_name:
+          type: string
+          description: Human-readable guardrail-rule name.
+        description:
+          type: string
+        enabled:
+          type: boolean
+        expression:
+          $ref: '#/components/schemas/GuardrailRuleExpression'
+        guardrails:
+          type: array
+          items:
+            $ref: '#/components/schemas/GuardrailRuleGuardrail'
+        plugins:
+          type: array
+          items:
+            $ref: '#/components/schemas/GuardrailRulePlugin'
+    CreateGuardrailRuleResponse:
+      required:
+      - guardrail_rule
+      type: object
+      properties:
+        guardrail_rule:
+          $ref: '#/components/schemas/GuardrailRule'
+  securitySchemes:
+    ApiKey:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+externalDocs:
+  url: https://docs.orq.ai
+  description: orq.ai Documentation
+x-speakeasy-timeout: 600000

@@ -1,0 +1,384 @@
+openapi: 3.2.0
+info:
+  title: orq.ai Smart Routers API
+  version: '2.0'
+  description: orq.ai API documentation
+servers:
+- url: https://my.orq.ai
+security:
+- ApiKey: []
+tags:
+- name: Smart Routers
+  description: Create and manage workspace Smart Routers. A Smart Router selects a model from an eligible pool for each request according to a quality, balanced, or cost profile.
+paths:
+  /v2/smart-routers:
+    get:
+      tags:
+      - Smart Routers
+      summary: List Smart Routers
+      description: Lists Smart Routers in the current workspace, ordered newest first. Use cursor pagination and optional key, profile, or enabled-state filters to narrow the results.
+      operationId: SmartRouterList
+      parameters:
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          format: int32
+      - name: starting_after
+        in: query
+        schema:
+          type: string
+      - name: ending_before
+        in: query
+        schema:
+          type: string
+      - name: search
+        in: query
+        schema:
+          type: string
+      - name: profile
+        in: query
+        schema:
+          type: array
+          items:
+            $ref: '#/components/schemas/SmartRouterProfile'
+      - name: enabled
+        in: query
+        schema:
+          type: boolean
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListSmartRoutersResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: smartRouters
+      x-speakeasy-name-override: list
+      x-code-samples:
+      - lang: curl
+        label: Core - List Smart Routers
+        source: "curl --get 'https://my.orq.ai/v2/smart-routers' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\" \\\n  --data-urlencode 'limit=25'\n"
+      - lang: typescript
+        label: Node.js - List Smart Routers
+        source: "import { Orq } from '@orq-ai/node';\n\nconst client = new Orq({ apiKey: process.env.ORQ_API_KEY });\nconst page = await client.smartRouters.list({ limit: 25 });\n\nfor (const router of page.data) {\n  console.log(router.key, router.profile);\n}\n"
+    post:
+      tags:
+      - Smart Routers
+      summary: Create a Smart Router
+      description: Creates a Smart Router in the current workspace from 2 to 50 distinct eligible models. The key must be unique in the workspace and becomes part of the model reference used in AI Gateway requests.
+      operationId: SmartRouterCreate
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSmartRouterRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateSmartRouterResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: smartRouters
+      x-speakeasy-name-override: create
+      x-code-samples:
+      - lang: curl
+        label: Core - Create a Smart Router
+        source: "curl --request POST \\\n  --url 'https://my.orq.ai/v2/smart-routers' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\" \\\n  --header 'Content-Type: application/json' \\\n  --data '{\n    \"key\": \"production-assistant\",\n    \"models\": [\n      \"anthropic/claude-opus-5\",\n      \"openai/gpt-5.4-mini\"\n    ],\n    \"profile\": \"SMART_ROUTER_PROFILE_QUALITY\"\n  }'\n"
+      - lang: typescript
+        label: Node.js - Create a Smart Router
+        source: "import { Orq } from '@orq-ai/node';\n\nconst client = new Orq({ apiKey: process.env.ORQ_API_KEY });\nconst result = await client.smartRouters.create({\n  key: 'production-assistant',\n  models: ['anthropic/claude-opus-5', 'openai/gpt-5.4-mini'],\n  profile: 'SMART_ROUTER_PROFILE_QUALITY',\n});\n\nconsole.log(result.smartRouter.modelRef);\n"
+  /v2/smart-routers/{smart_router_id}:
+    get:
+      tags:
+      - Smart Routers
+      summary: Retrieve a Smart Router
+      description: Retrieves a Smart Router by ID from the current workspace, including its model reference, model pool, routing profile, and enabled state.
+      operationId: SmartRouterGet
+      parameters:
+      - name: smart_router_id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetSmartRouterResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Not permitted for this key, project or workspace. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: smartRouters
+      x-speakeasy-name-override: get
+      x-code-samples:
+      - lang: curl
+        label: Core - Retrieve a Smart Router
+        source: "curl --request GET \\\n  --url 'https://my.orq.ai/v2/smart-routers/019d-smart-router-id' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\"\n"
+      - lang: typescript
+        label: Node.js - Retrieve a Smart Router
+        source: "import { Orq } from '@orq-ai/node';\n\nconst client = new Orq({ apiKey: process.env.ORQ_API_KEY });\nconst result = await client.smartRouters.get({\n  smartRouterId: '019d-smart-router-id',\n});\n\nconsole.log(result.smartRouter.key);\n"
+    delete:
+      tags:
+      - Smart Routers
+      summary: Delete a Smart Router
+      description: Permanently deletes a Smart Router and removes its AI Gateway model configuration. A Smart Router referenced by an experiment cannot be deleted.
+      operationId: SmartRouterDelete
+      parameters:
+      - name: smart_router_id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteSmartRouterResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: smartRouters
+      x-speakeasy-name-override: delete
+      x-code-samples:
+      - lang: curl
+        label: Core - Delete a Smart Router
+        source: "curl --request DELETE \\\n  --url 'https://my.orq.ai/v2/smart-routers/019d-smart-router-id' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\"\n"
+      - lang: typescript
+        label: Node.js - Delete a Smart Router
+        source: "import { Orq } from '@orq-ai/node';\n\nconst client = new Orq({ apiKey: process.env.ORQ_API_KEY });\nawait client.smartRouters.delete({\n  smartRouterId: '019d-smart-router-id',\n});\n"
+    patch:
+      tags:
+      - Smart Routers
+      summary: Update a Smart Router
+      description: Updates the model pool, routing profile, session affinity, or any combination. Omitted fields retain their current values. The router key and model reference cannot be changed.
+      operationId: SmartRouterUpdate
+      parameters:
+      - name: smart_router_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSmartRouterRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateSmartRouterResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: smartRouters
+      x-speakeasy-name-override: update
+      x-speakeasy-max-method-params: 3
+      x-code-samples:
+      - lang: curl
+        label: Core - Update a Smart Router
+        source: "curl --request PATCH \\\n  --url 'https://my.orq.ai/v2/smart-routers/019d-smart-router-id' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\" \\\n  --header 'Content-Type: application/json' \\\n  --data '{\"profile\":\"SMART_ROUTER_PROFILE_COST\"}'\n"
+      - lang: typescript
+        label: Node.js - Update a Smart Router
+        source: "import { Orq } from '@orq-ai/node';\n\nconst client = new Orq({ apiKey: process.env.ORQ_API_KEY });\nawait client.smartRouters.update(\n  { profile: 'SMART_ROUTER_PROFILE_COST' },\n  '019d-smart-router-id',\n);\n"
+components:
+  schemas:
+    DeleteSmartRouterResponse:
+      type: object
+      properties: {}
+    CreateSmartRouterResponse:
+      required:
+      - smart_router
+      type: object
+      properties:
+        smart_router:
+          $ref: '#/components/schemas/SmartRouter'
+    CreateSmartRouterRequest:
+      required:
+      - key
+      - models
+      - profile
+      type: object
+      properties:
+        key:
+          type: string
+          description: Unique key for the Smart Router within the workspace. Use lowercase letters, numbers, and hyphens.
+        models:
+          type: array
+          items:
+            type: string
+          description: Pool of 2 to 50 distinct eligible models. Each value uses `provider/model` format.
+        profile:
+          description: 'Routing preference: quality favors more capable models, cost favors less expensive models, and balanced trades off both.'
+          $ref: '#/components/schemas/SmartRouterProfile'
+        session_affinity:
+          $ref: '#/components/schemas/SmartRouterSessionAffinity'
+    UpdateSmartRouterRequest:
+      required: []
+      type: object
+      properties:
+        models:
+          type: array
+          items:
+            type: string
+          description: Replacement pool of 2 to 50 distinct eligible models. Each value uses `provider/model` format. Omit to keep the current pool.
+        profile:
+          description: New routing preference. Omit to keep the current profile.
+          $ref: '#/components/schemas/SmartRouterProfile'
+        session_affinity:
+          $ref: '#/components/schemas/SmartRouterSessionAffinity'
+    SmartRouterProfile:
+      type: string
+      enum:
+      - SMART_ROUTER_PROFILE_QUALITY
+      - SMART_ROUTER_PROFILE_BALANCED
+      - SMART_ROUTER_PROFILE_COST
+    SmartRouterSessionAffinity:
+      required:
+      - enabled
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          description: Whether later turns of a thread stay on the model chosen for its first turn. Only requests that carry a thread id take part. Off by default.
+        ttl_seconds:
+          maximum: 3600
+          minimum: 60
+          type: integer
+          description: Sliding idle window in seconds. A thread that stays quiet longer than this is routed afresh on its next turn. Between 60 and 3600. Defaults to 600 when omitted.
+          format: int32
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Human-readable error message.
+        code:
+          type: integer
+          description: gRPC status code, when the service reports one.
+        details:
+          type: array
+          items: {}
+          description: Additional error details, when the service reports any.
+      required:
+      - message
+    UpdateSmartRouterResponse:
+      required:
+      - smart_router
+      type: object
+      properties:
+        smart_router:
+          $ref: '#/components/schemas/SmartRouter'
+    GetSmartRouterResponse:
+      required:
+      - smart_router
+      type: object
+      properties:
+        smart_router:
+          $ref: '#/components/schemas/SmartRouter'
+    ListSmartRoutersResponse:
+      required:
+      - object
+      - data
+      - has_more
+      type: object
+      properties:
+        object:
+          type: string
+          description: Object type for this collection. Always `list`.
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/SmartRouter'
+          description: Smart Routers in the current page.
+        has_more:
+          type: boolean
+          description: Whether more Smart Routers are available in the requested pagination direction.
+    SmartRouter:
+      required:
+      - smart_router_id
+      - key
+      - model_ref
+      - models
+      - profile
+      - enabled
+      - created_at
+      - updated_at
+      type: object
+      properties:
+        smart_router_id:
+          type: string
+          description: Unique identifier assigned to the Smart Router.
+        key:
+          type: string
+          description: Immutable lowercase key that identifies the Smart Router within the workspace.
+        model_ref:
+          type: string
+          description: Immutable workspace-qualified model reference to use in AI Gateway requests, in `<workspace-key>@orq/<key>` format.
+        models:
+          type: array
+          items:
+            type: string
+          description: Pool of 2 to 50 distinct eligible models. Each value uses `provider/model` format.
+        profile:
+          description: 'Routing preference: quality favors more capable models, cost favors less expensive models, and balanced trades off both.'
+          $ref: '#/components/schemas/SmartRouterProfile'
+        enabled:
+          type: boolean
+          description: Whether the Smart Router can be used in AI Gateway requests.
+        created_at:
+          type: string
+          description: Date and time when the Smart Router was created.
+          format: date-time
+        updated_at:
+          type: string
+          description: Date and time when the Smart Router was last updated.
+          format: date-time
+        session_affinity:
+          $ref: '#/components/schemas/SmartRouterSessionAffinity'
+  securitySchemes:
+    ApiKey:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+externalDocs:
+  url: https://docs.orq.ai
+  description: orq.ai Documentation
+x-speakeasy-timeout: 600000

@@ -1,0 +1,364 @@
+openapi: 3.2.0
+info:
+  title: orq.ai Users API
+  version: '2.0'
+  description: orq.ai API documentation
+servers:
+- url: https://my.orq.ai
+security:
+- ApiKey: []
+tags:
+- name: Users
+  description: Workspace user administration. Requires a Management Key with user permissions or an authenticated workspace admin session. Standard API keys are not supported.
+paths:
+  /v3/users:
+    get:
+      tags:
+      - Users
+      summary: List workspace users
+      description: Returns all users in the current workspace, including their team memberships and workspace roles. Requires a Management Key with user permissions or an authenticated workspace admin session. Standard API keys are not supported.
+      operationId: UserList
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListUsersResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: users
+      x-speakeasy-name-override: list
+      x-code-samples:
+      - lang: curl
+        label: cURL
+        source: "curl --request GET \\\n  --url 'https://my.orq.ai/v3/users' \\\n  --header \"Authorization: Bearer $ORQ_MANAGEMENT_KEY\"\n"
+      - lang: typescript
+        label: TypeScript (orq SDK)
+        source: 'import { Orq } from ''@orq-ai/node'';
+
+
+          const orq = new Orq({ apiKey: process.env.ORQ_MANAGEMENT_KEY });
+
+          const result = await orq.users.list();
+
+          console.log(result.users);
+
+          '
+  /v3/users/{id}:
+    get:
+      tags:
+      - Users
+      summary: Retrieve a workspace user
+      description: Retrieves one workspace user by workspace-user ID. Requires a Management Key with user permissions or an authenticated workspace admin session. Standard API keys are not supported.
+      operationId: UserGet
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        x-speakeasy-name-override: user_id
+        description: Workspace-user UUID returned by List workspace users. This is not the account ID.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetUserResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: users
+      x-speakeasy-name-override: get
+      x-code-samples:
+      - lang: curl
+        label: cURL
+        source: "curl --request GET \\\n  --url 'https://my.orq.ai/v3/users/550e8400-e29b-41d4-a716-446655440000' \\\n  --header \"Authorization: Bearer $ORQ_MANAGEMENT_KEY\"\n"
+      - lang: typescript
+        label: TypeScript (orq SDK)
+        source: 'import { Orq } from ''@orq-ai/node'';
+
+
+          const orq = new Orq({ apiKey: process.env.ORQ_MANAGEMENT_KEY });
+
+          const result = await orq.users.get({ userId: ''550e8400-e29b-41d4-a716-446655440000'' });
+
+          console.log(result.user);
+
+          '
+    delete:
+      tags:
+      - Users
+      summary: Delete a workspace user
+      description: Removes a user from the current workspace, refreshes membership state, and revokes API keys owned by that workspace user. Requires a Management Key with user permissions or an authenticated workspace admin session. Standard API keys are not supported.
+      operationId: UserDelete
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        x-speakeasy-name-override: user_id
+        description: Workspace-user UUID returned by List workspace users. This is not the account ID.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteUserResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: users
+      x-speakeasy-name-override: delete
+      x-code-samples:
+      - lang: curl
+        label: cURL
+        source: "curl --request DELETE \\\n  --url 'https://my.orq.ai/v3/users/550e8400-e29b-41d4-a716-446655440000' \\\n  --header \"Authorization: Bearer $ORQ_MANAGEMENT_KEY\"\n"
+      - lang: typescript
+        label: TypeScript (orq SDK)
+        source: 'import { Orq } from ''@orq-ai/node'';
+
+
+          const orq = new Orq({ apiKey: process.env.ORQ_MANAGEMENT_KEY });
+
+          await orq.users.delete({ userId: ''550e8400-e29b-41d4-a716-446655440000'' });
+
+          '
+    patch:
+      tags:
+      - Users
+      summary: Update a workspace user
+      description: Updates a user's last-activity timestamp and/or workspace role. Omitted fields remain unchanged. Requires a Management Key with user permissions or an authenticated workspace admin session. Standard API keys are not supported.
+      operationId: UserUpdate
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        x-speakeasy-name-override: user_id
+        description: Workspace-user UUID returned by List workspace users. This is not the account ID.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateUserResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: users
+      x-speakeasy-name-override: update
+      x-code-samples:
+      - lang: curl
+        label: cURL
+        source: "curl --request PATCH \\\n  --url 'https://my.orq.ai/v3/users/550e8400-e29b-41d4-a716-446655440000' \\\n  --header \"Authorization: Bearer $ORQ_MANAGEMENT_KEY\" \\\n  --header 'Content-Type: application/json' \\\n  --data '{\"role\": \"01J3HZA12M14T6Z82BZ35B170K\"}'\n"
+      - lang: typescript
+        label: TypeScript (orq SDK)
+        source: 'import { Orq } from ''@orq-ai/node'';
+
+
+          const orq = new Orq({ apiKey: process.env.ORQ_MANAGEMENT_KEY });
+
+          const result = await orq.users.update({ userId: ''550e8400-e29b-41d4-a716-446655440000'', role: ''01J3HZA12M14T6Z82BZ35B170K'' });
+
+          console.log(result.user);
+
+          '
+    post:
+      tags:
+      - Users
+      summary: Create or add workspace users
+      description: Creates accounts when necessary, adds each user to the current workspace and specified team, assigns the workspace role, and sends the welcome email for newly created accounts. Requires a Management Key with user permissions or an authenticated workspace admin session. Standard API keys are not supported.
+      operationId: UserCreate
+      parameters:
+      - name: id
+        in: path
+        description: Destination team UUID for every created or added workspace user.
+        required: true
+        schema:
+          type: string
+          format: uuid
+        x-speakeasy-name-override: team_id
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUsersRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateUsersResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: users
+      x-speakeasy-name-override: create
+      x-code-samples:
+      - lang: curl
+        label: cURL
+        source: "curl --request POST \\\n  --url 'https://my.orq.ai/v3/users/550e8400-e29b-41d4-a716-446655440001' \\\n  --header \"Authorization: Bearer $ORQ_MANAGEMENT_KEY\" \\\n  --header 'Content-Type: application/json' \\\n  --data '{\"emails\": [\"member@example.com\"], \"roles\": [\"01J3HZA12M14T6Z82BZ35B170K\"]}'\n"
+      - lang: typescript
+        label: TypeScript (orq SDK)
+        source: 'import { Orq } from ''@orq-ai/node'';
+
+
+          const orq = new Orq({ apiKey: process.env.ORQ_MANAGEMENT_KEY });
+
+          const result = await orq.users.create({ teamId: ''550e8400-e29b-41d4-a716-446655440001'', emails: [''member@example.com''], roles: [''01J3HZA12M14T6Z82BZ35B170K''] });
+
+          console.log(result.users);
+
+          '
+components:
+  schemas:
+    UpdateUserResponse:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+    CreateUsersResponse:
+      type: object
+      properties:
+        users:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+    UpdateUserRequest:
+      type: object
+      properties:
+        last_activity:
+          type: string
+          format: date-time
+        role:
+          type: string
+          description: One effective workspace role. Omit to preserve the existing role.
+    ListUsersResponse:
+      type: object
+      properties:
+        users:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+    UserInvitationData:
+      type: object
+      properties:
+        email:
+          type: string
+        display_name:
+          type: string
+    DeleteUserResponse:
+      type: object
+      properties: {}
+    CreateUsersRequest:
+      type: object
+      properties:
+        emails:
+          type: array
+          items:
+            type: string
+        roles:
+          type: array
+          items:
+            type: string
+          description: "One effective workspace role is required. The first entry is retained for\n wire compatibility with the legacy invitation payload."
+    GetUserResponse:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Human-readable error message.
+        code:
+          type: integer
+          description: gRPC status code, when the service reports one.
+        details:
+          type: array
+          items: {}
+          description: Additional error details, when the service reports any.
+      required:
+      - message
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Workspace-user identifier.
+        account_id:
+          type: string
+          description: Account identifier.
+        email:
+          type: string
+          description: Account email.
+        display_name:
+          type: string
+          description: Account display name.
+        logo_url:
+          type: string
+          description: Avatar URL.
+        team_ids:
+          type: array
+          items:
+            type: string
+          description: Team identifiers. The support-only team is excluded.
+        roles:
+          type: array
+          items:
+            type: string
+          description: Effective workspace roles.
+        last_activity:
+          type: string
+          description: Last activity timestamp. Absent when never active.
+          format: date-time
+        invitation_data:
+          allOf:
+          - $ref: '#/components/schemas/UserInvitationData'
+          description: Outstanding invitation metadata. Absent for active accounts.
+      description: User is the canonical workspace-user record.
+  securitySchemes:
+    ApiKey:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+externalDocs:
+  url: https://docs.orq.ai
+  description: orq.ai Documentation
+x-speakeasy-timeout: 600000

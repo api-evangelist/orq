@@ -1,0 +1,765 @@
+openapi: 3.2.0
+info:
+  title: orq.ai API keys API
+  version: '2.0'
+  description: orq.ai API documentation
+servers:
+- url: https://my.orq.ai
+security:
+- ApiKey: []
+tags:
+- name: API Keys
+  description: API keys authenticate programmatic access to the workspace. They expose opaque tokens, per-domain access grants, and budget and rate-limit constraints.
+paths:
+  /v2/api-keys:
+    get:
+      description: Returns API keys visible to the current workspace as a JSON array sorted by name. Raw tokens are never included; the `token` field contains a masked display value.
+      operationId: ApiKeyList
+      parameters:
+      - description: Only return keys bound to this project. When omitted, every key visible to the caller is returned.
+        explode: false
+        in: query
+        name: project_id
+        schema:
+          description: Only return keys bound to this project. When omitted, every key visible to the caller is returned.
+          type: string
+      - description: Only return keys of this source.
+        explode: false
+        in: query
+        name: source
+        schema:
+          description: Only return keys of this source.
+          enum:
+          - workspace
+          - router
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/ApiKeyResponse'
+                type:
+                - array
+                - 'null'
+          description: API keys visible to the caller
+        '401':
+          description: Missing or invalid credentials
+        '403':
+          description: The caller may not list API keys
+      summary: List API keys
+      tags:
+      - API Keys
+      x-speakeasy-group: apiKeys
+      x-speakeasy-name-override: list
+      x-code-samples:
+      - lang: curl
+        label: Core - List project keys
+        source: "curl --get 'https://my.orq.ai/v2/api-keys' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\" \\\n  --data-urlencode 'project_id=proj_01HZXW2K7Y8Q9M0N1P2R3S4T5V'\n"
+      - lang: python
+        label: Python - List project keys
+        source: "import os\nfrom orq_ai_sdk import Orq\n\nclient = Orq(api_key=os.environ[\"ORQ_API_KEY\"])\n\napi_keys = client.api_keys.list(\n    project_id=\"proj_01HZXW2K7Y8Q9M0N1P2R3S4T5V\",\n)\n\nfor api_key in api_keys:\n    print(api_key.name, api_key.token)\n"
+      - lang: typescript
+        label: Node.js - List project keys
+        source: "import { Orq } from '@orq-ai/node';\n\nconst client = new Orq({\n  apiKey: process.env.ORQ_API_KEY,\n});\n\nconst apiKeys = await client.apiKeys.list({\n  projectId: 'proj_01HZXW2K7Y8Q9M0N1P2R3S4T5V',\n});\n\nfor (const apiKey of apiKeys) {\n  console.log(apiKey.name, apiKey.token);\n}\n"
+    post:
+      description: Mints a new API key in the workspace, bound to the single project in `projects` or to every project when omitted. The raw token is returned once in the `token` field and is never retrievable afterwards. Unknown body fields are rejected.
+      operationId: ApiKeyCreate
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              properties:
+                access:
+                  additionalProperties:
+                    type: string
+                  description: Per-domain access level (none, read or write) for restricted keys; domain ids come from the capability catalog.
+                  type: object
+                constraints:
+                  $ref: '#/components/schemas/Constraints'
+                  description: Expiry and other limits applied to the key.
+                expiration:
+                  description: Legacy expiry as an RFC 3339 timestamp; prefer constraints.expires_at.
+                  format: date-time
+                  type: string
+                name:
+                  description: Display name of the key.
+                  maxLength: 100
+                  type: string
+                owner:
+                  $ref: '#/components/schemas/Owner'
+                  description: 'Lifecycle binding: a user-owned key is revoked with the user, a service-account key outlives any user.'
+                permission_mode:
+                  description: Permission preset; restricted keys hold only the domains granted in access.
+                  enum:
+                  - all
+                  - restricted
+                  - read_only
+                  - PERMISSION_MODE_ALL
+                  - PERMISSION_MODE_RESTRICTED
+                  - PERMISSION_MODE_READ_ONLY
+                  type: string
+                project_scope:
+                  $ref: '#/components/schemas/ProjectScope'
+                  description: 'Projects the key may reach: every project of the workspace or a single one.'
+                projects:
+                  description: Legacy single-project binding; prefer project_scope.
+                  items:
+                    type: string
+                  maxItems: 1
+                  type:
+                  - array
+                  - 'null'
+                source:
+                  description: Origin of the key; router keys are minted for the AI router.
+                  enum:
+                  - workspace
+                  - router
+                  type: string
+              required:
+              - name
+              type: object
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  access:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  active:
+                    type: boolean
+                  constraints:
+                    $ref: '#/components/schemas/Constraints'
+                  created:
+                    format: date-time
+                    type: string
+                  created_by_id:
+                    type: string
+                  expiration:
+                    type: string
+                  id:
+                    description: Unique identifier of the key.
+                    type: string
+                  is_legacy:
+                    type: boolean
+                  last_used_at:
+                    format: date-time
+                    type: string
+                  legacy_key_id:
+                    type: string
+                  legacy_token_family:
+                    type: string
+                  name:
+                    description: Display name of the key.
+                    type: string
+                  owner:
+                    $ref: '#/components/schemas/Owner'
+                  permission_mode:
+                    enum:
+                    - all
+                    - restricted
+                    - read_only
+                    type: string
+                  project_scope:
+                    $ref: '#/components/schemas/ProjectScope'
+                  projects:
+                    items:
+                      type: string
+                    type:
+                    - array
+                    - 'null'
+                  source:
+                    type: string
+                  status:
+                    enum:
+                    - active
+                    - disabled
+                    - revoked
+                    type: string
+                  token:
+                    description: The raw secret on create only; a masked display value everywhere else.
+                    type: string
+                  token_prefix:
+                    description: Display prefix of the secret; not usable as a credential.
+                    type: string
+                  updated:
+                    format: date-time
+                    type: string
+                  updated_by_id:
+                    type: string
+                  workspace_id:
+                    description: Workspace the key belongs to.
+                    type: string
+                required:
+                - id
+                - name
+                - workspace_id
+                - token
+                type: object
+          description: The created API key with its raw token
+        '400':
+          description: Invalid or unknown body field
+        '401':
+          description: Missing or invalid credentials
+        '403':
+          description: The caller may not create API keys or the requested scope exceeds the caller's reach
+      summary: Create a new API key
+      tags:
+      - API Keys
+      x-speakeasy-group: apiKeys
+      x-speakeasy-name-override: create
+      x-code-samples:
+      - lang: curl
+        label: Core - Create service account key
+        source: "curl --request POST \\\n  --url 'https://my.orq.ai/v2/api-keys' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\" \\\n  --header 'Content-Type: application/json' \\\n  --data '{\n    \"name\": \"Production service key\",\n    \"owner\": {\n      \"type\": \"service_account\"\n    },\n    \"project_scope\": {\n      \"mode\": \"all\"\n    },\n    \"permission_mode\": \"all\"\n  }'\n"
+      - lang: python
+        label: Python - Create service account key
+        source: "import os\nfrom orq_ai_sdk import Orq\n\nclient = Orq(api_key=os.environ[\"ORQ_API_KEY\"])\n\nresult = client.api_keys.create(\n    name=\"Production service key\",\n    owner={\"type\": \"service_account\"},\n    project_scope={\"mode\": \"all\"},\n    permission_mode=\"all\",\n)\n\n# Store the token immediately. It is only returned once.\nprint(result.token)\n"
+      - lang: typescript
+        label: Node.js - Create service account key
+        source: "import { Orq } from '@orq-ai/node';\n\nconst client = new Orq({\n  apiKey: process.env.ORQ_API_KEY,\n});\n\nconst result = await client.apiKeys.create({\n  name: 'Production service key',\n  owner: {\n    type: 'service_account',\n  },\n  projectScope: {\n    mode: 'all',\n  },\n  permissionMode: 'all',\n});\n\n// Store the token immediately. It is only returned once.\nconsole.log(result.token);\n"
+      - lang: curl
+        label: Core - Create restricted project key
+        source: "curl --request POST \\\n  --url 'https://my.orq.ai/v2/api-keys' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\" \\\n  --header 'Content-Type: application/json' \\\n  --data '{\n    \"name\": \"Support automation key\",\n    \"project_scope\": {\n      \"mode\": \"single\",\n      \"project_id\": \"proj_01HZXW2K7Y8Q9M0N1P2R3S4T5V\"\n    },\n    \"permission_mode\": \"restricted\",\n    \"access\": {\n      \"agent\": \"write\",\n      \"deployment\": \"read\"\n    }\n  }'\n"
+      - lang: python
+        label: Python - Create restricted project key
+        source: "import os\nfrom orq_ai_sdk import Orq\n\nclient = Orq(api_key=os.environ[\"ORQ_API_KEY\"])\n\nresult = client.api_keys.create(\n    name=\"Support automation key\",\n    project_scope={\n        \"mode\": \"single\",\n        \"project_id\": \"proj_01HZXW2K7Y8Q9M0N1P2R3S4T5V\",\n    },\n    permission_mode=\"restricted\",\n    access={\n        \"agent\": \"write\",\n        \"deployment\": \"read\",\n    },\n)\n\nprint(result.id)\nprint(result.token)\n"
+      - lang: typescript
+        label: Node.js - Create restricted project key
+        source: "import { Orq } from '@orq-ai/node';\n\nconst client = new Orq({\n  apiKey: process.env.ORQ_API_KEY,\n});\n\nconst result = await client.apiKeys.create({\n  name: 'Support automation key',\n  projectScope: {\n    mode: 'single',\n    projectId: 'proj_01HZXW2K7Y8Q9M0N1P2R3S4T5V',\n  },\n  permissionMode: 'restricted',\n  access: {\n    agent: 'write',\n    deployment: 'read',\n  },\n});\n\nconsole.log(result.id);\nconsole.log(result.token);\n"
+  /v2/api-keys/capabilities:
+    get:
+      description: 'Returns the capability catalog: the set of permission domains that can be granted to an API key. Each entry includes the domain id, display name, group, allowed project scopes and whether it can be granted read or write access. No credentials are required.'
+      operationId: ApiKeyListCapabilities
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  domains:
+                    description: 'Full capability catalog. Order is stable: workspace-admin first, then platform, then gateway.'
+                    items:
+                      $ref: '#/components/schemas/Domain'
+                    type:
+                    - array
+                    - 'null'
+                required:
+                - domains
+                type: object
+          description: The capability catalog
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      summary: List capability catalog
+      tags:
+      - API Keys
+      x-speakeasy-group: apiKeys
+      x-speakeasy-name-override: listCapabilities
+      x-code-samples:
+      - lang: curl
+        label: Core - List capability catalog
+        source: "curl --request GET \\\n  --url 'https://my.orq.ai/v2/api-keys/capabilities'\n"
+      - lang: python
+        label: Python - List capability catalog
+        source: "import os\nfrom orq_ai_sdk import Orq\n\nclient = Orq(api_key=os.environ[\"ORQ_API_KEY\"])\n\ncatalog = client.api_keys.list_capabilities()\n\nfor domain in catalog.domains:\n    print(domain.id, domain.display_name)\n"
+      - lang: typescript
+        label: Node.js - List capability catalog
+        source: "import { Orq } from '@orq-ai/node';\n\nconst client = new Orq({\n  apiKey: process.env.ORQ_API_KEY,\n});\n\nconst catalog = await client.apiKeys.listCapabilities();\n\nfor (const domain of catalog.domains) {\n  console.log(domain.id, domain.displayName);\n}\n"
+  /v2/api-keys/{api_key_id}:
+    delete:
+      description: Permanently deletes an API key. The key is revoked immediately; in-flight requests using it will fail. The response body is empty on success.
+      operationId: ApiKeyDelete
+      parameters:
+      - description: Unique identifier of the API key.
+        in: path
+        name: api_key_id
+        required: true
+        schema:
+          description: Unique identifier of the API key.
+          type: string
+      responses:
+        '204':
+          description: API key deleted
+        '401':
+          description: Missing or invalid credentials
+        '403':
+          description: The caller may not delete API keys
+        '404':
+          description: No API key with this id is visible to the caller
+      summary: Delete an API key
+      tags:
+      - API Keys
+      x-speakeasy-group: apiKeys
+      x-speakeasy-name-override: delete
+      x-code-samples:
+      - lang: curl
+        label: Core - Delete a key
+        source: "curl --request DELETE \\\n  --url 'https://my.orq.ai/v2/api-keys/01HZXW2K7Y8Q9M0N1P2R3S4T5V' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\"\n"
+      - lang: python
+        label: Python - Delete a key
+        source: "import os\nfrom orq_ai_sdk import Orq\n\nclient = Orq(api_key=os.environ[\"ORQ_API_KEY\"])\n\nclient.api_keys.delete(\n    api_key_id=\"01HZXW2K7Y8Q9M0N1P2R3S4T5V\",\n)\n"
+      - lang: typescript
+        label: Node.js - Delete a key
+        source: "import { Orq } from '@orq-ai/node';\n\nconst client = new Orq({\n  apiKey: process.env.ORQ_API_KEY,\n});\n\nawait client.apiKeys.delete({\n  apiKeyId: '01HZXW2K7Y8Q9M0N1P2R3S4T5V',\n});\n"
+    get:
+      description: Retrieves the metadata for an existing API key by its unique identifier. The raw secret is never returned; `token` carries a masked display value.
+      operationId: ApiKeyGet
+      parameters:
+      - description: Unique identifier of the API key.
+        in: path
+        name: api_key_id
+        required: true
+        schema:
+          description: Unique identifier of the API key.
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  access:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  active:
+                    type: boolean
+                  constraints:
+                    $ref: '#/components/schemas/Constraints'
+                  created:
+                    format: date-time
+                    type: string
+                  created_by_id:
+                    type: string
+                  expiration:
+                    type: string
+                  id:
+                    description: Unique identifier of the key.
+                    type: string
+                  is_legacy:
+                    type: boolean
+                  last_used_at:
+                    format: date-time
+                    type: string
+                  legacy_key_id:
+                    type: string
+                  legacy_token_family:
+                    type: string
+                  name:
+                    description: Display name of the key.
+                    type: string
+                  owner:
+                    $ref: '#/components/schemas/Owner'
+                  permission_mode:
+                    enum:
+                    - all
+                    - restricted
+                    - read_only
+                    type: string
+                  project_scope:
+                    $ref: '#/components/schemas/ProjectScope'
+                  projects:
+                    items:
+                      type: string
+                    type:
+                    - array
+                    - 'null'
+                  source:
+                    type: string
+                  status:
+                    enum:
+                    - active
+                    - disabled
+                    - revoked
+                    type: string
+                  token:
+                    description: The raw secret on create only; a masked display value everywhere else.
+                    type: string
+                  token_prefix:
+                    description: Display prefix of the secret; not usable as a credential.
+                    type: string
+                  updated:
+                    format: date-time
+                    type: string
+                  updated_by_id:
+                    type: string
+                  workspace_id:
+                    description: Workspace the key belongs to.
+                    type: string
+                required:
+                - id
+                - name
+                - workspace_id
+                - token
+                type: object
+          description: The API key
+        '401':
+          description: Missing or invalid credentials
+        '403':
+          description: The caller may not view API keys
+        '404':
+          description: No API key with this id is visible to the caller
+      summary: Retrieve an API key
+      tags:
+      - API Keys
+      x-speakeasy-group: apiKeys
+      x-speakeasy-name-override: get
+      x-code-samples:
+      - lang: curl
+        label: Core - Retrieve key metadata
+        source: "curl --request GET \\\n  --url 'https://my.orq.ai/v2/api-keys/01HZXW2K7Y8Q9M0N1P2R3S4T5V' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\"\n"
+      - lang: python
+        label: Python - Retrieve key metadata
+        source: "import os\nfrom orq_ai_sdk import Orq\n\nclient = Orq(api_key=os.environ[\"ORQ_API_KEY\"])\n\nresult = client.api_keys.get(\n    api_key_id=\"01HZXW2K7Y8Q9M0N1P2R3S4T5V\",\n)\n\nprint(result.name)\n"
+      - lang: typescript
+        label: Node.js - Retrieve key metadata
+        source: "import { Orq } from '@orq-ai/node';\n\nconst client = new Orq({\n  apiKey: process.env.ORQ_API_KEY,\n});\n\nconst result = await client.apiKeys.get({\n  apiKeyId: '01HZXW2K7Y8Q9M0N1P2R3S4T5V',\n});\n\nconsole.log(result.name);\n"
+    patch:
+      description: 'Updates mutable fields of an API key: display name, status (active / disabled / revoked), permission mode and access map, project scope and constraints. Omitted fields keep their current values. Unknown body fields are rejected.'
+      operationId: ApiKeyUpdate
+      parameters:
+      - description: Unique identifier of the API key.
+        in: path
+        name: api_key_id
+        required: true
+        schema:
+          description: Unique identifier of the API key.
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              properties:
+                access:
+                  additionalProperties:
+                    type: string
+                  description: Per-domain access level (none, read or write) for restricted keys.
+                  type: object
+                active:
+                  description: 'Legacy toggle mirrored onto status: false disables, true re-enables.'
+                  type: boolean
+                constraints:
+                  $ref: '#/components/schemas/Constraints'
+                  description: Expiry and other limits; null clears them.
+                name:
+                  description: New display name.
+                  maxLength: 100
+                  type: string
+                permission_mode:
+                  description: Permission preset; a restricted key must keep at least one granted domain.
+                  enum:
+                  - all
+                  - restricted
+                  - read_only
+                  - PERMISSION_MODE_ALL
+                  - PERMISSION_MODE_RESTRICTED
+                  - PERMISSION_MODE_READ_ONLY
+                  type: string
+                project_scope:
+                  $ref: '#/components/schemas/ProjectScope'
+                  description: Projects the key may reach.
+                status:
+                  description: Lifecycle status; revoked is terminal.
+                  enum:
+                  - active
+                  - disabled
+                  - revoked
+                  type: string
+              type: object
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  access:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  active:
+                    type: boolean
+                  constraints:
+                    $ref: '#/components/schemas/Constraints'
+                  created:
+                    format: date-time
+                    type: string
+                  created_by_id:
+                    type: string
+                  expiration:
+                    type: string
+                  id:
+                    description: Unique identifier of the key.
+                    type: string
+                  is_legacy:
+                    type: boolean
+                  last_used_at:
+                    format: date-time
+                    type: string
+                  legacy_key_id:
+                    type: string
+                  legacy_token_family:
+                    type: string
+                  name:
+                    description: Display name of the key.
+                    type: string
+                  owner:
+                    $ref: '#/components/schemas/Owner'
+                  permission_mode:
+                    enum:
+                    - all
+                    - restricted
+                    - read_only
+                    type: string
+                  project_scope:
+                    $ref: '#/components/schemas/ProjectScope'
+                  projects:
+                    items:
+                      type: string
+                    type:
+                    - array
+                    - 'null'
+                  source:
+                    type: string
+                  status:
+                    enum:
+                    - active
+                    - disabled
+                    - revoked
+                    type: string
+                  token:
+                    description: The raw secret on create only; a masked display value everywhere else.
+                    type: string
+                  token_prefix:
+                    description: Display prefix of the secret; not usable as a credential.
+                    type: string
+                  updated:
+                    format: date-time
+                    type: string
+                  updated_by_id:
+                    type: string
+                  workspace_id:
+                    description: Workspace the key belongs to.
+                    type: string
+                required:
+                - id
+                - name
+                - workspace_id
+                - token
+                type: object
+          description: The updated API key
+        '400':
+          description: Invalid or unknown body field
+        '401':
+          description: Missing or invalid credentials
+        '403':
+          description: The caller may not update API keys
+        '404':
+          description: No API key with this id is visible to the caller
+        '409':
+          description: The key is revoked and cannot change status
+      summary: Update an API key
+      tags:
+      - API Keys
+      x-speakeasy-group: apiKeys
+      x-speakeasy-name-override: update
+      x-code-samples:
+      - lang: curl
+        label: Core - Disable a key
+        source: "curl --request PATCH \\\n  --url 'https://my.orq.ai/v2/api-keys/01HZXW2K7Y8Q9M0N1P2R3S4T5V' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\" \\\n  --header 'Content-Type: application/json' \\\n  --data '{\n    \"status\": \"disabled\"\n  }'\n"
+      - lang: python
+        label: Python - Disable a key
+        source: "import os\nfrom orq_ai_sdk import Orq\n\nclient = Orq(api_key=os.environ[\"ORQ_API_KEY\"])\n\nresult = client.api_keys.update(\n    api_key_id=\"01HZXW2K7Y8Q9M0N1P2R3S4T5V\",\n    status=\"disabled\",\n)\n\nprint(result.status)\n"
+      - lang: typescript
+        label: Node.js - Disable a key
+        source: "import { Orq } from '@orq-ai/node';\n\nconst client = new Orq({\n  apiKey: process.env.ORQ_API_KEY,\n});\n\nconst result = await client.apiKeys.update({\n  apiKeyId: '01HZXW2K7Y8Q9M0N1P2R3S4T5V',\n  status: 'disabled',\n});\n\nconsole.log(result.status);\n"
+components:
+  schemas:
+    Domain:
+      additionalProperties: false
+      properties:
+        allowed_scopes:
+          description: Project scopes this domain may be granted under.
+          items:
+            type: string
+          type:
+          - array
+          - 'null'
+        display_name:
+          description: Human-readable label.
+          type: string
+        extra_write_verbs:
+          description: Additional verbs granted only with write access.
+          items:
+            type: string
+          type:
+          - array
+          - 'null'
+        group:
+          description: Logical group the entry belongs to.
+          enum:
+          - DOMAIN_GROUP_WORKSPACE_ADMIN
+          - DOMAIN_GROUP_PLATFORM
+          - DOMAIN_GROUP_GATEWAY
+          type: string
+        id:
+          description: Stable domain identifier, used as the key in access and as the verb prefix in resolved permissions.
+          type: string
+        readable:
+          description: Whether the domain can be granted read access.
+          type: boolean
+        writable:
+          description: Whether the domain can be granted write access.
+          type: boolean
+      required:
+      - id
+      - display_name
+      - group
+      - allowed_scopes
+      - readable
+      - writable
+      - extra_write_verbs
+      type: object
+    ApiKeyResponse:
+      additionalProperties: false
+      properties:
+        access:
+          additionalProperties:
+            type: string
+          type: object
+        active:
+          type: boolean
+        constraints:
+          $ref: '#/components/schemas/Constraints'
+        created:
+          format: date-time
+          type: string
+        created_by_id:
+          type: string
+        expiration:
+          type: string
+        id:
+          description: Unique identifier of the key.
+          type: string
+        is_legacy:
+          type: boolean
+        last_used_at:
+          format: date-time
+          type: string
+        legacy_key_id:
+          type: string
+        legacy_token_family:
+          type: string
+        name:
+          description: Display name of the key.
+          type: string
+        owner:
+          $ref: '#/components/schemas/Owner'
+        permission_mode:
+          enum:
+          - all
+          - restricted
+          - read_only
+          type: string
+        project_scope:
+          $ref: '#/components/schemas/ProjectScope'
+        projects:
+          items:
+            type: string
+          type:
+          - array
+          - 'null'
+        source:
+          type: string
+        status:
+          enum:
+          - active
+          - disabled
+          - revoked
+          type: string
+        token:
+          description: The raw secret on create only; a masked display value everywhere else.
+          type: string
+        token_prefix:
+          description: Display prefix of the secret; not usable as a credential.
+          type: string
+        updated:
+          format: date-time
+          type: string
+        updated_by_id:
+          type: string
+        workspace_id:
+          description: Workspace the key belongs to.
+          type: string
+      required:
+      - id
+      - name
+      - workspace_id
+      - token
+      type: object
+    Owner:
+      additionalProperties: false
+      properties:
+        type:
+          type: string
+        user_id:
+          type: string
+      required:
+      - type
+      type: object
+    Constraints:
+      additionalProperties: false
+      properties:
+        expires_at:
+          format: date-time
+          type: string
+      type: object
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Human-readable error message.
+        code:
+          type: integer
+          description: gRPC status code, when the service reports one.
+        details:
+          type: array
+          items: {}
+          description: Additional error details, when the service reports any.
+      required:
+      - message
+    ProjectScope:
+      additionalProperties: false
+      properties:
+        mode:
+          type: string
+        project_id:
+          type: string
+      required:
+      - mode
+      type: object
+  securitySchemes:
+    ApiKey:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+externalDocs:
+  url: https://docs.orq.ai
+  description: orq.ai Documentation
+x-speakeasy-timeout: 600000

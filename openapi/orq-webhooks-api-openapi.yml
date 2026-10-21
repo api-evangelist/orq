@@ -1,0 +1,544 @@
+openapi: 3.2.0
+info:
+  title: orq.ai Webhooks API
+  version: '2.0'
+  description: orq.ai API documentation
+servers:
+- url: https://my.orq.ai
+security:
+- ApiKey: []
+tags:
+- name: Webhooks
+  description: Create and manage webhooks that deliver workspace events to external HTTPS endpoints.
+paths:
+  /v2/webhooks:
+    get:
+      tags:
+      - Webhooks
+      summary: List webhooks
+      description: Returns a page of webhooks in the current workspace. By default, the first 20 matching webhooks are ordered by creation time, newest first. Supplied filters are combined, `count` reports the total number of matches before pagination, and `has_more` indicates whether another page is available.
+      operationId: WebhookList
+      parameters:
+      - name: page
+        in: query
+        description: One-based page number. Defaults to 1 and must be between 1 and 1,000,000.
+        schema:
+          type: integer
+          format: int32
+      - name: limit
+        in: query
+        description: "Number of webhooks to return per page. Defaults to 20 and must be between\n 1 and 200."
+        schema:
+          type: integer
+          format: int32
+      - name: search
+        in: query
+        description: "Optional case-insensitive substring matched against display name, content\n type, and URL. Maximum length is 200 characters."
+        schema:
+          type: string
+      - name: event
+        in: query
+        description: "Optional event slug that must be present in the webhook's event\n subscriptions, for example `llm.response`. Maximum length is 200\n characters."
+        schema:
+          type: string
+      - name: sort
+        in: query
+        description: "Field used to order results. Allowed values are `created`, `updated`, and\n `display_name`. Defaults to `created`."
+        schema:
+          type: string
+      - name: direction
+        in: query
+        description: Sort direction. Allowed values are `asc` and `desc`. Defaults to `desc`.
+        schema:
+          type: string
+      - name: content_type
+        in: query
+        description: "Optional comma-separated content types to match, for example\n `application/json,application/x-www-form-urlencoded`. A webhook matches\n when its content type equals any supplied value."
+        schema:
+          type: string
+      - name: enabled
+        in: query
+        description: "Optional delivery status filter. When omitted, enabled and disabled\n webhooks are returned."
+        schema:
+          type: boolean
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListWebhooksResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: webhooks
+      x-speakeasy-name-override: list
+      x-code-samples:
+      - lang: curl
+        label: Core - List filtered webhooks
+        source: "curl --get 'https://my.orq.ai/v2/webhooks' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\" \\\n  --data-urlencode 'search=production' \\\n  --data-urlencode 'event=llm.response' \\\n  --data-urlencode 'content_type=application/json' \\\n  --data-urlencode 'enabled=true' \\\n  --data-urlencode 'page=1' \\\n  --data-urlencode 'limit=20' \\\n  --data-urlencode 'sort=created' \\\n  --data-urlencode 'direction=desc'\n"
+      - lang: python
+        label: Python - List filtered webhooks
+        source: "import os\nfrom orq_ai_sdk import Orq\n\nclient = Orq(api_key=os.environ[\"ORQ_API_KEY\"])\n\npage = client.webhooks.list(\n    search=\"production\",\n    event=\"llm.response\",\n    content_type=\"application/json\",\n    enabled=True,\n    page=1,\n    limit=20,\n    sort=\"created\",\n    direction=\"desc\",\n)\n\nprint(f\"{page.count} matching webhooks\")\nfor webhook in page.items:\n    print(webhook._id, webhook.display_name)\nprint(f\"Has more: {page.has_more}\")\n"
+      - lang: typescript
+        label: Node.js - List filtered webhooks
+        source: "import { Orq } from '@orq-ai/node';\n\nconst client = new Orq({\n  apiKey: process.env.ORQ_API_KEY,\n});\n\nconst page = await client.webhooks.list({\n  search: 'production',\n  event: 'llm.response',\n  contentType: 'application/json',\n  enabled: true,\n  page: 1,\n  limit: 20,\n  sort: 'created',\n  direction: 'desc',\n});\n\nconsole.log(`${page.count} matching webhooks`);\nfor (const webhook of page.items) {\n  console.log(webhook._id, webhook.displayName);\n}\nconsole.log(`Has more: ${page.hasMore}`);\n"
+    post:
+      tags:
+      - Webhooks
+      summary: Create a webhook
+      description: Creates a webhook that delivers the selected workspace events to an HTTPS endpoint. Generate a signing secret first with `GET /v2/webhooks/secret`.
+      operationId: WebhookCreate
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateWebhookRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Webhook'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: webhooks
+      x-speakeasy-name-override: create
+      x-code-samples:
+      - lang: curl
+        label: Core - Create webhook
+        source: "curl --request POST \\\n  --url 'https://my.orq.ai/v2/webhooks' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\" \\\n  --header 'Content-Type: application/json' \\\n  --data '{\n    \"_id\": \"webhook_01HZXW2K7Y8Q9M0N1P2R3S4T5V\",\n    \"url\": \"https://example.com/orq-webhook\",\n    \"content_type\": \"application/json\",\n    \"display_name\": \"Production alerts\",\n    \"events\": [\"deployment.invoked\"],\n    \"secret\": \"orq_wh_example\",\n    \"enabled\": true\n  }'\n"
+  /v2/webhooks/count:
+    get:
+      tags:
+      - Webhooks
+      summary: Count webhooks
+      description: Returns the total number of enabled and disabled webhooks in the current workspace.
+      operationId: WebhookCount
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CountWebhooksResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: webhooks
+      x-speakeasy-name-override: count
+      x-code-samples:
+      - lang: curl
+        label: Core - Count webhooks
+        source: "curl --request GET \\\n  --url 'https://my.orq.ai/v2/webhooks/count' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\"\n"
+  /v2/webhooks/query:
+    post:
+      tags:
+      - Webhooks
+      summary: Query webhooks
+      description: '**Deprecated.** Returns webhooks matching legacy query filters. Use `GET /v2/webhooks` for pagination, search, event filtering, and sorting.'
+      operationId: WebhookQuery
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QueryWebhooksRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueryWebhooksResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      deprecated: true
+      x-speakeasy-group: webhooks
+      x-speakeasy-name-override: query
+      x-code-samples:
+      - lang: curl
+        label: Core - Query webhooks
+        source: "curl --request POST \\\n  --url 'https://my.orq.ai/v2/webhooks/query' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\" \\\n  --header 'Content-Type: application/json' \\\n  --data '{\n    \"sortingProps\": [{\"key\": \"created\", \"direction\": \"desc\"}],\n    \"filters\": []\n  }'\n"
+  /v2/webhooks/secret:
+    get:
+      tags:
+      - Webhooks
+      summary: Generate a webhook secret
+      description: Generates a signing secret for verifying webhook deliveries. The secret is not persisted until it is used to create or update a webhook; store it securely.
+      operationId: WebhookGenerateSecret
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenerateWebhookSecretResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: webhooks
+      x-speakeasy-name-override: generateSecret
+      x-code-samples:
+      - lang: curl
+        label: Core - Generate webhook secret
+        source: "curl --request GET \\\n  --url 'https://my.orq.ai/v2/webhooks/secret' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\"\n"
+  /v2/webhooks/{id}:
+    get:
+      tags:
+      - Webhooks
+      summary: Retrieve a webhook
+      description: Retrieves a webhook in the current workspace by ID. The signing secret is returned masked; it is only shown in full when the webhook is created.
+      operationId: WebhookGet
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Webhook'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: The resource does not exist. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: webhooks
+      x-speakeasy-name-override: get
+      x-code-samples:
+      - lang: curl
+        label: Core - Retrieve webhook
+        source: "curl --request GET \\\n  --url 'https://my.orq.ai/v2/webhooks/webhook_01HZXW2K7Y8Q9M0N1P2R3S4T5V' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\"\n"
+    delete:
+      tags:
+      - Webhooks
+      summary: Delete a webhook
+      description: Deletes a webhook in the current workspace and returns the deleted webhook ID.
+      operationId: WebhookDelete
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteWebhookResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: webhooks
+      x-speakeasy-name-override: delete
+      x-code-samples:
+      - lang: curl
+        label: Core - Delete webhook
+        source: "curl --request DELETE \\\n  --url 'https://my.orq.ai/v2/webhooks/webhook_01HZXW2K7Y8Q9M0N1P2R3S4T5V' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\"\n"
+    patch:
+      tags:
+      - Webhooks
+      summary: Update a webhook
+      description: Updates the supplied fields on a webhook in the current workspace. Omitted fields are unchanged. The response contains the applied fields rather than the complete webhook.
+      operationId: WebhookUpdate
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: webhooks
+      x-speakeasy-name-override: update
+      x-code-samples:
+      - lang: curl
+        label: Core - Update webhook
+        source: "curl --request PATCH \\\n  --url 'https://my.orq.ai/v2/webhooks/webhook_01HZXW2K7Y8Q9M0N1P2R3S4T5V' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\" \\\n  --header 'Content-Type: application/json' \\\n  --data '{\n    \"display_name\": \"Updated alerts\",\n    \"enabled\": false\n  }'\n"
+components:
+  schemas:
+    DeleteWebhookResponse:
+      required:
+      - id
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID of the deleted webhook.
+    QueryWebhooksRequest:
+      type: object
+      properties:
+        pagination:
+          $ref: '#/components/schemas/QueryParamsPagination'
+        sortingProps:
+          type: array
+          items:
+            $ref: '#/components/schemas/QueryParamsSort'
+        query:
+          type: object
+        filters:
+          type: array
+          items:
+            type: object
+        includedFields:
+          type: object
+          additionalProperties:
+            type: string
+    Webhook:
+      required:
+      - _id
+      - url
+      - content_type
+      - display_name
+      - events
+      - secret
+      - created_by_id
+      - updated_by_id
+      - created
+      - updated
+      type: object
+      properties:
+        _id:
+          type: string
+          description: Unique webhook ID.
+        url:
+          pattern: ^https://
+          type: string
+          description: HTTPS endpoint that receives webhook deliveries.
+          format: uri
+        content_type:
+          enum:
+          - application/json
+          - application/x-www-form-urlencoded
+          type: string
+          description: Content type sent with webhook deliveries.
+        display_name:
+          type: string
+          description: Human-readable webhook name.
+        events:
+          type: array
+          items:
+            type: string
+          description: Workspace event slugs that trigger a delivery, for example `deployment.invoked` or `llm.response`.
+        secret:
+          type: string
+          description: Signing secret used to compute `X-Orq-Signature` as the lowercase hexadecimal HMAC-SHA256 of the exact request body bytes. Shown in full only in the create response; list and get return a masked value.
+        enabled:
+          type: boolean
+          description: Whether webhook deliveries are enabled.
+        failure_count:
+          readOnly: true
+          type: integer
+          description: Server-managed number of consecutive delivery failures.
+          format: int32
+        created_by_id:
+          readOnly: true
+          type: string
+          description: Account ID that created the webhook.
+        updated_by_id:
+          readOnly: true
+          type: string
+          description: Account ID that most recently updated the webhook.
+        created:
+          readOnly: true
+          type: string
+          description: Creation time in RFC 3339 format.
+          format: date-time
+        updated:
+          readOnly: true
+          type: string
+          description: Most recent update time in RFC 3339 format.
+          format: date-time
+      description: A webhook subscription and its delivery configuration. The signing secret is shown in full only in the create response and is masked everywhere else.
+    QueryParamsSort:
+      type: object
+      properties:
+        key:
+          type: string
+        direction:
+          type: string
+    CountWebhooksResponse:
+      required:
+      - total
+      type: object
+      properties:
+        total:
+          type: integer
+          description: Total number of webhooks in the current workspace.
+          format: int32
+      description: Webhook count for the current workspace.
+    QueryParamsPagination:
+      type: object
+      properties:
+        page:
+          type: integer
+          format: int32
+        limit:
+          type: integer
+          format: int32
+        lastId:
+          type: string
+        firstId:
+          type: string
+    QueryWebhooksResponse:
+      required:
+      - count
+      - items
+      type: object
+      properties:
+        count:
+          type: integer
+          format: int32
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Webhook'
+    ListWebhooksResponse:
+      required:
+      - count
+      - items
+      - has_more
+      type: object
+      properties:
+        count:
+          type: integer
+          description: Total number of webhooks matching the filters, before pagination.
+          format: int32
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Webhook'
+          description: Requested page of webhooks.
+        has_more:
+          type: boolean
+          description: Whether another page of matching webhooks is available.
+      description: A page of webhooks and the total number of matching records.
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Human-readable error message.
+        code:
+          type: integer
+          description: gRPC status code, when the service reports one.
+        details:
+          type: array
+          items: {}
+          description: Additional error details, when the service reports any.
+      required:
+      - message
+    CreateWebhookRequest:
+      required:
+      - _id
+      - url
+      - content_type
+      - display_name
+      - events
+      - secret
+      type: object
+      properties:
+        _id:
+          minLength: 1
+          type: string
+          description: Client-generated webhook ID.
+        url:
+          pattern: ^https://
+          type: string
+          description: HTTPS endpoint that receives webhook deliveries.
+          format: uri
+        content_type:
+          enum:
+          - application/json
+          - application/x-www-form-urlencoded
+          type: string
+          description: Content type sent with webhook deliveries.
+        display_name:
+          type: string
+          description: Human-readable webhook name.
+        events:
+          minItems: 1
+          type: array
+          items:
+            type: string
+          description: One or more workspace event slugs that trigger a delivery, for example `deployment.invoked` or `llm.response`.
+        secret:
+          writeOnly: true
+          minLength: 1
+          type: string
+          description: Signing secret returned by `GET /v2/webhooks/secret`. Deliveries set `X-Orq-Signature` to the lowercase hexadecimal HMAC-SHA256 of the exact request body bytes.
+        enabled:
+          type: boolean
+          description: Whether webhook deliveries are enabled.
+      description: Configuration used to create a webhook in the current workspace.
+    GenerateWebhookSecretResponse:
+      required:
+      - secret
+      type: object
+      properties:
+        secret:
+          type: string
+          description: Signing secret to supply when creating or updating a webhook. Store it securely.
+      description: A newly generated webhook signing secret.
+  securitySchemes:
+    ApiKey:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+externalDocs:
+  url: https://docs.orq.ai
+  description: orq.ai Documentation
+x-speakeasy-timeout: 600000

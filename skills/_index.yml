@@ -1,0 +1,20 @@
+generated: '2026-10-21'
+method: generated
+generator: extract-docs-artifacts.py skills (local)
+source: openapi/orq-openapi.json
+skills:
+- file: skills/orq-create-user.md
+  name: orq-create-user
+  api: openapi/orq-openapi.json
+  operations:
+  - UserCreate
+  - UserGet
+- file: skills/orq-manage-identities.md
+  name: orq-manage-identities
+  api: openapi/orq-openapi.json
+  operations:
+  - CreateIdentity
+  - RetrieveIdentity
+  - UpdateIdentity
+  - ListIdentities
+  - DeleteIdentity

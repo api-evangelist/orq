@@ -1,0 +1,3176 @@
+openapi: 3.2.0
+info:
+  title: orq.ai Knowledge Bases API
+  version: '2.0'
+  description: orq.ai API documentation
+servers:
+- url: https://my.orq.ai
+security:
+- ApiKey: []
+tags:
+- name: Knowledge Bases
+  description: Create and manage knowledge bases used by agents and retrieval workflows.
+paths:
+  /v2/knowledge:
+    get:
+      tags:
+      - Knowledge Bases
+      summary: List all knowledge bases
+      description: Returns a list of your knowledge bases. The knowledge bases are returned sorted by creation date, with the most recent knowledge bases appearing first
+      operationId: ListKnowledgeBases
+      parameters:
+      - schema:
+          type: string
+          description: A cursor for use in pagination. `starting_after` is an object ID that defines your place in the list. For instance, if you make a list request and receive 20 objects, ending with `01JJ1HDHN79XAS7A01WB3HYSDB`, your subsequent call can include `starting_after=01JJ1HDHN79XAS7A01WB3HYSDB` in order to fetch the next page of the list.
+        required: false
+        description: A cursor for use in pagination. `starting_after` is an object ID that defines your place in the list. For instance, if you make a list request and receive 20 objects, ending with `01JJ1HDHN79XAS7A01WB3HYSDB`, your subsequent call can include `starting_after=01JJ1HDHN79XAS7A01WB3HYSDB` in order to fetch the next page of the list.
+        name: starting_after
+        in: query
+      - schema:
+          type: string
+          description: A cursor for use in pagination. `ending_before` is an object ID that defines your place in the list. For instance, if you make a list request and receive 20 objects, starting with `01JJ1HDHN79XAS7A01WB3HYSDB`, your subsequent call can include `ending_before=01JJ1HDHN79XAS7A01WB3HYSDB` in order to fetch the previous page of the list.
+        required: false
+        description: A cursor for use in pagination. `ending_before` is an object ID that defines your place in the list. For instance, if you make a list request and receive 20 objects, starting with `01JJ1HDHN79XAS7A01WB3HYSDB`, your subsequent call can include `ending_before=01JJ1HDHN79XAS7A01WB3HYSDB` in order to fetch the previous page of the list.
+        name: ending_before
+        in: query
+      - schema:
+          type: integer
+          minimum: 1
+          maximum: 300
+          default: 25
+          description: A limit on the number of objects to be returned. Limit can range between 1 and 300, and the default is 25
+        required: false
+        description: A limit on the number of objects to be returned. Limit can range between 1 and 300, and the default is 25
+        name: limit
+        in: query
+      - schema:
+          type: string
+          description: Filter knowledge bases by key (case-insensitive match)
+        required: false
+        description: Filter knowledge bases by key (case-insensitive match)
+        name: search
+        in: query
+      - schema:
+          type: string
+          description: Filter by the users who last updated the knowledge base. Accepts a comma-separated list of user IDs
+        required: false
+        description: Filter by the users who last updated the knowledge base. Accepts a comma-separated list of user IDs
+        name: updated_by
+        in: query
+      - schema:
+          type: string
+          enum:
+          - internal
+          - external
+          description: Filter knowledge bases by type
+        required: false
+        description: Filter knowledge bases by type
+        name: type
+        in: query
+      - schema:
+          type: string
+          description: Filter knowledge bases by project ID
+        required: false
+        description: Filter knowledge bases by project ID
+        name: project_id
+        in: query
+      responses:
+        '200':
+          description: Knowledge bases retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgeBasesServiceListResponse'
+        '401':
+          description: Unauthorized - Bearer token is missing or invalid.
+      x-speakeasy-group: knowledge
+      x-speakeasy-name-override: list
+      x-cli-group: knowledge-bases
+      x-cli-name: list
+      x-code-samples:
+      - lang: curl
+        label: Core - List knowledge bases
+        source: "curl --request GET \\\n  --url 'https://my.orq.ai/v2/knowledge?limit=25' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\"\n"
+    post:
+      tags:
+      - Knowledge Bases
+      summary: Create a knowledge base
+      description: Creates an internal or external knowledge base. Internal knowledge bases embed and index uploaded content; external knowledge bases query the configured external retrieval API.
+      operationId: CreateKnowledge
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KnowledgeBasesServiceCreateRequest'
+        required: true
+      responses:
+        '200':
+          description: Knowledge successfully created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Knowledge'
+        '401':
+          description: Unauthorized - Bearer token is missing or invalid.
+      x-speakeasy-group: knowledge
+      x-speakeasy-name-override: create
+      x-cli-group: knowledge-bases
+      x-cli-name: create
+      x-code-samples:
+      - lang: curl
+        label: Core - Create knowledge base
+        source: "curl --request POST \\\n  --url 'https://my.orq.ai/v2/knowledge' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\" \\\n  --header 'Content-Type: application/json' \\\n  --data '{\n    \"type\": \"internal\",\n    \"key\": \"product-docs\",\n    \"description\": \"Product documentation\",\n    \"embedding_model\": \"openai/text-embedding-3-small\",\n    \"path\": \"Default/knowledge\"\n  }'\n"
+  /v2/knowledge/{knowledge_id}:
+    get:
+      tags:
+      - Knowledge Bases
+      summary: Retrieve a knowledge base
+      description: Retrieve a knowledge base with the settings.
+      operationId: GetOneKnowledge
+      parameters:
+      - name: knowledge_id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Knowledge base retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Knowledge'
+        '401':
+          description: Unauthorized - Bearer token is missing or invalid.
+        '404':
+          description: Knowledge not found
+      x-speakeasy-group: knowledge
+      x-speakeasy-name-override: retrieve
+      x-cli-group: knowledge-bases
+      x-cli-name: retrieve
+      x-code-samples:
+      - lang: curl
+        label: Core - Retrieve knowledge base
+        source: "curl --request GET \\\n  --url 'https://my.orq.ai/v2/knowledge/01JEXAMPLEKNOWLEDGEBASE01' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\"\n"
+    delete:
+      tags:
+      - Knowledge Bases
+      summary: Delete a knowledge base
+      description: Deletes a knowledge base. Deleting a knowledge base will delete all the datasources and chunks associated with it.
+      operationId: DeleteKnowledge
+      parameters:
+      - name: knowledge_id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          description: Knowledge successfully deleted
+        '401':
+          description: Unauthorized - Bearer token is missing or invalid.
+      x-speakeasy-group: knowledge
+      x-speakeasy-name-override: delete
+      x-cli-group: knowledge-bases
+      x-cli-name: delete
+      x-code-samples:
+      - lang: curl
+        label: Core - Delete knowledge base
+        source: "curl --request DELETE \\\n  --url 'https://my.orq.ai/v2/knowledge/01JEXAMPLEKNOWLEDGEBASE01' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\"\n"
+    patch:
+      tags:
+      - Knowledge Bases
+      summary: Update a knowledge base
+      description: Updates a knowledge base. Omitted optional fields retain their current values.
+      operationId: UpdateKnowledge
+      parameters:
+      - name: knowledge_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KnowledgeBasesServiceUpdateRequest'
+        required: true
+      responses:
+        '200':
+          description: Knowledge successfully updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Knowledge'
+        '401':
+          description: Unauthorized - Bearer token is missing or invalid.
+      x-speakeasy-group: knowledge
+      x-speakeasy-name-override: update
+      x-cli-group: knowledge-bases
+      x-cli-name: update
+      x-code-samples:
+      - lang: curl
+        label: Core - Update knowledge base
+        source: "curl --request PATCH \\\n  --url 'https://my.orq.ai/v2/knowledge/01JEXAMPLEKNOWLEDGEBASE01' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\" \\\n  --header 'Content-Type: application/json' \\\n  --data '{\n    \"type\": \"internal\",\n    \"description\": \"Current product documentation\",\n    \"retrieval_settings\": {\n      \"retrieval_type\": \"hybrid_search\",\n      \"top_k\": 8,\n      \"threshold\": 0.2\n    }\n  }'\n"
+  /v2/knowledge/{knowledge_id}/datasources:
+    get:
+      tags:
+      - Knowledge Bases
+      summary: List all datasources
+      description: Returns the datasources in a knowledge base. Use cursors to page through results and optional query or status filters to narrow the list.
+      operationId: ListDatasources
+      parameters:
+      - schema:
+          type: string
+          description: Unique identifier of the knowledge base
+        required: true
+        description: Unique identifier of the knowledge base
+        name: knowledge_id
+        in: path
+      - schema:
+          type: string
+          description: A cursor for use in pagination. `starting_after` is an object ID that defines your place in the list. For instance, if you make a list request and receive 20 objects, ending with `01JJ1HDHN79XAS7A01WB3HYSDB`, your subsequent call can include `starting_after=01JJ1HDHN79XAS7A01WB3HYSDB` in order to fetch the next page of the list.
+        required: false
+        description: A cursor for use in pagination. `starting_after` is an object ID that defines your place in the list. For instance, if you make a list request and receive 20 objects, ending with `01JJ1HDHN79XAS7A01WB3HYSDB`, your subsequent call can include `starting_after=01JJ1HDHN79XAS7A01WB3HYSDB` in order to fetch the next page of the list.
+        name: starting_after
+        in: query
+      - schema:
+          type: string
+          description: A cursor for use in pagination. `ending_before` is an object ID that defines your place in the list. For instance, if you make a list request and receive 20 objects, starting with `01JJ1HDHN79XAS7A01WB3HYSDB`, your subsequent call can include `ending_before=01JJ1HDHN79XAS7A01WB3HYSDB` in order to fetch the previous page of the list.
+        required: false
+        description: A cursor for use in pagination. `ending_before` is an object ID that defines your place in the list. For instance, if you make a list request and receive 20 objects, starting with `01JJ1HDHN79XAS7A01WB3HYSDB`, your subsequent call can include `ending_before=01JJ1HDHN79XAS7A01WB3HYSDB` in order to fetch the previous page of the list.
+        name: ending_before
+        in: query
+      - schema:
+          type: string
+          description: Search query to find datasources by name.
+        required: false
+        description: Search query to find datasources by name.
+        name: q
+        in: query
+      - schema:
+          type: integer
+          minimum: 1
+          maximum: 50
+          default: 50
+          description: A limit on the number of objects to be returned. Limit can range between 1 and 50, and the default is 50
+        required: false
+        description: A limit on the number of objects to be returned. Limit can range between 1 and 50, and the default is 50
+        name: limit
+        in: query
+      - schema:
+          anyOf:
+          - type: array
+            items:
+              type: string
+            example:
+            - completed
+            - failed
+          - type: string
+            example: completed
+          description: Filter datasources by status.
+        required: false
+        description: Filter datasources by status.
+        name: status
+        in: query
+      responses:
+        '200':
+          description: Datasources successfully retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DatasourcesServiceListResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: The resource does not exist. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: knowledge
+      x-speakeasy-name-override: listDatasources
+      x-cli-group: knowledge-bases
+      x-cli-name: listDatasources
+      x-code-samples:
+      - lang: curl
+        label: Core - List datasources
+        source: "curl --request GET \\\n  --url 'https://my.orq.ai/v2/knowledge/01JEXAMPLEKNOWLEDGEBASE01/datasources?limit=50' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\"\n"
+    post:
+      tags:
+      - Knowledge Bases
+      summary: Create a new datasource
+      description: Creates a datasource shell when only a display name is provided. When file_id is provided, the uploaded file is queued for chunking and ingestion.
+      operationId: CreateDatasource
+      parameters:
+      - name: knowledge_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DatasourcesServiceCreateRequest'
+        required: true
+      responses:
+        '200':
+          description: Datasource successfully created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Datasource'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Failed to create datasource
+      x-speakeasy-group: knowledge
+      x-speakeasy-name-override: createDatasource
+      x-cli-group: knowledge-bases
+      x-cli-name: createDatasource
+      x-code-samples:
+      - lang: curl
+        label: Core - Create datasource
+        source: "curl --request POST \\\n  --url 'https://my.orq.ai/v2/knowledge/01JEXAMPLEKNOWLEDGEBASE01/datasources' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\" \\\n  --header 'Content-Type: application/json' \\\n  --data '{\n    \"display_name\": \"Product guide\",\n    \"file_id\": \"file_01JEXAMPLE00000000000001\",\n    \"chunking_options\": {\n      \"chunking_configuration\": {\n        \"type\": \"advanced\",\n        \"chunk_max_characters\": 800,\n        \"chunk_overlap\": 100\n      }\n    }\n  }'\n"
+  /v2/knowledge/{knowledge_id}/datasources/preview-chunks:
+    post:
+      tags:
+      - Knowledge Bases
+      summary: Preview datasource chunks
+      description: Parses an uploaded file and returns the chunks it would produce for the given chunking options without creating a datasource.
+      operationId: PreviewDatasourceChunks
+      parameters:
+      - name: knowledge_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DatasourcesServicePreviewChunksRequest'
+        required: true
+      responses:
+        '200':
+          description: Datasource chunk preview successfully generated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DatasourcesServicePreviewChunksResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: knowledge
+      x-speakeasy-name-override: previewChunks
+      x-cli-group: knowledge-bases
+      x-cli-name: previewChunks
+  /v2/knowledge/{knowledge_id}/datasources/{datasource_id}:
+    get:
+      tags:
+      - Knowledge Bases
+      summary: Retrieve a datasource
+      description: Retrieves a datasource and its current processing status and chunk count.
+      operationId: RetrieveDatasource
+      parameters:
+      - name: knowledge_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: datasource_id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Datasource successfully retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Datasource'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: The resource does not exist. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: knowledge
+      x-speakeasy-name-override: retrieveDatasource
+      x-cli-group: knowledge-bases
+      x-cli-name: retrieveDatasource
+      x-code-samples:
+      - lang: curl
+        label: Core - Retrieve datasource
+        source: "curl --request GET \\\n  --url 'https://my.orq.ai/v2/knowledge/01JEXAMPLEKNOWLEDGEBASE01/datasources/01JEXAMPLEDATASOURCE0001' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\"\n"
+    delete:
+      tags:
+      - Knowledge Bases
+      summary: Delete a datasource
+      description: Deletes a datasource from a knowledge base. Deleting a datasource will remove it from the knowledge base and all associated chunks. This action is irreversible and cannot be undone.
+      operationId: DeleteDatasource
+      parameters:
+      - name: knowledge_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: datasource_id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          description: Datasource successfully deleted
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: knowledge
+      x-speakeasy-name-override: deleteDatasource
+      x-cli-group: knowledge-bases
+      x-cli-name: deleteDatasource
+      x-code-samples:
+      - lang: curl
+        label: Core - Delete datasource
+        source: "curl --request DELETE \\\n  --url 'https://my.orq.ai/v2/knowledge/01JEXAMPLEKNOWLEDGEBASE01/datasources/01JEXAMPLEDATASOURCE0001' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\"\n"
+    patch:
+      tags:
+      - Knowledge Bases
+      summary: Update a datasource
+      description: Updates the display name of a datasource.
+      operationId: UpdateDatasource
+      parameters:
+      - name: knowledge_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: datasource_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DatasourcesServiceUpdateRequest'
+        required: true
+      responses:
+        '200':
+          description: Datasource successfully updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Datasource'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: knowledge
+      x-speakeasy-name-override: updateDatasource
+      x-cli-group: knowledge-bases
+      x-cli-name: updateDatasource
+      x-code-samples:
+      - lang: curl
+        label: Core - Update datasource
+        source: "curl --request PATCH \\\n  --url 'https://my.orq.ai/v2/knowledge/01JEXAMPLEKNOWLEDGEBASE01/datasources/01JEXAMPLEDATASOURCE0001' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\" \\\n  --header 'Content-Type: application/json' \\\n  --data '{\"display_name\":\"Product guide 2026\"}'\n"
+  /v2/knowledge/{knowledge_id}/datasources/{datasource_id}/chunks:
+    get:
+      tags:
+      - Knowledge Bases
+      summary: List all chunks for a datasource
+      description: Returns chunks using cursor pagination, with optional text and processing-status filters.
+      operationId: ListChunks
+      parameters:
+      - schema:
+          type: string
+          description: The unique identifier of the knowledge base
+        required: true
+        description: The unique identifier of the knowledge base
+        name: knowledge_id
+        in: path
+      - schema:
+          type: string
+          description: The unique identifier of the datasource.
+        required: true
+        description: The unique identifier of the datasource.
+        name: datasource_id
+        in: path
+      - schema:
+          type: integer
+          minimum: 1
+          maximum: 200
+          default: 10
+          description: A limit on the number of objects to be returned. Limit can range between 1 and 200, and the default is 10
+        required: false
+        description: A limit on the number of objects to be returned. Limit can range between 1 and 200, and the default is 10
+        name: limit
+        in: query
+      - schema:
+          type: string
+          description: A cursor for use in pagination. `starting_after` is an object ID that defines your place in the list. For instance, if you make a list request and receive 20 objects, ending with `01JJ1HDHN79XAS7A01WB3HYSDB`, your subsequent call can include `starting_after=01JJ1HDHN79XAS7A01WB3HYSDB` in order to fetch the next page of the list.
+        required: false
+        description: A cursor for use in pagination. `starting_after` is an object ID that defines your place in the list. For instance, if you make a list request and receive 20 objects, ending with `01JJ1HDHN79XAS7A01WB3HYSDB`, your subsequent call can include `starting_after=01JJ1HDHN79XAS7A01WB3HYSDB` in order to fetch the next page of the list.
+        name: starting_after
+        in: query
+      - schema:
+          type: string
+          description: A cursor for use in pagination. `ending_before` is an object ID that defines your place in the list. For instance, if you make a list request and receive 20 objects, starting with `01JJ1HDHN79XAS7A01WB3HYSDB`, your subsequent call can include `ending_before=01JJ1HDHN79XAS7A01WB3HYSDB` in order to fetch the previous page of the list.
+        required: false
+        description: A cursor for use in pagination. `ending_before` is an object ID that defines your place in the list. For instance, if you make a list request and receive 20 objects, starting with `01JJ1HDHN79XAS7A01WB3HYSDB`, your subsequent call can include `ending_before=01JJ1HDHN79XAS7A01WB3HYSDB` in order to fetch the previous page of the list.
+        name: ending_before
+        in: query
+      - schema:
+          type: string
+          description: Search query to find datasources by name.
+        required: false
+        description: Search query to find datasources by name.
+        name: q
+        in: query
+      - schema:
+          anyOf:
+          - type: array
+            items:
+              type: string
+              enum:
+              - pending
+              - processing
+              - completed
+              - failed
+              - queued
+            example:
+            - completed
+            - failed
+          - type: string
+            enum:
+            - pending
+            - processing
+            - completed
+            - failed
+            - queued
+            example: completed
+          description: Filter chunks by status.
+        required: false
+        description: Filter chunks by status.
+        name: status
+        in: query
+      responses:
+        '200':
+          description: Chunks successfully retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChunksServiceListResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: The resource does not exist. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: knowledge
+      x-speakeasy-name-override: listChunks
+      x-cli-group: knowledge-bases
+      x-cli-name: listChunks
+      x-code-samples:
+      - lang: curl
+        label: Core - List chunks
+        source: "curl --request GET \\\n  --url 'https://my.orq.ai/v2/knowledge/01JEXAMPLEKNOWLEDGEBASE01/datasources/01JEXAMPLEDATASOURCE0001/chunks?limit=100' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\"\n"
+    post:
+      tags:
+      - Knowledge Bases
+      summary: Create chunks for a datasource
+      description: Creates between 1 and 100 chunks. Chunks with supplied embeddings are indexed immediately; chunks without embeddings are queued for embedding.
+      operationId: CreateChunk
+      parameters:
+      - name: knowledge_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: datasource_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/UpsertChunk'
+              minItems: 1
+              maxItems: 100
+              description: Array of chunks to create. Maximum of 100 chunks per request.
+        required: true
+      responses:
+        '200':
+          description: Chunk successfully created
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/KnowledgeChunk'
+                description: Array of created chunks
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Failed to create chunk
+      x-speakeasy-group: knowledge
+      x-speakeasy-name-override: createChunks
+      x-cli-group: knowledge-bases
+      x-cli-name: createChunks
+      x-code-samples:
+      - lang: curl
+        label: Core - Create chunks
+        source: "curl --request POST \\\n  --url 'https://my.orq.ai/v2/knowledge/01JEXAMPLEKNOWLEDGEBASE01/datasources/01JEXAMPLEDATASOURCE0001/chunks' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\" \\\n  --header 'Content-Type: application/json' \\\n  --data '[\n    {\n      \"text\": \"ORQ routes each request to the configured model.\",\n      \"metadata\": {\"section\":\"routing\"}\n    }\n  ]'\n"
+    delete:
+      tags:
+      - Knowledge Bases
+      summary: Delete multiple chunks
+      description: Deletes up to 100 chunks and reports IDs that were not found or could not be deleted.
+      operationId: DeleteChunks
+      parameters:
+      - name: knowledge_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: datasource_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChunksServiceDeleteManyRequest'
+        required: true
+      responses:
+        '200':
+          description: Chunks deletion result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChunksServiceDeleteManyResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: knowledge
+      x-speakeasy-name-override: deleteChunks
+      x-cli-group: knowledge-bases
+      x-cli-name: deleteChunks
+      x-code-samples:
+      - lang: curl
+        label: Core - Delete multiple chunks
+        source: "curl --request DELETE \\\n  --url 'https://my.orq.ai/v2/knowledge/01JEXAMPLEKNOWLEDGEBASE01/datasources/01JEXAMPLEDATASOURCE0001/chunks' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\" \\\n  --header 'Content-Type: application/json' \\\n  --data '{\n    \"chunk_ids\": [\n      \"chunk_01JEXAMPLE000000000001\",\n      \"chunk_01JEXAMPLE000000000002\"\n    ]\n  }'\n"
+  /v2/knowledge/{knowledge_id}/datasources/{datasource_id}/chunks/count:
+    post:
+      tags:
+      - Knowledge Bases
+      summary: Get chunks total count
+      description: Returns the total count of chunks in a datasource. When `q` is provided, the count reflects indexed chunks only — recently created chunks may not be counted until embedding completes.
+      operationId: GetChunksCount
+      parameters:
+      - name: knowledge_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: datasource_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChunksServiceCountRequest'
+        required: true
+      responses:
+        '200':
+          description: Chunks count
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChunksServiceCountResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: knowledge
+      x-speakeasy-name-override: getChunksCount
+      x-cli-group: knowledge-bases
+      x-cli-name: getChunksCount
+      x-code-samples:
+      - lang: curl
+        label: Core - Count chunks
+        source: "curl --request POST \\\n  --url 'https://my.orq.ai/v2/knowledge/01JEXAMPLEKNOWLEDGEBASE01/datasources/01JEXAMPLEDATASOURCE0001/chunks/count' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\" \\\n  --header 'Content-Type: application/json' \\\n  --data '{\"q\":\"routing\",\"enabled\":true}'\n"
+  /v2/knowledge/{knowledge_id}/datasources/{datasource_id}/chunks/list:
+    post:
+      tags:
+      - Knowledge Bases
+      summary: List chunks with offset-based pagination
+      description: Returns a page of chunks, with optional text, enabled-state, and processing-status filters.
+      operationId: ListChunksPaginated
+      parameters:
+      - name: knowledge_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: datasource_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChunksServiceListPaginatedRequest'
+        required: true
+      responses:
+        '200':
+          description: Chunks successfully retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChunksServiceListPaginatedResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: knowledge
+      x-speakeasy-name-override: listChunksPaginated
+      x-cli-group: knowledge-bases
+      x-cli-name: listChunksPaginated
+      x-code-samples:
+      - lang: curl
+        label: Core - List a page of chunks
+        source: "curl --request POST \\\n  --url 'https://my.orq.ai/v2/knowledge/01JEXAMPLEKNOWLEDGEBASE01/datasources/01JEXAMPLEDATASOURCE0001/chunks/list' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\" \\\n  --header 'Content-Type: application/json' \\\n  --data '{\"q\":\"routing\",\"limit\":25,\"page\":1}'\n"
+  /v2/knowledge/{knowledge_id}/datasources/{datasource_id}/chunks/{chunk_id}:
+    get:
+      tags:
+      - Knowledge Bases
+      summary: Retrieve a chunk
+      description: Retrieves a chunk by its chunk identifier.
+      operationId: GetOneChunk
+      parameters:
+      - name: knowledge_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: datasource_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: chunk_id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Chunk successfully retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgeChunk'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: The resource does not exist. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: knowledge
+      x-speakeasy-name-override: retrieveChunk
+      x-cli-group: knowledge-bases
+      x-cli-name: retrieveChunk
+      x-code-samples:
+      - lang: curl
+        label: Core - Retrieve chunk
+        source: "curl --request GET \\\n  --url 'https://my.orq.ai/v2/knowledge/01JEXAMPLEKNOWLEDGEBASE01/datasources/01JEXAMPLEDATASOURCE0001/chunks/chunk_01JEXAMPLE000000000001' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\"\n"
+    delete:
+      tags:
+      - Knowledge Bases
+      summary: Delete a chunk
+      description: Deletes a chunk from the datasource and its vector index.
+      operationId: DeleteChunk
+      parameters:
+      - name: knowledge_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: datasource_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: chunk_id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          description: Chunk successfully deleted
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: knowledge
+      x-speakeasy-name-override: deleteChunk
+      x-cli-group: knowledge-bases
+      x-cli-name: deleteChunk
+      x-code-samples:
+      - lang: curl
+        label: Core - Delete chunk
+        source: "curl --request DELETE \\\n  --url 'https://my.orq.ai/v2/knowledge/01JEXAMPLEKNOWLEDGEBASE01/datasources/01JEXAMPLEDATASOURCE0001/chunks/chunk_01JEXAMPLE000000000001' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\"\n"
+    patch:
+      tags:
+      - Knowledge Bases
+      summary: Update a chunk
+      description: Updates chunk text, metadata, or a supplied embedding. Changing text without an embedding queues the chunk for re-embedding.
+      operationId: UpdateChunk
+      parameters:
+      - name: knowledge_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: datasource_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: chunk_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChunksServiceUpdateRequest'
+        required: true
+      responses:
+        '200':
+          description: Chunk successfully updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgeChunk'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: knowledge
+      x-speakeasy-name-override: updateChunk
+      x-cli-group: knowledge-bases
+      x-cli-name: updateChunk
+      x-code-samples:
+      - lang: curl
+        label: Core - Update chunk
+        source: "curl --request PATCH \\\n  --url 'https://my.orq.ai/v2/knowledge/01JEXAMPLEKNOWLEDGEBASE01/datasources/01JEXAMPLEDATASOURCE0001/chunks/chunk_01JEXAMPLE000000000001' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\" \\\n  --header 'Content-Type: application/json' \\\n  --data '{\n    \"text\": \"ORQ routes requests to the configured model.\",\n    \"metadata\": {\"section\":\"routing\",\"reviewed\":true}\n  }'\n"
+  /v2/knowledge/{knowledge_id}/datasources/{datasource_id}/chunks/{chunk_id}/enabled:
+    patch:
+      tags:
+      - Knowledge Bases
+      summary: Set a chunk's enabled status
+      description: Enables or disables a chunk for retrieval. If the vector-index document is missing, enabling the chunk queues it for embedding.
+      operationId: UpdateChunkEnabled
+      parameters:
+      - name: knowledge_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: datasource_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: chunk_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChunksServiceSetEnabledRequest'
+        required: true
+      responses:
+        '200':
+          description: Chunk successfully updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgeChunk'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: knowledge
+      x-speakeasy-name-override: toggleChunk
+      x-cli-group: knowledge-bases
+      x-cli-name: toggleChunk
+      x-code-samples:
+      - lang: curl
+        label: Core - Set chunk enabled status
+        source: "curl --request PATCH \\\n  --url 'https://my.orq.ai/v2/knowledge/01JEXAMPLEKNOWLEDGEBASE01/datasources/01JEXAMPLEDATASOURCE0001/chunks/chunk_01JEXAMPLE000000000001/enabled' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\" \\\n  --header 'Content-Type: application/json' \\\n  --data '{\"enabled\":false}'\n"
+  /v2/knowledge/{knowledge_id}/datasources/{datasource_id}/datasource-processing-status:
+    get:
+      tags:
+      - Knowledge Bases
+      summary: Retrieve datasource processing status
+      description: Returns aggregate queued, completed, passed, and failed chunk counts together with the datasource and chunk processing attempts.
+      operationId: GetOneDatasourceProcessingStatus
+      parameters:
+      - name: knowledge_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: datasource_id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Datasource processed chunks status successfully retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DatasourcesServiceGetProcessingStatusResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: The resource does not exist. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: knowledge
+      x-speakeasy-name-override: retrieveProcessingStatus
+      x-cli-group: knowledge-bases
+      x-cli-name: retrieveProcessingStatus
+      x-code-samples:
+      - lang: curl
+        label: Core - Retrieve datasource processing status
+        source: "curl --request GET \\\n  --url 'https://my.orq.ai/v2/knowledge/01JEXAMPLEKNOWLEDGEBASE01/datasources/01JEXAMPLEDATASOURCE0001/datasource-processing-status' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\"\n"
+  /v2/knowledge/{knowledge_id}/search:
+    post:
+      tags:
+      - Knowledge Bases
+      summary: Search knowledge base
+      description: Search a Knowledge Base and return the most similar chunks, along with their search and rerank scores. Note that all configuration changes made in the API will override the settings in the UI.
+      operationId: SearchKnowledge
+      parameters:
+      - name: knowledge_id
+        in: path
+        description: The unique identifier or key of the knowledge base.
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: A search request for chunks in a knowledge base
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchKnowledgeRequest'
+        required: true
+      responses:
+        '200':
+          description: Search knowledge base
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchKnowledgeResponse'
+        '401':
+          description: Unauthorized - Bearer token is missing or invalid.
+      x-speakeasy-group: knowledge
+      x-speakeasy-name-override: search
+      x-cli-group: knowledge-bases
+      x-cli-name: search
+      x-code-samples:
+      - lang: curl
+        label: Core
+        source: "curl --request POST \\\n  --url \"https://my.orq.ai/v2/knowledge/$KNOWLEDGE_ID/search\" \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\" \\\n  --header 'Content-Type: application/json' \\\n  --data '{\n    \"query\": \"What is our refund policy?\",\n    \"top_k\": 10,\n    \"search_type\": \"hybrid_search\",\n    \"search_options\": {\n      \"include_vectors\": false,\n      \"include_metadata\": true,\n      \"include_scores\": true\n    }\n  }'"
+      - lang: typescript
+        label: Node.js
+        source: "import { Orq } from \"@orq-ai/node\";\n\nconst orq = new Orq({\n  apiKey: process.env[\"ORQ_API_KEY\"]\n});\n\nconst result = await orq.knowledge.search({\n  knowledgeId: process.env[\"KNOWLEDGE_ID\"],\n  requestBody: {\n    query: \"What is our refund policy?\",\n    topK: 10,\n    searchType: \"hybrid_search\",\n    searchOptions: {\n      includeVectors: false,\n      includeMetadata: true,\n      includeScores: true\n    }\n  }\n});\n\nconsole.log(result.matches);"
+      - lang: python
+        label: Python
+        source: "import os\nfrom orq_ai_sdk import Orq\n\norq = Orq(api_key=os.getenv(\"ORQ_API_KEY\"))\n\nresult = orq.knowledge.search(\n    knowledge_id=os.getenv(\"KNOWLEDGE_ID\"),\n    query=\"What is our refund policy?\",\n    top_k=10,\n    search_type=\"hybrid_search\",\n    search_options={\n        \"include_vectors\": False,\n        \"include_metadata\": True,\n        \"include_scores\": True,\n    },\n)\n\nprint(result.matches)"
+  /v2/knowledge/{knowledge_id}/upload-file:
+    get:
+      tags:
+      - Knowledge Bases
+      summary: Retrieve a file upload URL
+      description: Creates a presigned upload policy for a file that will be attached to a knowledge-base datasource. Submit the returned form fields and file directly to the returned URL.
+      operationId: GetOneFileUploadUrl
+      parameters:
+      - name: knowledge_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: fileName
+        in: query
+        description: The name of the file to upload.
+        schema:
+          type: string
+        required: true
+      - name: contentType
+        in: query
+        description: The media type of the file to upload.
+        schema:
+          type: string
+        required: true
+      - name: datasourceId
+        in: query
+        description: The datasource identifier that will own the uploaded file.
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          description: File upload url successfully retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetUploadFileUrlResponse'
+        '400':
+          description: The request is invalid. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized - Bearer token is missing or invalid.
+        '500':
+          description: An error has occured
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgeApiError'
+      x-speakeasy-group: knowledge
+      x-speakeasy-name-override: retrieveFileUrl
+      x-cli-group: knowledge-bases
+      x-cli-name: retrieveFileUrl
+      x-code-samples:
+      - lang: curl
+        label: Core - Create file upload policy
+        source: "curl --request GET \\\n  --url 'https://my.orq.ai/v2/knowledge/01JEXAMPLEKNOWLEDGEBASE01/upload-file?fileName=guide.pdf&contentType=application%2Fpdf&datasourceId=01JEXAMPLEDATASOURCE0001' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\"\n"
+components:
+  schemas:
+    ChunkingCleanupOptions:
+      type: object
+      properties:
+        delete_emails:
+          type: boolean
+        delete_credit_cards:
+          type: boolean
+        delete_phone_numbers:
+          type: boolean
+        clean_bullet_points:
+          type: boolean
+        clean_numbered_list:
+          type: boolean
+        clean_unicode:
+          type: boolean
+        clean_dashes:
+          type: boolean
+        clean_whitespaces:
+          type: boolean
+    ChunksServiceUpdateRequest:
+      required: []
+      type: object
+      properties:
+        text:
+          type: string
+          minLength: 1
+          description: The text content of the chunk
+        embedding:
+          type: array
+          items:
+            type: number
+            format: double
+        metadata:
+          type: object
+          additionalProperties:
+            anyOf:
+            - type: string
+            - type: number
+            - type: boolean
+          description: Metadata of the chunk
+    ChunkProcessingAttempts:
+      type: object
+      properties:
+        id:
+          type: string
+        processing_attempts:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProcessingAttempt'
+    DatasourcesServicePreviewChunksRequest:
+      required:
+      - file_id
+      type: object
+      properties:
+        file_id:
+          type: string
+        chunking_options:
+          $ref: '#/components/schemas/DatasourceChunkingOptions'
+    SearchRerankConfig:
+      required:
+      - model
+      type: object
+      properties:
+        model:
+          example: cohere/rerank-v4.0-pro
+          type: string
+          description: The name of the rerank model to use. Refer to the [model list](https://docs.orq.ai/ai-gateway/supported-models#rerank-models).
+        threshold:
+          maximum: 1
+          type: number
+          default: 0
+          description: The threshold value used to filter the rerank results, only documents with a relevance score greater than the threshold will be returned
+          format: double
+          minimum: 0
+        top_k:
+          maximum: 100
+          minimum: 1
+          type: integer
+          default: 10
+          description: The number of top results to return after reranking. If not provided, will default to the knowledge base configured `top_k`.
+          format: int32
+    SearchKnowledgeMatch:
+      required:
+      - id
+      - text
+      type: object
+      properties:
+        id:
+          type: string
+        text:
+          type: string
+        vector:
+          type: array
+          items:
+            type: number
+            format: double
+          description: Embedding vector of the chunk, returned only when requested.
+        metadata:
+          type: object
+          description: Arbitrary chunk metadata, omitted unless requested.
+        scores:
+          allOf:
+          - $ref: '#/components/schemas/SearchKnowledgeScores'
+          description: Search and rerank scores, omitted unless requested.
+    KnowledgeBasesServiceUpdateRequest:
+      oneOf:
+      - type: object
+        properties:
+          description:
+            type:
+            - string
+            - 'null'
+            description: The description of the knowledge base.
+          path:
+            type: string
+            description: 'Entity storage path.
+
+
+              With workspace-level API keys, use the format `project/folder/subfolder/...`. The first element identifies the project, followed by nested folders (auto-created as needed). Example: `Default/agents`.
+
+
+              With project-level API keys, the project is predetermined by the API key, so the path is relative to that project. Example: `agents`. For backward compatibility, a leading project name is ignored when it matches the scoped project.'
+            example: Default
+          retrieval_settings:
+            type: object
+            properties:
+              top_k:
+                type: integer
+                exclusiveMinimum: 0
+                default: 5
+                description: The number of results to return from the search.
+              threshold:
+                type: number
+                minimum: 0
+                maximum: 1
+                default: 0
+                description: The threshold value used to filter the search results, only documents with a relevance score greater than the threshold will be returned
+              rerank_config:
+                type:
+                - object
+                - 'null'
+                properties:
+                  top_k:
+                    type: integer
+                    minimum: 1
+                    maximum: 100
+                    default: 5
+                    description: The number of results to return by the reranking model
+                  rerank_threshold:
+                    type: number
+                    minimum: 0
+                    maximum: 1
+                    default: 0.5
+                    description: The threshold value used to filter the rerank results, only documents with a relevance score greater than the threshold will be returned
+                  rerank_model:
+                    type: string
+                    description: The rerank model to use for the knowledge base.
+                required:
+                - rerank_model
+                description: The rerank configuration for the knowledge base. In case the model is provided it will be used to enhance the search precision.
+              agentic_rag_config:
+                type:
+                - object
+                - 'null'
+                properties:
+                  model:
+                    type: string
+                    description: The model to use for the Agentic RAG
+                required:
+                - model
+                description: The Agentic RAG configuration for the knowledge base. If `null` is provided, Agentic RAG will be disabled.
+            description: The retrieval settings for the knowledge base.
+          external_config:
+            type: object
+            properties:
+              name:
+                type: string
+                description: The name of the external knowledge base.
+              api_url:
+                type: string
+                format: uri
+                description: The API URL for the external knowledge base.
+              api_key:
+                type: string
+                description: The API key for the external knowledge base.
+            description: Configuration for the external knowledge base.
+          type:
+            type: string
+            enum:
+            - external
+            default: external
+          settings:
+            $ref: '#/components/schemas/KnowledgeUpdateSettings'
+          domain_id:
+            type: string
+      - type: object
+        properties:
+          description:
+            type:
+            - string
+            - 'null'
+            description: The description of the knowledge base.
+          embedding_model:
+            type: string
+            description: The embeddings model used for the knowledge base. If the models is provided and is different than the previous set model, all the datasources in the knowledge base will be re-embedded.
+          path:
+            type: string
+            description: 'Entity storage path.
+
+
+              With workspace-level API keys, use the format `project/folder/subfolder/...`. The first element identifies the project, followed by nested folders (auto-created as needed). Example: `Default/agents`.
+
+
+              With project-level API keys, the project is predetermined by the API key, so the path is relative to that project. Example: `agents`. For backward compatibility, a leading project name is ignored when it matches the scoped project.'
+            example: Default
+          retrieval_settings:
+            type: object
+            properties:
+              retrieval_type:
+                type: string
+                enum:
+                - vector_search
+                - keyword_search
+                - hybrid_search
+                default: hybrid_search
+                description: The retrieval type to use for the knowledge base. If not provided, Hybrid Search will be used as a default query strategy.
+              top_k:
+                type: integer
+                exclusiveMinimum: 0
+                default: 5
+                description: The number of results to return from the search.
+              threshold:
+                type: number
+                minimum: 0
+                maximum: 1
+                default: 0
+                description: The threshold value used to filter the search results, only documents with a relevance score greater than the threshold will be returned
+              rerank_config:
+                type:
+                - object
+                - 'null'
+                properties:
+                  top_k:
+                    type: integer
+                    minimum: 1
+                    maximum: 100
+                    default: 5
+                    description: The number of results to return by the reranking model
+                  rerank_threshold:
+                    type: number
+                    minimum: 0
+                    maximum: 1
+                    default: 0.5
+                    description: The threshold value used to filter the rerank results, only documents with a relevance score greater than the threshold will be returned
+                  rerank_model:
+                    type: string
+                    description: The rerank model to use for the knowledge base.
+                required:
+                - rerank_model
+                description: The rerank configuration for the knowledge base. In case the model is provided it will be used to enhance the search precision.
+              agentic_rag_config:
+                type:
+                - object
+                - 'null'
+                properties:
+                  model:
+                    type: string
+                    description: The model to use for the Agentic RAG
+                required:
+                - model
+                description: The Agentic RAG configuration for the knowledge base. If `null` is provided, Agentic RAG will be disabled.
+            description: The retrieval settings for the knowledge base. If not provider, Hybrid Search will be used as a default query strategy.
+          type:
+            type: string
+            enum:
+            - internal
+            default: internal
+          settings:
+            $ref: '#/components/schemas/KnowledgeUpdateSettings'
+          domain_id:
+            type: string
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Human-readable error message.
+        code:
+          type: integer
+          description: gRPC status code, when the service reports one.
+        details:
+          type: array
+          items: {}
+          description: Additional error details, when the service reports any.
+      required:
+      - message
+    RerankConfig:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+        provider:
+          type: string
+        top_k:
+          type: integer
+          format: int32
+        model:
+          type: string
+        model_db_id:
+          type: string
+        model_type:
+          type: string
+        model_parameters:
+          $ref: '#/components/schemas/RerankModelParameters'
+        integration_id:
+          type: string
+    RerankModelParameters:
+      type: object
+      properties:
+        threshold:
+          type: number
+          format: double
+    EmbeddingsModelParameters:
+      type: object
+      properties:
+        encoding_format:
+          type: string
+        dimensions:
+          type: integer
+          format: int32
+    SearchType:
+      type: string
+      enum:
+      - vector_search
+      - keyword_search
+      - hybrid_search
+    DatasourcesServiceGetProcessingStatusResponse:
+      required:
+      - total_queued
+      - total_completed
+      - total_passed
+      - total_failed
+      - overall_total_processing
+      - chunks_processing_attempts
+      - datasource_processing_attempts
+      type: object
+      properties:
+        total_queued:
+          type: number
+          format: double
+        total_completed:
+          type: number
+          format: double
+        total_passed:
+          type: number
+          format: double
+        total_failed:
+          type: number
+          format: double
+        overall_total_processing:
+          type: number
+          format: double
+        chunks_processing_attempts:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChunkProcessingAttempts'
+        datasource_processing_attempts:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProcessingAttempt'
+    UpsertChunk:
+      required:
+      - text
+      type: object
+      properties:
+        text:
+          type: string
+          minLength: 1
+          description: The text content of the chunk
+        embedding:
+          type: array
+          items:
+            type: number
+            format: double
+        metadata:
+          type: object
+          additionalProperties:
+            anyOf:
+            - type: string
+            - type: number
+            - type: boolean
+          description: Metadata of the chunk
+        _id:
+          type: string
+          pattern: ^chunk_[0-9A-HJKMNP-TV-Z]{26}$
+          description: 'Optional client-supplied chunk id. Reusing the same _id makes creation idempotent: an existing chunk with that _id in this datasource is replaced instead of duplicated.'
+    ChunksServiceDeleteManyResponse:
+      required:
+      - deleted_count
+      type: object
+      properties:
+        deleted_count:
+          type: number
+          format: double
+        failed_ids:
+          type: array
+          items:
+            type: string
+    DatasourcesServiceUpdateRequest:
+      required:
+      - display_name
+      type: object
+      properties:
+        display_name:
+          type: string
+          minLength: 1
+        description:
+          type:
+          - string
+          - 'null'
+    ProcessingAttempt:
+      required:
+      - id
+      - started_at
+      type: object
+      properties:
+        id:
+          type: string
+        started_at:
+          type: string
+        queued_at:
+          type: string
+        completed_at:
+          type: string
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProcessingError'
+        retryable:
+          type: boolean
+    SearchRetrievalConfig:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/SearchType'
+        top_k:
+          type: integer
+          format: int32
+        threshold:
+          type: number
+          format: double
+        rerank_config:
+          type:
+          - object
+          - 'null'
+          description: Override reranking for this retrieval configuration. Omit to inherit stored settings or set to null to disable reranking.
+          properties:
+            enabled:
+              type: boolean
+            provider:
+              type: string
+            top_k:
+              type: integer
+              format: int32
+              minimum: 1
+              maximum: 100
+            model:
+              type: string
+            model_db_id:
+              type: string
+            model_type:
+              type: string
+              enum:
+              - rerank
+            model_parameters:
+              type: object
+              properties:
+                threshold:
+                  type: number
+            integration_id:
+              type:
+              - string
+              - 'null'
+      description: "SearchRetrievalConfig is the retrieval strategy configuration. Type remains\n optional because external knowledge bases use the same base configuration\n without a retrieval strategy discriminator."
+    SearchKnowledgeRequest:
+      required:
+      - query
+      type: object
+      properties:
+        query:
+          minLength: 1
+          type: string
+          description: The query to use to search the knowledge base
+        top_k:
+          maximum: 100
+          minimum: 1
+          type: integer
+          description: The number of results to return. If not provided, will default to the knowledge base configured `top_k`.
+          format: int32
+        threshold:
+          maximum: 1
+          type: number
+          description: The threshold to apply to the search. If not provided, will default to the knowledge base configured `threshold`
+          format: double
+          minimum: 0
+        search_type:
+          default: hybrid_search
+          description: The type of search to perform. If not provided, will default to the knowledge base configured `retrieval_type`
+          $ref: '#/components/schemas/SearchType'
+        filter_by:
+          description: The metadata filter to apply to the search. Check the [Searching a Knowledge Base](https://docs.orq.ai/ai-studio/ai-engineering/knowledge-bases#search-a-knowledge-base) for more information.
+          anyOf:
+          - type: object
+            additionalProperties:
+              anyOf:
+              - type: object
+                properties:
+                  eq:
+                    anyOf:
+                    - type: string
+                      title: string
+                      description: String
+                    - type: number
+                      title: number
+                      description: Number
+                    - type: boolean
+                      title: boolean
+                      description: Boolean
+                required:
+                - eq
+                title: eq
+                description: Equal to
+              - type: object
+                properties:
+                  ne:
+                    anyOf:
+                    - type: string
+                      title: string
+                      description: String
+                    - type: number
+                      title: number
+                      description: Number
+                    - type: boolean
+                      title: boolean
+                      description: Boolean
+                required:
+                - ne
+                title: ne
+                description: Not equal to
+              - type: object
+                properties:
+                  gt:
+                    type: number
+                required:
+                - gt
+                title: gt
+                description: Greater than
+              - type: object
+                properties:
+                  gte:
+                    type: number
+                required:
+                - gte
+                title: gte
+                description: Greater than or equal to
+              - type: object
+                properties:
+                  lt:
+                    type: number
+                required:
+                - lt
+                title: lt
+                description: Less than
+              - type: object
+                properties:
+                  lte:
+                    type: number
+                required:
+                - lte
+                title: lte
+                description: Less than or equal to
+              - type: object
+                properties:
+                  in:
+                    type: array
+                    items:
+                      anyOf:
+                      - type: string
+                        title: string
+                        description: String
+                      - type: number
+                        title: number
+                        description: Number
+                      - type: boolean
+                        title: boolean
+                        description: Boolean
+                required:
+                - in
+                title: in
+                description: In
+              - type: object
+                properties:
+                  nin:
+                    type: array
+                    items:
+                      anyOf:
+                      - type: string
+                        title: string
+                        description: String
+                      - type: number
+                        title: number
+                        description: Number
+                      - type: boolean
+                        title: boolean
+                        description: Boolean
+                required:
+                - nin
+                title: nin
+                description: Not in
+              - type: object
+                properties:
+                  exists:
+                    type: boolean
+                required:
+                - exists
+                title: exists
+                description: Exists
+            title: Search operator
+          - type: object
+            properties:
+              and:
+                type: array
+                items:
+                  type: object
+                  additionalProperties:
+                    anyOf:
+                    - type: object
+                      properties:
+                        eq:
+                          anyOf:
+                          - type: string
+                            title: string
+                            description: String
+                          - type: number
+                            title: number
+                            description: Number
+                          - type: boolean
+                            title: boolean
+                            description: Boolean
+                      required:
+                      - eq
+                      title: eq
+                      description: Equal to
+                    - type: object
+                      properties:
+                        ne:
+                          anyOf:
+                          - type: string
+                            title: string
+                            description: String
+                          - type: number
+                            title: number
+                            description: Number
+                          - type: boolean
+                            title: boolean
+                            description: Boolean
+                      required:
+                      - ne
+                      title: ne
+                      description: Not equal to
+                    - type: object
+                      properties:
+                        gt:
+                          type: number
+                      required:
+                      - gt
+                      title: gt
+                      description: Greater than
+                    - type: object
+                      properties:
+                        gte:
+                          type: number
+                      required:
+                      - gte
+                      title: gte
+                      description: Greater than or equal to
+                    - type: object
+                      properties:
+                        lt:
+                          type: number
+                      required:
+                      - lt
+                      title: lt
+                      description: Less than
+                    - type: object
+                      properties:
+                        lte:
+                          type: number
+                      required:
+                      - lte
+                      title: lte
+                      description: Less than or equal to
+                    - type: object
+                      properties:
+                        in:
+                          type: array
+                          items:
+                            anyOf:
+                            - type: string
+                              title: string
+                              description: String
+                            - type: number
+                              title: number
+                              description: Number
+                            - type: boolean
+                              title: boolean
+                              description: Boolean
+                      required:
+                      - in
+                      title: in
+                      description: In
+                    - type: object
+                      properties:
+                        nin:
+                          type: array
+                          items:
+                            anyOf:
+                            - type: string
+                              title: string
+                              description: String
+                            - type: number
+                              title: number
+                              description: Number
+                            - type: boolean
+                              title: boolean
+                              description: Boolean
+                      required:
+                      - nin
+                      title: nin
+                      description: Not in
+                    - type: object
+                      properties:
+                        exists:
+                          type: boolean
+                      required:
+                      - exists
+                      title: exists
+                      description: Exists
+            required:
+            - and
+            title: and
+            description: And
+          - type: object
+            properties:
+              or:
+                type: array
+                items:
+                  type: object
+                  additionalProperties:
+                    anyOf:
+                    - type: object
+                      properties:
+                        eq:
+                          anyOf:
+                          - type: string
+                            title: string
+                            description: String
+                          - type: number
+                            title: number
+                            description: Number
+                          - type: boolean
+                            title: boolean
+                            description: Boolean
+                      required:
+                      - eq
+                      title: eq
+                      description: Equal to
+                    - type: object
+                      properties:
+                        ne:
+                          anyOf:
+                          - type: string
+                            title: string
+                            description: String
+                          - type: number
+                            title: number
+                            description: Number
+                          - type: boolean
+                            title: boolean
+                            description: Boolean
+                      required:
+                      - ne
+                      title: ne
+                      description: Not equal to
+                    - type: object
+                      properties:
+                        gt:
+                          type: number
+                      required:
+                      - gt
+                      title: gt
+                      description: Greater than
+                    - type: object
+                      properties:
+                        gte:
+                          type: number
+                      required:
+                      - gte
+                      title: gte
+                      description: Greater than or equal to
+                    - type: object
+                      properties:
+                        lt:
+                          type: number
+                      required:
+                      - lt
+                      title: lt
+                      description: Less than
+                    - type: object
+                      properties:
+                        lte:
+                          type: number
+                      required:
+                      - lte
+                      title: lte
+                      description: Less than or equal to
+                    - type: object
+                      properties:
+                        in:
+                          type: array
+                          items:
+                            anyOf:
+                            - type: string
+                              title: string
+                              description: String
+                            - type: number
+                              title: number
+                              description: Number
+                            - type: boolean
+                              title: boolean
+                              description: Boolean
+                      required:
+                      - in
+                      title: in
+                      description: In
+                    - type: object
+                      properties:
+                        nin:
+                          type: array
+                          items:
+                            anyOf:
+                            - type: string
+                              title: string
+                              description: String
+                            - type: number
+                              title: number
+                              description: Number
+                            - type: boolean
+                              title: boolean
+                              description: Boolean
+                      required:
+                      - nin
+                      title: nin
+                      description: Not in
+                    - type: object
+                      properties:
+                        exists:
+                          type: boolean
+                      required:
+                      - exists
+                      title: exists
+                      description: Exists
+            required:
+            - or
+            title: or
+            description: Or
+        search_options:
+          allOf:
+          - $ref: '#/components/schemas/SearchOptions'
+          description: Additional search options
+        rerank_config:
+          allOf:
+          - $ref: '#/components/schemas/SearchRerankConfig'
+          description: Override the rerank configuration for this search. If not provided, will use the knowledge base configured rerank settings.
+        agentic_rag_config:
+          description: Override the agentic RAG configuration for this search. If not provided, will use the knowledge base configured agentic RAG settings.
+          anyOf:
+          - type: object
+            allOf:
+            - $ref: '#/components/schemas/JsonValue'
+            anyOf:
+            - required:
+              - model
+            - required:
+              - model_db_id
+              - provider
+            properties:
+              model:
+                type: string
+                description: The name of the model for the Agent to use. Refer to the [model list](https://docs.orq.ai/ai-gateway/supported-models#chat-models).
+              model_db_id:
+                type: string
+                description: Identifier of the stored model configuration to use.
+              provider:
+                type: string
+                description: Provider identifier for the stored model configuration.
+              integration_id:
+                type:
+                - string
+                - 'null'
+                description: Optional integration identifier for the stored model configuration.
+          - type: 'null'
+        retrieval_config:
+          allOf:
+          - $ref: '#/components/schemas/SearchRetrievalConfig'
+          description: Override the stored retrieval configuration for this search. If not provided, the knowledge base configuration is used.
+      description: "Search request. Sets the knowledge base and query, plus optional retrieval\n settings."
+    SearchKnowledgeScores:
+      type: object
+      properties:
+        rerank_score:
+          type: number
+          format: double
+        search_score:
+          type: number
+          format: double
+    ChunksServiceListPaginatedResponse:
+      required:
+      - object
+      - data
+      - has_more
+      type: object
+      properties:
+        object:
+          enum:
+          - list
+          type: string
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/KnowledgeChunk'
+        has_more:
+          type: boolean
+    Datasource:
+      required:
+      - _id
+      - display_name
+      - status
+      - created
+      - updated
+      - knowledge_id
+      - chunks_count
+      type: object
+      properties:
+        display_name:
+          type: string
+        description:
+          type:
+          - string
+          - 'null'
+          description: The description of the datasource
+        status:
+          type: string
+          enum:
+          - pending
+          - processing
+          - completed
+          - failed
+          - queued
+        file_id:
+          type:
+          - string
+          - 'null'
+          description: The unique identifier of the file used to create the datasource.
+        created:
+          type: string
+        updated:
+          type: string
+        created_by_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+          pattern: ^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$
+          readOnly: true
+          description: The user ID of the creator of the datasource
+        update_by_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+          pattern: ^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$
+          readOnly: true
+          description: The user ID of the last user who updated the datasource
+        knowledge_id:
+          type: string
+        chunks_count:
+          type: number
+          format: double
+        processing_attempts:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProcessingAttempt'
+          description: Processing attempts recorded for the datasource.
+        metadata:
+          $ref: '#/components/schemas/CountMetadata'
+        attachment:
+          $ref: '#/components/schemas/DatasourceAttachment'
+        _id:
+          type: string
+    CountMetadata:
+      type: object
+      properties:
+        words_count:
+          type: number
+          format: double
+        sentences_count:
+          type: number
+          format: double
+        paragraphs_count:
+          type: number
+          format: double
+        tokens_count:
+          type: number
+          format: double
+        characters_count:
+          type: number
+          format: double
+        chunks_count:
+          type: number
+          format: double
+    JsonValue:
+      description: Represents a dynamically typed value which can be either null, a number, a string, a boolean, a recursive struct value, or a list of values.
+    ChunkingConfiguration:
+      description: The chunking configuration settings for the datasource. Defaults to the system's standard chunking configuration if not specified.
+      oneOf:
+      - type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - default
+        required:
+        - type
+        description: 'Optimized chunking strategy focusing on speed and avoiding duplication of content chunks. Deprecated: use one of the named chunking strategies instead.'
+        deprecated: true
+      - type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - advanced
+          chunk_max_characters:
+            type: number
+            default: 500
+            description: Defines the absolute maximum character length per chunk. Text elements exceeding this size will be automatically split into multiple chunks.
+          chunk_overlap:
+            type: number
+            default: 0
+            description: Specifies the number of characters to overlap between consecutive chunks. This overlap helps maintain semantic continuity when splitting large text elements.
+        required:
+        - type
+        description: 'Provides advanced settings for customizing chunking behavior, enabling fine-grained control to better meet specific data processing needs. Deprecated: use one of the named chunking strategies instead.'
+        deprecated: true
+      - type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - token
+          chunk_size:
+            type: integer
+            default: 512
+            description: Maximum number of tokens per chunk.
+          chunk_overlap:
+            type: integer
+            default: 0
+            description: Number of tokens to overlap between consecutive chunks. Helps preserve continuity across chunk boundaries.
+        required:
+        - type
+        description: Splits text into fixed-size token windows with optional overlap. Predictable chunk sizes, no regard for sentence or paragraph boundaries.
+      - type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - sentence
+          chunk_size:
+            type: integer
+            default: 512
+            description: Maximum number of tokens per chunk.
+          chunk_overlap:
+            type: integer
+            default: 0
+            description: Number of tokens to overlap between consecutive chunks. Helps preserve continuity across chunk boundaries.
+          min_sentences_per_chunk:
+            type: integer
+            default: 1
+            description: Minimum number of sentences each chunk must contain.
+        required:
+        - type
+        description: Groups whole sentences up to the chunk size, so chunks never cut a sentence in half.
+      - type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - recursive
+          chunk_size:
+            type: integer
+            default: 512
+            description: Maximum number of tokens per chunk.
+          separators:
+            type: array
+            items:
+              type: string
+            description: Separator hierarchy to split on, tried in order. Defaults to paragraph, line, space, then character.
+          min_characters_per_chunk:
+            type: integer
+            default: 24
+            description: Minimum number of characters each chunk must contain.
+        required:
+        - type
+        description: Splits on a separator hierarchy, falling back through paragraph, line, sentence, and word boundaries until chunks fit. Respects document structure.
+      - type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - fast
+          target_size:
+            type: integer
+            default: 4096
+            description: Target chunk size in bytes.
+          delimiters:
+            type: string
+            default: '
+
+              .?'
+            description: Single-byte characters to split on.
+          pattern:
+            type: string
+            description: Multi-byte split pattern. Takes precedence over delimiters when set.
+          prefix:
+            type: boolean
+            default: false
+            description: Attach the delimiter to the start of the next chunk instead of the end of the previous one.
+          consecutive:
+            type: boolean
+            default: false
+            description: Split at the start of a run of consecutive delimiters rather than at each one.
+          forward_fallback:
+            type: boolean
+            default: false
+            description: Search forward for a delimiter when searching backward finds none.
+        required:
+        - type
+        description: Splits on delimiters or a regular expression without tokenizing. Fastest option; chunk sizes vary with where delimiters fall.
+      - type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - semantic
+          chunk_size:
+            type: integer
+            default: 512
+            description: Maximum number of tokens per chunk.
+          embedding_model:
+            type: string
+            description: Embedding model used to detect semantic boundaries.
+          dimensions:
+            type: integer
+            description: Number of dimensions for the embedding output, when the model supports it.
+          threshold:
+            type: string
+            default: auto
+            description: Similarity threshold from 0 through 1, or "auto".
+          mode:
+            type: string
+            default: window
+            enum:
+            - window
+            - sentence
+            description: Comparison mode.
+          similarity_window:
+            type: integer
+            default: 1
+            description: Window size for similarity comparison.
+        required:
+        - type
+        description: Embeds the text and breaks where meaning shifts, so related passages stay together. Makes paid embedding calls.
+      - type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - late
+          chunk_size:
+            type: integer
+            default: 512
+            description: Maximum number of tokens per chunk.
+          separators:
+            type: array
+            items:
+              type: string
+            description: Separator hierarchy to split on, tried in order. Defaults to paragraph, line, space, then character.
+          min_characters_per_chunk:
+            type: integer
+            default: 24
+            description: Minimum number of characters each chunk must contain.
+          embedding_model:
+            type: string
+            description: Embedding model used to embed the document before it is split.
+          dimensions:
+            type: integer
+            description: Number of dimensions for the embedding output, when the model supports it.
+        required:
+        - type
+        description: Embeds the document before splitting it recursively, so each chunk is embedded with the surrounding document in context. Makes paid embedding calls.
+      - type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - agentic
+          chunk_size:
+            type: integer
+            default: 1024
+            description: Maximum number of tokens per chunk.
+          model:
+            type: string
+            default: openai/gpt-4o
+            description: Model that chooses the chunk boundaries.
+          candidate_size:
+            type: integer
+            default: 128
+            description: Size of candidate splits offered to the model.
+          min_characters_per_chunk:
+            type: integer
+            default: 24
+            description: Minimum number of characters each chunk must contain.
+          system_prompt:
+            type: string
+            description: Custom system prompt for the boundary model.
+        required:
+        - type
+        description: Asks a model to choose the boundaries. Slowest and most expensive, best on documents with irregular structure. Makes paid model calls.
+    ChunksServiceSetEnabledRequest:
+      required:
+      - enabled
+      type: object
+      properties:
+        enabled:
+          type: boolean
+    KnowledgeBasesServiceListResponse:
+      required:
+      - object
+      - data
+      - has_more
+      type: object
+      properties:
+        object:
+          enum:
+          - list
+          type: string
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Knowledge'
+        has_more:
+          type: boolean
+    KnowledgeSettings:
+      type: object
+      properties:
+        embeddings_config:
+          $ref: '#/components/schemas/EmbeddingsConfig'
+        retrieval_config:
+          $ref: '#/components/schemas/RetrievalConfig'
+        agentic_rag_config:
+          $ref: '#/components/schemas/AgenticRagConfig'
+    RetrievalConfig:
+      type: object
+      properties:
+        type:
+          type: string
+        top_k:
+          type: integer
+          format: int32
+        threshold:
+          type: number
+          format: double
+        rerank_config:
+          $ref: '#/components/schemas/RerankConfig'
+    KnowledgeApiError:
+      type: object
+      properties:
+        code:
+          type: string
+          description: HTTP status code
+        message:
+          type: string
+          description: Error message
+      required:
+      - message
+    PreviewChunk:
+      required:
+      - text
+      type: object
+      properties:
+        text:
+          type: string
+        page_number:
+          type: integer
+          format: uint32
+    AgenticRagConfig:
+      type: object
+      properties:
+        model_db_id:
+          type: string
+        provider:
+          type: string
+        integration_id:
+          type: string
+        model:
+          type: string
+    ChunksServiceCountResponse:
+      required:
+      - count
+      type: object
+      properties:
+        count:
+          type: number
+          format: double
+    DatasourceAttachment:
+      type: object
+      properties:
+        id:
+          type: string
+        object_name:
+          type: string
+    KnowledgeBasesServiceCreateRequest:
+      oneOf:
+      - type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - internal
+            default: internal
+          key:
+            type: string
+          description:
+            type:
+            - string
+            - 'null'
+          embedding_model:
+            type: string
+            description: The embeddings model to use for the knowledge base in the format "provider/model" for public models or "workspaceKey@provider/model" for private workspace models. This model will be used to embed the chunks when they are added to the knowledge base.
+          retrieval_settings:
+            type: object
+            properties:
+              retrieval_type:
+                type: string
+                enum:
+                - vector_search
+                - keyword_search
+                - hybrid_search
+                default: hybrid_search
+                description: The retrieval type to use for the knowledge base. If not provided, Hybrid Search will be used as a default query strategy.
+              top_k:
+                type: integer
+                exclusiveMinimum: 0
+                default: 5
+                description: The number of results to return from the search.
+              threshold:
+                type: number
+                minimum: 0
+                maximum: 1
+                default: 0
+                description: The threshold value used to filter the search results, only documents with a relevance score greater than the threshold will be returned
+              rerank_config:
+                type:
+                - object
+                - 'null'
+                properties:
+                  top_k:
+                    type: integer
+                    minimum: 1
+                    maximum: 100
+                    default: 5
+                    description: The number of results to return by the reranking model
+                  rerank_threshold:
+                    type: number
+                    minimum: 0
+                    maximum: 1
+                    default: 0.5
+                    description: The threshold value used to filter the rerank results, only documents with a relevance score greater than the threshold will be returned
+                  rerank_model:
+                    type: string
+                    description: The rerank model to use for the knowledge base.
+                required:
+                - rerank_model
+                description: The rerank configuration for the knowledge base. In case the model is provided it will be used to enhance the search precision.
+              agentic_rag_config:
+                type:
+                - object
+                - 'null'
+                properties:
+                  model:
+                    type: string
+                    description: The model to use for the Agentic RAG
+                required:
+                - model
+                description: The Agentic RAG configuration for the knowledge base. If `null` is provided, Agentic RAG will be disabled.
+            description: The retrieval settings for the knowledge base. If not provider, Hybrid Search will be used as a default query strategy.
+          path:
+            type: string
+            description: 'Entity storage path.
+
+
+              With workspace-level API keys, use the format `project/folder/subfolder/...`. The first element identifies the project, followed by nested folders (auto-created as needed). Example: `Default/agents`.
+
+
+              With project-level API keys, the project is predetermined by the API key, so the path is relative to that project. Example: `agents`. For backward compatibility, a leading project name is ignored when it matches the scoped project.'
+            example: Default
+        required:
+        - key
+        - embedding_model
+        - path
+      - type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - external
+            default: external
+          key:
+            type: string
+          description:
+            type:
+            - string
+            - 'null'
+          external_config:
+            type: object
+            properties:
+              name:
+                type: string
+                description: The name of the external knowledge base.
+              api_url:
+                type: string
+                format: uri
+                description: The API URL of the external knowledge base.
+              api_key:
+                type: string
+                description: The API key to access the external knowledge base.
+            required:
+            - name
+            - api_url
+            - api_key
+          path:
+            type: string
+            description: 'Entity storage path.
+
+
+              With workspace-level API keys, use the format `project/folder/subfolder/...`. The first element identifies the project, followed by nested folders (auto-created as needed). Example: `Default/agents`.
+
+
+              With project-level API keys, the project is predetermined by the API key, so the path is relative to that project. Example: `agents`. For backward compatibility, a leading project name is ignored when it matches the scoped project.'
+            example: Default
+        required:
+        - key
+        - external_config
+        - path
+    DatasourceChunkingOptions:
+      type: object
+      properties:
+        chunking_configuration:
+          $ref: '#/components/schemas/ChunkingConfiguration'
+        chunking_cleanup_options:
+          $ref: '#/components/schemas/ChunkingCleanupOptions'
+    SearchKnowledgeResponse:
+      required:
+      - matches
+      type: object
+      properties:
+        matches:
+          type: array
+          items:
+            $ref: '#/components/schemas/SearchKnowledgeMatch'
+          description: Matching chunks. The response codec must emit this field even when empty.
+    ChunksServiceListPaginatedRequest:
+      required: []
+      type: object
+      properties:
+        q:
+          type: string
+          default: ''
+        enabled:
+          type: boolean
+        status:
+          type: string
+          enum:
+          - pending
+          - processing
+          - completed
+          - failed
+          - queued
+          description: Filter chunks by processing status
+        limit:
+          type: integer
+          default: 100
+          maximum: 200
+          minimum: 1
+        page:
+          type: integer
+          default: 1
+          format: int32
+    SearchOptions:
+      type: object
+      properties:
+        include_vectors:
+          type: boolean
+          description: Whether to include the vector in the chunk
+        include_metadata:
+          type: boolean
+          description: Whether to include the metadata in the chunk
+        include_scores:
+          type: boolean
+          description: Whether to include the scores in the chunk
+    Knowledge:
+      oneOf:
+      - type: object
+        properties:
+          _id:
+            type: string
+            description: The unique identifier of the knowledge base.
+          created:
+            type: string
+            description: The creation date of the knowledge base.
+          description:
+            type:
+            - string
+            - 'null'
+            description: The description of the knowledge base.
+          key:
+            type: string
+            description: The unique key of the knowledge base.
+          domain_id:
+            type: string
+            description: The project/domain ID of the knowledge base.
+          path:
+            type: string
+            description: 'Entity storage path.
+
+
+              With workspace-level API keys, use the format `project/folder/subfolder/...`. The first element identifies the project, followed by nested folders (auto-created as needed). Example: `Default/agents`.
+
+
+              With project-level API keys, the project is predetermined by the API key, so the path is relative to that project. Example: `agents`. For backward compatibility, a leading project name is ignored when it matches the scoped project.'
+            example: Default
+          created_by_id:
+            type:
+            - string
+            - 'null'
+            format: uuid
+          updated_by_id:
+            type:
+            - string
+            - 'null'
+            format: uuid
+          updated:
+            type: string
+            description: The last update date of the knowledge base.
+          type:
+            type: string
+            enum:
+            - internal
+            default: internal
+          retrieval_settings:
+            type: object
+            properties:
+              retrieval_type:
+                type: string
+                enum:
+                - vector_search
+                - keyword_search
+                - hybrid_search
+                default: hybrid_search
+                description: The retrieval type to use for the knowledge base. If not provided, Hybrid Search will be used as a default query strategy.
+              top_k:
+                type: integer
+                exclusiveMinimum: 0
+                default: 5
+                description: The number of results to return from the search.
+              threshold:
+                type: number
+                minimum: 0
+                maximum: 1
+                default: 0
+                description: The threshold value used to filter the search results, only documents with a relevance score greater than the threshold will be returned
+              rerank_config:
+                type:
+                - object
+                - 'null'
+                properties:
+                  top_k:
+                    type: integer
+                    minimum: 1
+                    maximum: 100
+                    default: 5
+                    description: The number of results to return by the reranking model
+                  rerank_threshold:
+                    type: number
+                    minimum: 0
+                    maximum: 1
+                    default: 0.5
+                    description: The threshold value used to filter the rerank results, only documents with a relevance score greater than the threshold will be returned
+                  rerank_model:
+                    type: string
+                    description: The rerank model to use for the knowledge base.
+                required:
+                - rerank_model
+                description: The rerank configuration for the knowledge base. In case the model is provided it will be used to enhance the search precision.
+              agentic_rag_config:
+                type:
+                - object
+                - 'null'
+                properties:
+                  model:
+                    type: string
+                    description: The model to use for the Agentic RAG
+                required:
+                - model
+                description: The Agentic RAG configuration for the knowledge base. If `null` is provided, Agentic RAG will be disabled.
+            description: The retrieval settings for the knowledge base. If not provider, Hybrid Search will be used as a default query strategy.
+          model:
+            type: string
+            description: The embeddings model used for the knowledge base.
+          settings:
+            allOf:
+            - $ref: '#/components/schemas/KnowledgeSettings'
+            description: 'Settings for the knowledge base: embedding model, retrieval configuration, and agentic RAG configuration.'
+          metadata:
+            $ref: '#/components/schemas/KnowledgeMetadata'
+        required:
+        - _id
+        - created
+        - key
+        - domain_id
+        - updated
+        - model
+      - type: object
+        properties:
+          _id:
+            type: string
+            description: The unique identifier of the knowledge base.
+          created:
+            type: string
+            description: The creation date of the knowledge base.
+          description:
+            type:
+            - string
+            - 'null'
+            description: The description of the knowledge base.
+          key:
+            type: string
+            description: The unique key of the knowledge base.
+          domain_id:
+            type: string
+            description: The project/domain ID of the knowledge base.
+          path:
+            type: string
+            description: 'Entity storage path.
+
+
+              With workspace-level API keys, use the format `project/folder/subfolder/...`. The first element identifies the project, followed by nested folders (auto-created as needed). Example: `Default/agents`.
+
+
+              With project-level API keys, the project is predetermined by the API key, so the path is relative to that project. Example: `agents`. For backward compatibility, a leading project name is ignored when it matches the scoped project.'
+            example: Default
+          created_by_id:
+            type:
+            - string
+            - 'null'
+            format: uuid
+          updated_by_id:
+            type:
+            - string
+            - 'null'
+            format: uuid
+          updated:
+            type: string
+            description: The last update date of the knowledge base.
+          type:
+            type: string
+            enum:
+            - external
+            default: external
+          retrieval_settings:
+            type: object
+            properties:
+              top_k:
+                type: integer
+                exclusiveMinimum: 0
+                default: 5
+                description: The number of results to return from the search.
+              threshold:
+                type: number
+                minimum: 0
+                maximum: 1
+                default: 0
+                description: The threshold value used to filter the search results, only documents with a relevance score greater than the threshold will be returned
+              rerank_config:
+                type:
+                - object
+                - 'null'
+                properties:
+                  top_k:
+                    type: integer
+                    minimum: 1
+                    maximum: 100
+                    default: 5
+                    description: The number of results to return by the reranking model
+                  rerank_threshold:
+                    type: number
+                    minimum: 0
+                    maximum: 1
+                    default: 0.5
+                    description: The threshold value used to filter the rerank results, only documents with a relevance score greater than the threshold will be returned
+                  rerank_model:
+                    type: string
+                    description: The rerank model to use for the knowledge base.
+                required:
+                - rerank_model
+                description: The rerank configuration for the knowledge base. In case the model is provided it will be used to enhance the search precision.
+              agentic_rag_config:
+                type:
+                - object
+                - 'null'
+                properties:
+                  model:
+                    type: string
+                    description: The model to use for the Agentic RAG
+                required:
+                - model
+                description: The Agentic RAG configuration for the knowledge base. If `null` is provided, Agentic RAG will be disabled.
+            description: The retrieval settings for the knowledge base.
+          external_config:
+            type: object
+            properties:
+              name:
+                type: string
+                description: The name of the external knowledge base.
+              api_url:
+                type: string
+                format: uri
+                description: The API URL of the external knowledge base.
+            required:
+            - name
+            - api_url
+          settings:
+            allOf:
+            - $ref: '#/components/schemas/KnowledgeSettings'
+            description: 'Settings for the knowledge base: embedding model, retrieval configuration, and agentic RAG configuration.'
+          metadata:
+            $ref: '#/components/schemas/KnowledgeMetadata'
+        required:
+        - _id
+        - created
+        - key
+        - domain_id
+        - updated
+        - external_config
+    EmbeddingsConfig:
+      type: object
+      properties:
+        provider:
+          type: string
+        model:
+          type: string
+        model_db_id:
+          type: string
+        model_type:
+          type: string
+        model_parameters:
+          $ref: '#/components/schemas/EmbeddingsModelParameters'
+        integration_id:
+          type: string
+    UploadPostPolicy:
+      required:
+      - postURL
+      - formData
+      type: object
+      properties:
+        postURL:
+          type: string
+        formData:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/JsonValue'
+    ChunksServiceListResponse:
+      required:
+      - object
+      - data
+      - has_more
+      type: object
+      properties:
+        object:
+          enum:
+          - list
+          type: string
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/KnowledgeChunk'
+        has_more:
+          type: boolean
+    DatasourcesServicePreviewChunksResponse:
+      required:
+      - chunks
+      - metadata
+      type: object
+      properties:
+        chunks:
+          type: array
+          items:
+            $ref: '#/components/schemas/PreviewChunk'
+        metadata:
+          $ref: '#/components/schemas/PreviewChunksMetadata'
+    ProcessingError:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+    DatasourcesServiceCreateRequest:
+      required: []
+      type: object
+      properties:
+        display_name:
+          type: string
+        description:
+          type:
+          - string
+          - 'null'
+          description: The description of the datasource
+        file_id:
+          type: string
+        chunking_options:
+          $ref: '#/components/schemas/DatasourceChunkingOptions'
+        id:
+          type: string
+          description: Optional datasource ID. When omitted, the server generates one.
+        attachment:
+          $ref: '#/components/schemas/DatasourceAttachment'
+        metadata:
+          $ref: '#/components/schemas/CountMetadata'
+    KnowledgeChunk:
+      required:
+      - _id
+      - text
+      - enabled
+      - status
+      - created
+      - updated
+      type: object
+      properties:
+        text:
+          type: string
+        metadata:
+          type: object
+          additionalProperties:
+            anyOf:
+            - type: string
+            - type: number
+            - type: boolean
+          default: {}
+          description: Metadata of the chunk. Can include `page_number` or any other key-value pairs
+        enabled:
+          type: boolean
+        status:
+          type: string
+          enum:
+          - pending
+          - processing
+          - completed
+          - failed
+          - queued
+          description: The status of the chunk
+        created:
+          type: string
+        updated:
+          type: string
+        created_by_id:
+          type:
+          - string
+          - 'null'
+          description: The unique identifier of the user who created the chunk
+        update_by_id:
+          type:
+          - string
+          - 'null'
+          description: The unique identifier of the user who updated the chunk
+        processing_attempts:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProcessingAttempt'
+          description: Processing attempts recorded for the chunk.
+        count_metadata:
+          $ref: '#/components/schemas/CountMetadata'
+        _id:
+          type: string
+    ChunksServiceCountRequest:
+      required: []
+      type: object
+      properties:
+        q:
+          type: string
+          default: ''
+        enabled:
+          type: boolean
+        status:
+          type: string
+          enum:
+          - pending
+          - processing
+          - completed
+          - failed
+          - queued
+          description: Filter chunks by processing status
+    PreviewChunksMetadata:
+      required:
+      - words_count
+      - sentences_count
+      - paragraphs_count
+      - tokens_count
+      - characters_count
+      - chunks_count
+      type: object
+      properties:
+        words_count:
+          type: integer
+          format: uint32
+        sentences_count:
+          type: integer
+          format: uint32
+        paragraphs_count:
+          type: integer
+          format: uint32
+        tokens_count:
+          type: integer
+          format: uint32
+        characters_count:
+          type: integer
+          format: uint32
+        chunks_count:
+          type: integer
+          format: uint32
+    GetUploadFileUrlResponse:
+      required:
+      - objectName
+      - postPolicy
+      - fileId
+      type: object
+      properties:
+        objectName:
+          type: string
+        postPolicy:
+          $ref: '#/components/schemas/UploadPostPolicy'
+        fileId:
+          type: string
+          description: Identifier of the file record registered for this upload
+    KnowledgeMetadata:
+      type: object
+      properties:
+        word_count:
+          type: integer
+          format: int32
+        document_count:
+          type: integer
+          format: int32
+        sentences_count:
+          type: integer
+          format: int32
+        support_enabled:
+          type: boolean
+        unique_metadata_fields:
+          type: array
+          items:
+            type: string
+    DatasourcesServiceListResponse:
+      required:
+      - object
+      - data
+      - has_more
+      type: object
+      properties:
+        object:
+          enum:
+          - list
+          type: string
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Datasource'
+        has_more:
+          type: boolean
+    ChunksServiceDeleteManyRequest:
+      required:
+      - chunk_ids
+      type: object
+      properties:
+        chunk_ids:
+          type: array
+          items:
+            type: string
+          minItems: 1
+          maxItems: 100
+          description: Array of chunk IDs to delete
+    KnowledgeUpdateSettings:
+      type: object
+      properties:
+        embeddings_config:
+          $ref: '#/components/schemas/EmbeddingsConfig'
+        retrieval_config:
+          $ref: '#/components/schemas/JsonValue'
+        agentic_rag_config:
+          $ref: '#/components/schemas/JsonValue'
+  securitySchemes:
+    ApiKey:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+externalDocs:
+  url: https://docs.orq.ai
+  description: orq.ai Documentation
+x-speakeasy-timeout: 600000

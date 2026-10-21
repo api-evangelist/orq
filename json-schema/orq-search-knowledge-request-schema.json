@@ -1,0 +1,850 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/orq/main/json-schema/orq-search-knowledge-request-schema.json",
+  "title": "SearchKnowledgeRequest",
+  "description": "Search request. Sets the knowledge base and query, plus optional retrieval\n settings.",
+  "x-generated": "2026-10-21",
+  "x-method": "derived",
+  "x-generator": "derive-json-schema.py",
+  "x-source": "openapi/orq-openapi.json#/components/schemas/SearchKnowledgeRequest",
+  "required": [
+    "query"
+  ],
+  "type": "object",
+  "properties": {
+    "query": {
+      "minLength": 1,
+      "type": "string",
+      "description": "The query to use to search the knowledge base"
+    },
+    "top_k": {
+      "maximum": 100,
+      "minimum": 1,
+      "type": "integer",
+      "description": "The number of results to return. If not provided, will default to the knowledge base configured `top_k`.",
+      "format": "int32"
+    },
+    "threshold": {
+      "maximum": 1,
+      "type": "number",
+      "description": "The threshold to apply to the search. If not provided, will default to the knowledge base configured `threshold`",
+      "format": "double",
+      "minimum": 0
+    },
+    "search_type": {
+      "default": "hybrid_search",
+      "description": "The type of search to perform. If not provided, will default to the knowledge base configured `retrieval_type`",
+      "$ref": "#/$defs/SearchType"
+    },
+    "filter_by": {
+      "description": "The metadata filter to apply to the search. Check the [Searching a Knowledge Base](https://docs.orq.ai/ai-studio/ai-engineering/knowledge-bases#search-a-knowledge-base) for more information.",
+      "anyOf": [
+        {
+          "type": "object",
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "eq": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "title": "string",
+                        "description": "String"
+                      },
+                      {
+                        "type": "number",
+                        "title": "number",
+                        "description": "Number"
+                      },
+                      {
+                        "type": "boolean",
+                        "title": "boolean",
+                        "description": "Boolean"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "eq"
+                ],
+                "title": "eq",
+                "description": "Equal to"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "ne": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "title": "string",
+                        "description": "String"
+                      },
+                      {
+                        "type": "number",
+                        "title": "number",
+                        "description": "Number"
+                      },
+                      {
+                        "type": "boolean",
+                        "title": "boolean",
+                        "description": "Boolean"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "ne"
+                ],
+                "title": "ne",
+                "description": "Not equal to"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "gt": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "gt"
+                ],
+                "title": "gt",
+                "description": "Greater than"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "gte": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "gte"
+                ],
+                "title": "gte",
+                "description": "Greater than or equal to"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "lt": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "lt"
+                ],
+                "title": "lt",
+                "description": "Less than"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "lte": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "lte"
+                ],
+                "title": "lte",
+                "description": "Less than or equal to"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "in": {
+                    "type": "array",
+                    "items": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "title": "string",
+                          "description": "String"
+                        },
+                        {
+                          "type": "number",
+                          "title": "number",
+                          "description": "Number"
+                        },
+                        {
+                          "type": "boolean",
+                          "title": "boolean",
+                          "description": "Boolean"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "in"
+                ],
+                "title": "in",
+                "description": "In"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "nin": {
+                    "type": "array",
+                    "items": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "title": "string",
+                          "description": "String"
+                        },
+                        {
+                          "type": "number",
+                          "title": "number",
+                          "description": "Number"
+                        },
+                        {
+                          "type": "boolean",
+                          "title": "boolean",
+                          "description": "Boolean"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "nin"
+                ],
+                "title": "nin",
+                "description": "Not in"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "exists": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "exists"
+                ],
+                "title": "exists",
+                "description": "Exists"
+              }
+            ]
+          },
+          "title": "Search operator"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "and": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "eq": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "title": "string",
+                              "description": "String"
+                            },
+                            {
+                              "type": "number",
+                              "title": "number",
+                              "description": "Number"
+                            },
+                            {
+                              "type": "boolean",
+                              "title": "boolean",
+                              "description": "Boolean"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "eq"
+                      ],
+                      "title": "eq",
+                      "description": "Equal to"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "ne": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "title": "string",
+                              "description": "String"
+                            },
+                            {
+                              "type": "number",
+                              "title": "number",
+                              "description": "Number"
+                            },
+                            {
+                              "type": "boolean",
+                              "title": "boolean",
+                              "description": "Boolean"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "ne"
+                      ],
+                      "title": "ne",
+                      "description": "Not equal to"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "gt": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "gt"
+                      ],
+                      "title": "gt",
+                      "description": "Greater than"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "gte": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "gte"
+                      ],
+                      "title": "gte",
+                      "description": "Greater than or equal to"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "lt": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "lt"
+                      ],
+                      "title": "lt",
+                      "description": "Less than"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "lte": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "lte"
+                      ],
+                      "title": "lte",
+                      "description": "Less than or equal to"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "in": {
+                          "type": "array",
+                          "items": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "title": "string",
+                                "description": "String"
+                              },
+                              {
+                                "type": "number",
+                                "title": "number",
+                                "description": "Number"
+                              },
+                              {
+                                "type": "boolean",
+                                "title": "boolean",
+                                "description": "Boolean"
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      "required": [
+                        "in"
+                      ],
+                      "title": "in",
+                      "description": "In"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "nin": {
+                          "type": "array",
+                          "items": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "title": "string",
+                                "description": "String"
+                              },
+                              {
+                                "type": "number",
+                                "title": "number",
+                                "description": "Number"
+                              },
+                              {
+                                "type": "boolean",
+                                "title": "boolean",
+                                "description": "Boolean"
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      "required": [
+                        "nin"
+                      ],
+                      "title": "nin",
+                      "description": "Not in"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "exists": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "exists"
+                      ],
+                      "title": "exists",
+                      "description": "Exists"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "required": [
+            "and"
+          ],
+          "title": "and",
+          "description": "And"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "or": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "eq": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "title": "string",
+                              "description": "String"
+                            },
+                            {
+                              "type": "number",
+                              "title": "number",
+                              "description": "Number"
+                            },
+                            {
+                              "type": "boolean",
+                              "title": "boolean",
+                              "description": "Boolean"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "eq"
+                      ],
+                      "title": "eq",
+                      "description": "Equal to"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "ne": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "title": "string",
+                              "description": "String"
+                            },
+                            {
+                              "type": "number",
+                              "title": "number",
+                              "description": "Number"
+                            },
+                            {
+                              "type": "boolean",
+                              "title": "boolean",
+                              "description": "Boolean"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "ne"
+                      ],
+                      "title": "ne",
+                      "description": "Not equal to"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "gt": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "gt"
+                      ],
+                      "title": "gt",
+                      "description": "Greater than"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "gte": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "gte"
+                      ],
+                      "title": "gte",
+                      "description": "Greater than or equal to"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "lt": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "lt"
+                      ],
+                      "title": "lt",
+                      "description": "Less than"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "lte": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "lte"
+                      ],
+                      "title": "lte",
+                      "description": "Less than or equal to"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "in": {
+                          "type": "array",
+                          "items": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "title": "string",
+                                "description": "String"
+                              },
+                              {
+                                "type": "number",
+                                "title": "number",
+                                "description": "Number"
+                              },
+                              {
+                                "type": "boolean",
+                                "title": "boolean",
+                                "description": "Boolean"
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      "required": [
+                        "in"
+                      ],
+                      "title": "in",
+                      "description": "In"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "nin": {
+                          "type": "array",
+                          "items": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "title": "string",
+                                "description": "String"
+                              },
+                              {
+                                "type": "number",
+                                "title": "number",
+                                "description": "Number"
+                              },
+                              {
+                                "type": "boolean",
+                                "title": "boolean",
+                                "description": "Boolean"
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      "required": [
+                        "nin"
+                      ],
+                      "title": "nin",
+                      "description": "Not in"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "exists": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "exists"
+                      ],
+                      "title": "exists",
+                      "description": "Exists"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "required": [
+            "or"
+          ],
+          "title": "or",
+          "description": "Or"
+        }
+      ]
+    },
+    "search_options": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/SearchOptions"
+        }
+      ],
+      "description": "Additional search options"
+    },
+    "rerank_config": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/SearchRerankConfig"
+        }
+      ],
+      "description": "Override the rerank configuration for this search. If not provided, will use the knowledge base configured rerank settings."
+    },
+    "agentic_rag_config": {
+      "description": "Override the agentic RAG configuration for this search. If not provided, will use the knowledge base configured agentic RAG settings.",
+      "anyOf": [
+        {
+          "type": "object",
+          "allOf": [
+            {
+              "$ref": "#/$defs/JsonValue"
+            }
+          ],
+          "anyOf": [
+            {
+              "required": [
+                "model"
+              ]
+            },
+            {
+              "required": [
+                "model_db_id",
+                "provider"
+              ]
+            }
+          ],
+          "properties": {
+            "model": {
+              "type": "string",
+              "description": "The name of the model for the Agent to use. Refer to the [model list](https://docs.orq.ai/ai-gateway/supported-models#chat-models)."
+            },
+            "model_db_id": {
+              "type": "string",
+              "description": "Identifier of the stored model configuration to use."
+            },
+            "provider": {
+              "type": "string",
+              "description": "Provider identifier for the stored model configuration."
+            },
+            "integration_id": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "Optional integration identifier for the stored model configuration."
+            }
+          }
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "retrieval_config": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/SearchRetrievalConfig"
+        }
+      ],
+      "description": "Override the stored retrieval configuration for this search. If not provided, the knowledge base configuration is used."
+    }
+  },
+  "$defs": {
+    "JsonValue": {
+      "description": "Represents a dynamically typed value which can be either null, a number, a string, a boolean, a recursive struct value, or a list of values."
+    },
+    "SearchOptions": {
+      "type": "object",
+      "properties": {
+        "include_vectors": {
+          "type": "boolean",
+          "description": "Whether to include the vector in the chunk"
+        },
+        "include_metadata": {
+          "type": "boolean",
+          "description": "Whether to include the metadata in the chunk"
+        },
+        "include_scores": {
+          "type": "boolean",
+          "description": "Whether to include the scores in the chunk"
+        }
+      }
+    },
+    "SearchRerankConfig": {
+      "required": [
+        "model"
+      ],
+      "type": "object",
+      "properties": {
+        "model": {
+          "type": "string",
+          "description": "The name of the rerank model to use. Refer to the [model list](https://docs.orq.ai/ai-gateway/supported-models#rerank-models)."
+        },
+        "threshold": {
+          "maximum": 1,
+          "type": "number",
+          "default": 0,
+          "description": "The threshold value used to filter the rerank results, only documents with a relevance score greater than the threshold will be returned",
+          "format": "double",
+          "minimum": 0
+        },
+        "top_k": {
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer",
+          "default": 10,
+          "description": "The number of top results to return after reranking. If not provided, will default to the knowledge base configured `top_k`.",
+          "format": "int32"
+        }
+      }
+    },
+    "SearchRetrievalConfig": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "$ref": "#/$defs/SearchType"
+        },
+        "top_k": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "threshold": {
+          "type": "number",
+          "format": "double"
+        },
+        "rerank_config": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "description": "Override reranking for this retrieval configuration. Omit to inherit stored settings or set to null to disable reranking.",
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "provider": {
+              "type": "string"
+            },
+            "top_k": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 1,
+              "maximum": 100
+            },
+            "model": {
+              "type": "string"
+            },
+            "model_db_id": {
+              "type": "string"
+            },
+            "model_type": {
+              "type": "string",
+              "enum": [
+                "rerank"
+              ]
+            },
+            "model_parameters": {
+              "type": "object",
+              "properties": {
+                "threshold": {
+                  "type": "number"
+                }
+              }
+            },
+            "integration_id": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          }
+        }
+      },
+      "description": "SearchRetrievalConfig is the retrieval strategy configuration. Type remains\n optional because external knowledge bases use the same base configuration\n without a retrieval strategy discriminator."
+    },
+    "SearchType": {
+      "type": "string",
+      "enum": [
+        "vector_search",
+        "keyword_search",
+        "hybrid_search"
+      ]
+    }
+  }
+}

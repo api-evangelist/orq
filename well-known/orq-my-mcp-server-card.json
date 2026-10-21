@@ -1,0 +1,1 @@
+{"serverInfo":{"name":"orq-mcp","version":"v4.16.14"},"transport":{"type":"streamable-http","endpoint":"https://my.orq.ai/v2/mcp"},"capabilities":{"resources":{},"tools":{}},"auth":{"type":"oauth2","protected_resource_metadata":"https://my.orq.ai/.well-known/oauth-protected-resource"}}

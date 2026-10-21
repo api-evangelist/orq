@@ -1,0 +1,383 @@
+openapi: 3.2.0
+info:
+  title: orq.ai Audit Logs API
+  version: '2.0'
+  description: orq.ai API documentation
+servers:
+- url: https://my.orq.ai
+security:
+- ApiKey: []
+tags:
+- name: Audit Logs
+  description: Audit logs record workspace entity changes and access-relevant events.
+paths:
+  /v2/audit-logs/query:
+    post:
+      tags:
+      - Audit Logs
+      summary: Query audit logs
+      description: Queries audit logs from your workspace with filters, sorting, and cursor pagination.
+      operationId: AuditLogQuery
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QueryAuditLogsRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueryAuditLogsResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: auditLogs
+      x-speakeasy-name-override: query
+      x-code-samples:
+      - lang: curl
+        label: cURL
+        source: "curl --request POST \\\n  --url https://my.orq.ai/v2/audit-logs/query \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\" \\\n  --header \"Content-Type: application/json\" \\\n  --data '{\n    \"filters\": {\n      \"operator\": \"and\",\n      \"filters\": [\n        {\n          \"type\": \"string\",\n          \"path\": \"entity_type\",\n          \"operator\": \"is\",\n          \"value\": \"skill\"\n        }\n      ]\n    },\n    \"pagination\": {\n      \"limit\": 20\n    },\n    \"sorting\": [\n      {\n        \"key\": \"created_at\",\n        \"direction\": \"desc\"\n      }\n    ]\n  }'\n"
+      - lang: typescript
+        label: TypeScript
+        source: "const auditLogs = await client.auditLogs.query({\n  filters: {\n    operator: \"and\",\n    filters: [\n      {\n        type: \"string\",\n        path: \"entity_type\",\n        operator: \"is\",\n        value: \"skill\",\n      },\n    ],\n  },\n  pagination: {\n    limit: 20,\n  },\n  sorting: [\n    {\n      key: \"created_at\",\n      direction: \"desc\",\n    },\n  ],\n});\n"
+components:
+  schemas:
+    OriginValue:
+      type: string
+      enum:
+      - ui
+      - api
+      - scim
+      - system
+      - router
+      - mcp
+      - automation
+      - internal
+    QueryAuditLogsResponse:
+      example:
+        audit_logs:
+        - audit_log_id: audit_log_01JZ9QMB6AEH7B8XH0ZQ9ZPQEY
+          project_id: proj_01JZ9QMB6AEH7B8XH0ZQ9ZPQEY
+          entity_id: skill_01JZ9QMB6AEH7B8XH0ZQ9ZPQEY
+          entity_type: skill
+          action: updated
+          actor_id: usr_01JZ9QMB6AEH7B8XH0ZQ9ZPQEY
+          actor_ip: 203.0.113.10
+          created_at: '2026-06-15T12:30:00Z'
+          metadata:
+            display_name: Production skill
+        overall_total: 1
+        has_more: false
+      required:
+      - audit_logs
+      - overall_total
+      - has_more
+      type: object
+      properties:
+        audit_logs:
+          type: array
+          items:
+            $ref: '#/components/schemas/AuditLog'
+          description: Audit logs matching the query.
+        overall_total:
+          example: 42
+          type: string
+          description: Total number of audit logs matching the query before cursor pagination.
+        has_more:
+          example: false
+          type: boolean
+          description: Whether another page exists after the returned audit logs.
+      description: Paginated audit log query result.
+    JsonValue:
+      description: Represents a dynamically typed value which can be either null, a number, a string, a boolean, a recursive struct value, or a list of values.
+    AuditLogFilterQuery:
+      required:
+      - operator
+      - filters
+      type: object
+      properties:
+        search:
+          example: Production skill
+          type: string
+          description: Optional text search applied to supported display fields.
+        operator:
+          example: and
+          type: string
+          description: Logical operator used to combine filters.
+        filters:
+          type: array
+          items:
+            $ref: '#/components/schemas/AuditLogFilter'
+          description: Advanced filters applied to the query.
+      description: Search and advanced filters for querying audit logs.
+    AuditLog:
+      required:
+      - audit_log_id
+      - entity_id
+      - entity_type
+      - action
+      - created_at
+      type: object
+      properties:
+        audit_log_id:
+          example: audit_log_01JZ9QMB6AEH7B8XH0ZQ9ZPQEY
+          type: string
+          description: Unique identifier for the audit log entry.
+        project_id:
+          example: proj_01JZ9QMB6AEH7B8XH0ZQ9ZPQEY
+          type: string
+          description: Project associated with the event, when the audited entity belongs to a project.
+        entity_id:
+          example: skill_01JZ9QMB6AEH7B8XH0ZQ9ZPQEY
+          type: string
+          description: Identifier of the entity that changed.
+        entity_type:
+          example: skill
+          description: Type of entity that changed.
+          $ref: '#/components/schemas/EntityTypeValue'
+        action:
+          example: updated
+          description: Action recorded for the entity event.
+          $ref: '#/components/schemas/ActionValue'
+        actor_id:
+          example: usr_01JZ9QMB6AEH7B8XH0ZQ9ZPQEY
+          type: string
+          description: User or system actor that caused the event, when available.
+        actor_ip:
+          example: 203.0.113.10
+          type: string
+          description: IP address observed for the actor, when available.
+        actor_type:
+          example: user
+          description: Kind of actor behind the action. Omitted when unknown.
+          $ref: '#/components/schemas/ActorTypeValue'
+        actor_display:
+          example: user@example.com
+          type: string
+          description: Human readable actor name captured when the action happened.
+        origin:
+          example: api
+          description: Surface the action came from. Omitted when unknown.
+          $ref: '#/components/schemas/OriginValue'
+        request_id:
+          example: req_01JZ9QMB6AEH7B8XH0ZQ9ZPQEY
+          type: string
+          description: Correlates the entry with the originating request.
+        created_at:
+          example: '2026-06-15T12:30:00Z'
+          type: string
+          description: Time when the audit log entry was created.
+          format: date-time
+        metadata:
+          example:
+            display_name: Production skill
+          type: object
+          description: Additional event metadata. The exact shape depends on entity_type and action.
+      description: An audit log entry for an entity event in the authenticated workspace.
+    EntityTypeValue:
+      type: string
+      enum:
+      - agent
+      - agent_schedule
+      - alert
+      - annotation_queue
+      - api_key
+      - automation
+      - budget
+      - dataset
+      - deployment
+      - directory
+      - evaluator
+      - experiment
+      - experiment_v2
+      - factory
+      - file
+      - file_system
+      - guardrail_rule
+      - human_review
+      - human_review_set
+      - identity
+      - integration
+      - knowledge
+      - management_key
+      - mcp_gateway
+      - mcp_server
+      - member
+      - memory_store
+      - model
+      - monitor
+      - notifier
+      - permission
+      - playground
+      - project
+      - prompt_library
+      - prompt_snippet
+      - report
+      - routing_rule
+      - scm_connection
+      - sheet
+      - skill
+      - smart_router
+      - subscription
+      - team
+      - tool
+      - variable_collection
+      - workflow
+      - workspace
+      - webhook
+      - session
+      - sso_config
+    ActionValue:
+      type: string
+      enum:
+      - created
+      - updated
+      - deleted
+      - archived
+      - enabled
+      - disabled
+      - invited
+      - added
+      - removed
+      - revoked
+      - connected
+      - disconnected
+      - subscribed
+      - cancelled
+      - consumption_reset
+      - set
+      - rotated
+      - scope_updated
+      - access_updated
+      - login_succeeded
+      - logged_out
+      - provisioned
+      - deprovisioned
+      - exported
+      - triggered
+      - completed
+      - errored
+      - skipped
+      - accessed
+    ActorTypeValue:
+      type: string
+      enum:
+      - user
+      - api_key
+      - management_key
+      - scim
+      - system
+      - service
+    AuditLogSort:
+      required:
+      - key
+      type: object
+      properties:
+        key:
+          example: created_at
+          type: string
+          description: Audit log field to sort by. Supported keys include _id, created_at, entity_type, entity_id, action, and actor_id.
+        direction:
+          example: desc
+          type: string
+          description: Sort direction. Defaults to desc when omitted or invalid.
+      description: A sort expression for audit log queries.
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Human-readable error message.
+        code:
+          type: integer
+          description: gRPC status code, when the service reports one.
+        details:
+          type: array
+          items: {}
+          description: Additional error details, when the service reports any.
+      required:
+      - message
+    AuditLogPagination:
+      type: object
+      properties:
+        limit:
+          example: 20
+          type: integer
+          description: Maximum number of audit logs to return. Defaults to 50 when omitted.
+          format: int32
+        starting_after:
+          example: audit_log_01JZ9QMB6AEH7B8XH0ZQ9ZPQEY
+          type: string
+          description: Cursor for the next page. Use the last audit_log_id from the previous page.
+        ending_before:
+          example: audit_log_01JZ9QMB6AEH7B8XH0ZQ9ZPQEY
+          type: string
+          description: Cursor for the previous page. Use the first audit_log_id from the current page.
+      description: Cursor pagination settings for audit log queries.
+    QueryAuditLogsRequest:
+      example:
+        filters:
+          operator: and
+          filters:
+          - type: string
+            path: entity_type
+            operator: is
+            value: skill
+        pagination:
+          limit: 20
+        sorting:
+        - key: created_at
+          direction: desc
+      required:
+      - filters
+      - pagination
+      type: object
+      properties:
+        filters:
+          $ref: '#/components/schemas/AuditLogFilterQuery'
+        pagination:
+          $ref: '#/components/schemas/AuditLogPagination'
+        sorting:
+          type: array
+          items:
+            $ref: '#/components/schemas/AuditLogSort'
+          description: Sort expressions. Defaults to audit_log_id descending when omitted.
+      description: Request body for querying audit logs in the authenticated workspace.
+    AuditLogFilter:
+      required:
+      - type
+      - path
+      - operator
+      - value
+      type: object
+      properties:
+        type:
+          example: string
+          type: string
+          description: Filter value type, such as string, date, number, boolean, or array.
+        path:
+          example: entity_type
+          type: string
+          description: Audit log field path to filter on. Supported paths include created_at, entity_id, entity_type, action, actor_id, origin, and metadata.display_name.
+        operator:
+          example: is
+          type: string
+          description: Filter operator supported by the selected field type.
+        value:
+          $ref: '#/components/schemas/JsonValue'
+      description: A single advanced filter applied to audit logs.
+  securitySchemes:
+    ApiKey:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+externalDocs:
+  url: https://docs.orq.ai
+  description: orq.ai Documentation
+x-speakeasy-timeout: 600000

@@ -1,0 +1,830 @@
+openapi: 3.2.0
+info:
+  title: orq.ai Alerts API
+  version: '2.0'
+  description: orq.ai API documentation
+servers:
+- url: https://my.orq.ai
+security:
+- ApiKey: []
+tags:
+- name: Alerts
+  description: Alerts evaluate a Reporting API metric on a fixed interval and fire notifications through notifiers when the value breaches a threshold. Each breach opens a trigger that tracks the incident until the value recovers.
+paths:
+  /v2/alerts:
+    get:
+      tags:
+      - Alerts
+      summary: List alerts
+      description: Returns the alerts visible to the caller, newest first. Use `starting_after` or `ending_before` to page.
+      operationId: AlertList
+      parameters:
+      - name: limit
+        in: query
+        description: Page size, 1-200. Unset uses the server default (25).
+        schema:
+          type: integer
+          format: int32
+      - name: starting_after
+        in: query
+        description: "Cursor for forward pagination. Set to the `alert_id` of the last\n item from the previous page."
+        schema:
+          type: string
+      - name: ending_before
+        in: query
+        description: "Cursor for backward pagination. Set to the `alert_id` of the first\n item from the previous page."
+        schema:
+          type: string
+      - name: project_id
+        in: query
+        description: Restrict results to one project.
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListAlertsResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: alerts
+      x-speakeasy-name-override: list
+    post:
+      tags:
+      - Alerts
+      summary: Create an alert
+      description: Creates a threshold alert in a project. The alert's query is validated against the Reporting API metric catalogue and the evaluation schedule starts immediately when `enabled` is true. Plan limits apply to the number of alerts and the minimum evaluation interval.
+      operationId: AlertCreate
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAlertRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateAlertResponse'
+        '400':
+          description: The request is invalid. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: alerts
+      x-speakeasy-name-override: create
+  /v2/alerts/{alert_id}:
+    get:
+      tags:
+      - Alerts
+      summary: Retrieve an alert
+      description: Retrieves an alert by ID.
+      operationId: AlertGet
+      parameters:
+      - name: alert_id
+        in: path
+        description: Alert ID to retrieve.
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetAlertResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: The resource does not exist. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: alerts
+      x-speakeasy-name-override: get
+    delete:
+      tags:
+      - Alerts
+      summary: Delete an alert
+      description: Permanently deletes an alert together with its trigger history and events, and stops the evaluation schedule.
+      operationId: AlertDelete
+      parameters:
+      - name: alert_id
+        in: path
+        description: Alert ID to delete.
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteAlertResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: alerts
+      x-speakeasy-name-override: delete
+    patch:
+      tags:
+      - Alerts
+      summary: Update an alert
+      description: Updates alert metadata, query, condition, notifiers, or enabled state. Query and condition changes restart the evaluation schedule; disabling stops it. `project_id` is immutable.
+      operationId: AlertUpdate
+      parameters:
+      - name: alert_id
+        in: path
+        description: Alert ID to update.
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateAlertRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateAlertResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: alerts
+      x-speakeasy-name-override: update
+  /v2/alerts/{alert_id}/triggers:
+    get:
+      tags:
+      - Alerts
+      summary: List alert triggers
+      description: 'Returns the trigger history of an alert, newest first. A trigger is one breach incident: it opens when the threshold is first crossed and resolves when the value recovers.'
+      operationId: AlertListTriggers
+      parameters:
+      - name: alert_id
+        in: path
+        description: Alert whose triggers to list.
+        required: true
+        schema:
+          type: string
+      - name: limit
+        in: query
+        description: Page size, 1-200. Unset uses the server default (25).
+        schema:
+          type: integer
+          format: int32
+      - name: starting_after
+        in: query
+        description: "Cursor for forward pagination. Set to the `trigger_id` of the last\n item from the previous page."
+        schema:
+          type: string
+      - name: ending_before
+        in: query
+        description: "Cursor for backward pagination. Set to the `trigger_id` of the\n first item from the previous page."
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListAlertTriggersResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: The resource does not exist. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: alerts
+      x-speakeasy-name-override: listTriggers
+  /v2/alerts/{alert_id}/triggers/{trigger_id}/events:
+    get:
+      tags:
+      - Alerts
+      summary: List alert trigger events
+      description: Returns the evaluation events recorded while a trigger was open, newest first. Each event carries the observed value and, when available, exemplar traces that contributed to the breach.
+      operationId: AlertListTriggerEvents
+      parameters:
+      - name: alert_id
+        in: path
+        description: Alert the trigger belongs to.
+        required: true
+        schema:
+          type: string
+      - name: trigger_id
+        in: path
+        description: Trigger whose events to list.
+        required: true
+        schema:
+          type: string
+      - name: limit
+        in: query
+        description: Page size, 1-200. Unset uses the server default (25).
+        schema:
+          type: integer
+          format: int32
+      - name: starting_after
+        in: query
+        description: "Cursor for forward pagination. Set to the `event_id` of the last\n item from the previous page."
+        schema:
+          type: string
+      - name: ending_before
+        in: query
+        description: "Cursor for backward pagination. Set to the `event_id` of the first\n item from the previous page."
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListAlertTriggerEventsResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: The resource does not exist. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: alerts
+      x-speakeasy-name-override: listTriggerEvents
+components:
+  schemas:
+    AlertQuery:
+      required:
+      - metric
+      type: object
+      properties:
+        metric:
+          type: string
+          description: "Reporting API catalogue metric, e.g. `genai.cost` or\n `genai.latency.avg`. Validated against the catalogue when the alert\n is saved."
+        filters:
+          type: array
+          items:
+            $ref: '#/components/schemas/MonitorFilter'
+          description: Reporting filters combined with AND.
+    AlertDisplay:
+      type: object
+      properties:
+        visualization:
+          enum:
+          - lines
+          - bars
+          type: string
+          description: Chart style for the alert activity chart.
+        preview_range:
+          enum:
+          - 1h
+          - 4h
+          - 1d
+          - 7d
+          type: string
+          description: Default time range for the alert activity chart.
+    AlertEvidence:
+      required:
+      - trace_id
+      - span_id
+      - start_time
+      - value
+      type: object
+      properties:
+        trace_id:
+          type: string
+          description: Trace the exemplar span belongs to.
+        span_id:
+          type: string
+          description: Exemplar span ID.
+        start_time:
+          type: string
+          description: Start time of the exemplar span.
+          format: date-time
+        value:
+          type: number
+          description: Metric contribution of the exemplar (e.g. cost or duration).
+          format: double
+    ListAlertsResponse:
+      required:
+      - object
+      - data
+      - has_more
+      type: object
+      properties:
+        object:
+          type: string
+          description: Object discriminator for list responses; always `list`.
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Alert'
+          description: Page of alerts, ordered newest first.
+        has_more:
+          type: boolean
+          description: "Whether more alerts are available in the selected pagination\n direction."
+    AlertCondition:
+      required:
+      - comparator
+      - threshold
+      - window
+      - interval
+      type: object
+      properties:
+        comparator:
+          enum:
+          - gt
+          - gte
+          - lt
+          - lte
+          - eq
+          type: string
+          description: Comparison applied as `value <comparator> threshold`.
+        threshold:
+          type: number
+          description: "Critical-tier threshold. Breaching it opens (or escalates) a\n trigger at critical severity."
+          format: double
+        degraded_threshold:
+          type: number
+          description: "Optional degraded-tier threshold. Values past it but short of\n `threshold` open a trigger at degraded severity. Must sit on the\n recovery side of `threshold` for the chosen comparator and is not\n supported with `eq`."
+          format: double
+        resolve_threshold:
+          type: number
+          description: "Optional custom resolve bound (hysteresis). An open trigger\n resolves only once the value recovers past this bound; defaults to\n the lowest configured tier. Must sit at or past that tier on the\n recovery side. Not supported with `eq`."
+          format: double
+        window:
+          enum:
+          - 5m
+          - 15m
+          - 30m
+          - 1h
+          - 4h
+          - 1d
+          type: string
+          description: Look-back window aggregated on each evaluation tick.
+        interval:
+          enum:
+          - 5m
+          - 15m
+          - 1h
+          - 1d
+          type: string
+          description: How often the alert is evaluated. Plan limits may enforce a minimum.
+        delay:
+          enum:
+          - 30s
+          - 60s
+          - 120s
+          - 300s
+          - 600s
+          type: string
+          description: Ingestion delay subtracted from the evaluation window. Defaults to `30s`.
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Human-readable error message.
+        code:
+          type: integer
+          description: gRPC status code, when the service reports one.
+        details:
+          type: array
+          items: {}
+          description: Additional error details, when the service reports any.
+      required:
+      - message
+    Alert:
+      required:
+      - alert_id
+      - display_name
+      - description
+      - project_id
+      - signal
+      - query
+      - condition
+      - notifier_ids
+      - enabled
+      - status
+      - created_at
+      - updated_at
+      - created_by_id
+      - updated_by_id
+      type: object
+      properties:
+        alert_id:
+          type: string
+          description: "Unique alert identifier assigned by ORQ, for example `alert_01H...`.\n Use this value in retrieve, update, and delete requests."
+        display_name:
+          type: string
+          description: Workspace-unique display name.
+        description:
+          type: string
+          description: Short human-readable summary of what the alert watches.
+        project_id:
+          type: string
+          description: Project that owns the alert. Immutable after creation.
+        signal:
+          enum:
+          - cost
+          - latency
+          - errors
+          - evals
+          - custom
+          type: string
+          description: UI signal preset the alert was created from.
+        query:
+          allOf:
+          - $ref: '#/components/schemas/AlertQuery'
+          description: Metric query evaluated on each tick.
+        condition:
+          allOf:
+          - $ref: '#/components/schemas/AlertCondition'
+          description: Threshold condition applied to the query result.
+        notifier_ids:
+          type: array
+          items:
+            type: string
+          description: "Notifiers that receive trigger-open and trigger-resolve\n notifications."
+        enabled:
+          type: boolean
+          description: "Whether the alert is evaluated. Disabled alerts keep their trigger\n history but stop firing."
+        status:
+          enum:
+          - ok
+          - degraded
+          - triggered
+          type: string
+          description: Current runtime status, maintained by the evaluation engine.
+        last_triggered_at:
+          type:
+          - string
+          - 'null'
+          description: Time when the alert last opened a trigger. `null` until the alert first triggers.
+          format: date-time
+        recent_runs:
+          type: array
+          items:
+            $ref: '#/components/schemas/AlertRun'
+          description: "Rolling window of the most recent evaluation ticks, oldest first.\n Maintained by the evaluation engine; read-only."
+        created_at:
+          type: string
+          description: Time when the alert was created.
+          format: date-time
+        updated_at:
+          type: string
+          description: Time when the alert was last updated.
+          format: date-time
+        created_by_id:
+          type: string
+          description: User ID that created the alert.
+        updated_by_id:
+          type: string
+          description: User ID that last updated the alert.
+        display:
+          description: Display options for the alert activity chart. `null` when none are saved.
+          anyOf:
+          - allOf:
+            - $ref: '#/components/schemas/AlertDisplay'
+          - type: 'null'
+    ListAlertTriggerEventsResponse:
+      required:
+      - object
+      - data
+      - has_more
+      type: object
+      properties:
+        object:
+          type: string
+          description: Object discriminator for list responses; always `list`.
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/AlertTriggerEvent'
+          description: Page of events, ordered newest first.
+        has_more:
+          type: boolean
+          description: "Whether more events are available in the selected pagination\n direction."
+    UpdateAlertRequest:
+      required: []
+      type: object
+      properties:
+        display_name:
+          type: string
+          description: New workspace-unique display name. Omit to keep the current name.
+        description:
+          type: string
+          description: New description. Omit to keep the current description.
+        signal:
+          type: string
+          description: New UI signal preset. Omit to keep the current value.
+        query:
+          allOf:
+          - $ref: '#/components/schemas/AlertQuery'
+          description: Replacement query. Omit to keep the current query.
+        condition:
+          allOf:
+          - $ref: '#/components/schemas/AlertCondition'
+          description: Replacement condition. Omit to keep the current condition.
+        notifier_ids:
+          type: array
+          items:
+            type: string
+          description: Replacement notifier set. Omit to keep the current notifiers.
+        enabled:
+          type: boolean
+          description: New enabled state. Omit to keep the current state.
+        display:
+          allOf:
+          - $ref: '#/components/schemas/AlertDisplay'
+          description: Display options to merge. Omitted fields keep their current values.
+    MonitorFilter:
+      required:
+      - field
+      - op
+      - values
+      type: object
+      properties:
+        field:
+          type: string
+          description: "Reporting dimension to filter on. Valid fields depend on the\n metric; validated when the monitor is saved."
+        op:
+          enum:
+          - eq
+          - neq
+          - in
+          - not_in
+          - gt
+          - gte
+          - lt
+          - lte
+          - between
+          - contains
+          - exists
+          - not_exists
+          type: string
+          description: Predicate operator. `eq` and `neq` accept exactly one value; `in` and `not_in` accept 1-100 values.
+        values:
+          type: array
+          items:
+            type: string
+          description: Values compared against the selected field.
+    AlertTrigger:
+      required:
+      - trigger_id
+      - alert_id
+      - project_id
+      - status
+      - opened_at
+      - peak_value
+      - last_value
+      - event_count
+      type: object
+      properties:
+        trigger_id:
+          type: string
+          description: Unique trigger identifier, for example `trigger_01H...`.
+        alert_id:
+          type: string
+          description: Alert this trigger belongs to.
+        project_id:
+          type: string
+          description: Project that owns the alert.
+        status:
+          enum:
+          - open
+          - resolved
+          type: string
+          description: Whether the breach is ongoing or recovered.
+        severity:
+          enum:
+          - critical
+          - degraded
+          type: string
+          description: Current tier of the incident.
+        peak_severity:
+          enum:
+          - critical
+          - degraded
+          type: string
+          description: Worst tier reached while the trigger was open.
+        opened_at:
+          type: string
+          description: Time when the threshold was first crossed.
+          format: date-time
+        resolved_at:
+          type:
+          - string
+          - 'null'
+          description: Time when the value recovered. `null` while the trigger is open.
+          format: date-time
+        peak_value:
+          type: number
+          description: Worst observed value while the trigger was open.
+          format: double
+        last_value:
+          type: number
+          description: Most recent observed value.
+          format: double
+        event_count:
+          type: integer
+          description: Number of evaluation events recorded on this trigger.
+          format: int32
+    AlertTriggerEvent:
+      required:
+      - event_id
+      - trigger_id
+      - alert_id
+      - at
+      - value
+      type: object
+      properties:
+        event_id:
+          type: string
+          description: Unique event identifier, for example `alertevent_01H...`.
+        trigger_id:
+          type: string
+          description: Trigger the event was recorded on.
+        alert_id:
+          type: string
+          description: Alert the event belongs to.
+        at:
+          type: string
+          description: Time of the evaluation tick.
+          format: date-time
+        value:
+          type: number
+          description: Observed metric value at the tick.
+          format: double
+        evidence:
+          type: array
+          items:
+            $ref: '#/components/schemas/AlertEvidence'
+          description: Exemplar traces that contributed to the breach, worst first.
+    DeleteAlertResponse:
+      type: object
+      properties: {}
+    ListAlertTriggersResponse:
+      required:
+      - object
+      - data
+      - has_more
+      type: object
+      properties:
+        object:
+          type: string
+          description: Object discriminator for list responses; always `list`.
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/AlertTrigger'
+          description: Page of triggers, ordered newest first.
+        has_more:
+          type: boolean
+          description: "Whether more triggers are available in the selected pagination\n direction."
+    CreateAlertResponse:
+      required:
+      - alert
+      type: object
+      properties:
+        alert:
+          allOf:
+          - $ref: '#/components/schemas/Alert'
+          description: Newly created alert.
+    UpdateAlertResponse:
+      required:
+      - alert
+      type: object
+      properties:
+        alert:
+          allOf:
+          - $ref: '#/components/schemas/Alert'
+          description: Updated alert.
+    GetAlertResponse:
+      required:
+      - alert
+      type: object
+      properties:
+        alert:
+          allOf:
+          - $ref: '#/components/schemas/Alert'
+          description: Requested alert.
+    AlertRun:
+      required:
+      - at
+      - value
+      - breached
+      - has_data
+      type: object
+      properties:
+        at:
+          type: string
+          description: Time of the evaluation tick.
+          format: date-time
+        value:
+          type: number
+          description: Observed metric value. Zero when `has_data` is false.
+          format: double
+        breached:
+          type: boolean
+          description: Whether the value breached the alert condition.
+        has_data:
+          type: boolean
+          description: Whether the evaluation window contained any data.
+        severity:
+          enum:
+          - critical
+          - degraded
+          type: string
+          description: Tier the value landed in when breached. Empty when not breached.
+    CreateAlertRequest:
+      required:
+      - display_name
+      - project_id
+      - query
+      - condition
+      type: object
+      properties:
+        display_name:
+          type: string
+          description: Workspace-unique display name.
+        description:
+          type: string
+          description: Short human-readable summary of what the alert watches.
+        project_id:
+          type: string
+          description: Project that owns the alert. Required.
+        signal:
+          type: string
+          description: UI signal preset the alert is created from. Defaults to `custom`.
+        query:
+          allOf:
+          - $ref: '#/components/schemas/AlertQuery'
+          description: Metric query evaluated on each tick.
+        condition:
+          allOf:
+          - $ref: '#/components/schemas/AlertCondition'
+          description: Threshold condition applied to the query result.
+        notifier_ids:
+          type: array
+          items:
+            type: string
+          description: "Notifiers that receive trigger-open and trigger-resolve\n notifications."
+        enabled:
+          type: boolean
+          description: Whether the alert starts evaluating immediately. Defaults to true.
+        display:
+          allOf:
+          - $ref: '#/components/schemas/AlertDisplay'
+          description: Display options for the alert activity chart.
+  securitySchemes:
+    ApiKey:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+externalDocs:
+  url: https://docs.orq.ai
+  description: orq.ai Documentation
+x-speakeasy-timeout: 600000

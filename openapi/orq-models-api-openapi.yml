@@ -1,0 +1,2816 @@
+openapi: 3.2.0
+info:
+  title: orq.ai Models API
+  version: '2.0'
+  description: orq.ai API documentation
+servers:
+- url: https://my.orq.ai
+security:
+- ApiKey: []
+tags:
+- description: List models available through the AI Router.
+  name: Models
+paths:
+  /v2/models:
+    get:
+      description: Lists all available models for the workspace, including system and custom models with their enabled status.
+      operationId: ModelList
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/ModelDocument'
+                type:
+                - array
+                - 'null'
+          description: Models retrieved successfully
+        '401':
+          description: Unauthorized
+      summary: List models
+      tags:
+      - Models
+      x-cli-group: models
+      x-cli-list-fields:
+      - refId
+      - model_type
+      - metadata.context_window
+      - metadata.max_output_tokens
+      - metadata.million_tokens_input_cost
+      - metadata.million_tokens_output_cost
+      - has_functions
+      x-cli-name: list
+      x-code-samples:
+      - label: Node.js
+        lang: typescript
+        source: const models = await orq.models.list();
+      x-speakeasy-group: models
+      x-speakeasy-ignore: true
+      x-speakeasy-name-override: list
+    post:
+      description: Creates a new custom model for the workspace. Provider credentials in the configuration are encrypted using the workspace encryption key before being persisted.
+      operationId: ModelCreate
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              properties:
+                configuration:
+                  additionalProperties: {}
+                  type: object
+                display_name:
+                  maxLength: 128
+                  type: string
+                has_functions:
+                  type: boolean
+                id:
+                  type: string
+                input_cost:
+                  format: double
+                  type: number
+                metadata:
+                  $ref: '#/components/schemas/ModelMetadata'
+                model_developer:
+                  type: string
+                model_family:
+                  type: string
+                model_id:
+                  maxLength: 256
+                  type: string
+                model_type:
+                  type: string
+                output_cost:
+                  format: double
+                  type: number
+                parameters:
+                  items:
+                    $ref: '#/components/schemas/CreateModelParameter'
+                  type:
+                  - array
+                  - 'null'
+                provider:
+                  type: string
+              required:
+              - id
+              - display_name
+              - model_id
+              - model_developer
+              - model_family
+              - model_type
+              - provider
+              - has_functions
+              - input_cost
+              - output_cost
+              - metadata
+              - parameters
+              - configuration
+              type: object
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  configuration:
+                    $ref: '#/components/schemas/ModelConfigurationResponse'
+                  created:
+                    type: string
+                  description:
+                    type:
+                    - string
+                    - 'null'
+                  display_name:
+                    type: string
+                  docs_url:
+                    type:
+                    - string
+                    - 'null'
+                  enabled:
+                    type: boolean
+                  enabled_for_endpoints:
+                    type: boolean
+                  enabled_for_playground:
+                    type: boolean
+                  has_cpu_pricing:
+                    type: boolean
+                  has_functions:
+                    type: boolean
+                  id:
+                    type: string
+                  input_cost:
+                    format: double
+                    type:
+                    - number
+                    - 'null'
+                  input_currency:
+                    type: string
+                  is_active:
+                    type: boolean
+                  legacy_uuid:
+                    deprecated: true
+                    type: string
+                  metadata:
+                    $ref: '#/components/schemas/ModelMetadata'
+                  model_developer:
+                    type: string
+                  model_family:
+                    type: string
+                  model_id:
+                    type: string
+                  model_type:
+                    type: string
+                  output_cost:
+                    format: double
+                    type:
+                    - number
+                    - 'null'
+                  output_currency:
+                    type: string
+                  owner:
+                    type: string
+                  parameters:
+                    items:
+                      $ref: '#/components/schemas/ModelParameterDocument'
+                    type:
+                    - array
+                    - 'null'
+                  pricing_url:
+                    type:
+                    - string
+                    - 'null'
+                  provider:
+                    type: string
+                  refId:
+                    type: string
+                  sharing:
+                    $ref: '#/components/schemas/ModelSharingConfig'
+                  updated:
+                    type: string
+                required:
+                - id
+                - created
+                - updated
+                - display_name
+                - model_id
+                - is_active
+                - provider
+                - owner
+                - input_cost
+                - input_currency
+                - output_cost
+                - output_currency
+                - description
+                - pricing_url
+                - docs_url
+                - model_type
+                - has_functions
+                - has_cpu_pricing
+                - enabled_for_playground
+                - enabled_for_endpoints
+                - configuration
+                - metadata
+                - parameters
+                - enabled
+                - refId
+                type: object
+          description: Model created successfully
+        '400':
+          description: Invalid model configuration
+        '401':
+          description: Unauthorized
+        '404':
+          description: Workspace not found
+      summary: Create custom model
+      tags:
+      - Models
+      x-cli-group: models
+      x-cli-name: create
+      x-code-samples:
+      - label: Node.js
+        lang: typescript
+        source: "await orq.models.create({\n  id: \"...\",\n  displayName: \"My custom model\",\n  modelId: \"my-model\",\n  provider: \"openai\",\n  modelType: \"chat\",\n  modelDeveloper: \"openai\",\n  modelFamily: \"gpt\",\n  inputCost: 0,\n  outputCost: 0,\n  hasFunctions: false,\n  metadata: { isPrivate: true, region: \"us\" },\n  parameters: [],\n  configuration: { provider: \"openai\", api_key: \"sk-...\" },\n});"
+      x-speakeasy-group: models
+      x-speakeasy-name-override: create
+  /v2/models/aws-bedrock:
+    post:
+      description: Registers an AWS Bedrock inference profile as a custom model for the workspace. Credentials are resolved at request time via either the integration reference or the IAM role attached to the deployment — nothing is stored with the model.
+      operationId: ModelCreateAwsBedrock
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              properties:
+                assume_role_arn:
+                  type: string
+                assume_role_external_id:
+                  type: string
+                auth_mode:
+                  type: string
+                autorouter_id:
+                  type: string
+                autorouter_version:
+                  type: string
+                cache_read_cost:
+                  format: double
+                  type: number
+                cache_write_cost:
+                  format: double
+                  type: number
+                description:
+                  type: string
+                display_name:
+                  maxLength: 128
+                  type: string
+                has_reasoning:
+                  type: boolean
+                input_cost:
+                  format: double
+                  type: number
+                integration_id:
+                  type: string
+                max_tokens:
+                  format: int64
+                  type: integer
+                model_developer:
+                  type: string
+                model_family:
+                  type: string
+                model_id:
+                  type: string
+                model_type:
+                  type: string
+                output_cost:
+                  format: double
+                  type: number
+                region:
+                  type: string
+                supports_adaptive_reasoning:
+                  type: boolean
+                supports_extended_thinking:
+                  type: boolean
+                supports_json_mode:
+                  type: boolean
+                supports_json_schema:
+                  type: boolean
+                supports_strict_tool:
+                  type: boolean
+                supports_tool_calling:
+                  type: boolean
+                supports_vision:
+                  type: boolean
+                temperature:
+                  format: double
+                  type: number
+              required:
+              - display_name
+              - model_id
+              - region
+              - model_developer
+              - auth_mode
+              type: object
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  configuration:
+                    $ref: '#/components/schemas/ModelConfigurationResponse'
+                  created:
+                    type: string
+                  description:
+                    type:
+                    - string
+                    - 'null'
+                  display_name:
+                    type: string
+                  docs_url:
+                    type:
+                    - string
+                    - 'null'
+                  enabled:
+                    type: boolean
+                  enabled_for_endpoints:
+                    type: boolean
+                  enabled_for_playground:
+                    type: boolean
+                  has_cpu_pricing:
+                    type: boolean
+                  has_functions:
+                    type: boolean
+                  id:
+                    type: string
+                  input_cost:
+                    format: double
+                    type:
+                    - number
+                    - 'null'
+                  input_currency:
+                    type: string
+                  is_active:
+                    type: boolean
+                  legacy_uuid:
+                    deprecated: true
+                    type: string
+                  metadata:
+                    $ref: '#/components/schemas/ModelMetadata'
+                  model_developer:
+                    type: string
+                  model_family:
+                    type: string
+                  model_id:
+                    type: string
+                  model_type:
+                    type: string
+                  output_cost:
+                    format: double
+                    type:
+                    - number
+                    - 'null'
+                  output_currency:
+                    type: string
+                  owner:
+                    type: string
+                  parameters:
+                    items:
+                      $ref: '#/components/schemas/ModelParameterDocument'
+                    type:
+                    - array
+                    - 'null'
+                  pricing_url:
+                    type:
+                    - string
+                    - 'null'
+                  provider:
+                    type: string
+                  refId:
+                    type: string
+                  sharing:
+                    $ref: '#/components/schemas/ModelSharingConfig'
+                  updated:
+                    type: string
+                required:
+                - id
+                - created
+                - updated
+                - display_name
+                - model_id
+                - is_active
+                - provider
+                - owner
+                - input_cost
+                - input_currency
+                - output_cost
+                - output_currency
+                - description
+                - pricing_url
+                - docs_url
+                - model_type
+                - has_functions
+                - has_cpu_pricing
+                - enabled_for_playground
+                - enabled_for_endpoints
+                - configuration
+                - metadata
+                - parameters
+                - enabled
+                - refId
+                type: object
+          description: AWS Bedrock model created successfully
+        '400':
+          description: Invalid model configuration
+        '401':
+          description: Unauthorized
+        '404':
+          description: Workspace not found
+      summary: Create AWS Bedrock custom model
+      tags:
+      - Models
+      x-cli-group: models
+      x-cli-name: createAwsBedrock
+      x-code-samples:
+      - label: Node.js
+        lang: typescript
+        source: "await orq.models.createAwsBedrock({\n  displayName: \"My Bedrock Model\",\n  modelId: \"arn:aws:bedrock:us-east-1:123456789012:inference-profile/anthropic.claude-3-sonnet-20240229-v1:0\",\n  region: \"us-east-1\",\n  modelDeveloper: \"anthropic\",\n  authMode: \"integration\",\n  integrationId: \"int_...\",\n});"
+      x-speakeasy-group: models
+      x-speakeasy-name-override: createAwsBedrock
+  /v2/models/aws-bedrock/validate:
+    post:
+      description: Performs a live Bedrock Converse probe to verify the inference profile ARN and credentials, then best-effort enriches the response from known system models.
+      operationId: ModelValidateAwsBedrock
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              properties:
+                assume_role_arn:
+                  type: string
+                assume_role_external_id:
+                  type: string
+                auth_mode:
+                  type: string
+                inference_profile_arn:
+                  type: string
+                integration_id:
+                  type: string
+                model_type:
+                  type: string
+                region:
+                  type: string
+              required:
+              - inference_profile_arn
+              - region
+              - auth_mode
+              type: object
+        required: true
+      responses:
+        '200':
+          description: Validation result
+        '400':
+          description: Validation failed
+        '401':
+          description: Unauthorized
+        '404':
+          description: Integration not found
+      summary: Validate AWS Bedrock inference profile
+      tags:
+      - Models
+      x-cli-group: models
+      x-cli-name: validateAwsBedrock
+      x-code-samples:
+      - label: Node.js
+        lang: typescript
+        source: "await orq.models.validateAwsBedrock({\n  inferenceProfileArn: \"arn:aws:bedrock:us-east-1:123456789012:inference-profile/anthropic.claude-3-sonnet-20240229-v1:0\",\n  region: \"us-east-1\",\n});"
+      x-speakeasy-group: models
+      x-speakeasy-name-override: validateAwsBedrock
+  /v2/models/aws-bedrock/{id}:
+    patch:
+      description: Updates an AWS Bedrock custom model. ARN changes are format-validated (live AWS validation lives in the dedicated validate endpoint). Fields you send are merged into the stored configuration and metadata. Parameters are replaced only when the request produces a non-empty list.
+      operationId: ModelUpdateAwsBedrock
+      parameters:
+      - description: The ID of the model
+        in: path
+        name: id
+        required: true
+        schema:
+          description: The ID of the model
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              properties:
+                assume_role_arn:
+                  type: string
+                assume_role_external_id:
+                  type: string
+                autorouter_id:
+                  type: string
+                autorouter_version:
+                  type: string
+                cache_read_cost:
+                  format: double
+                  type: number
+                cache_write_cost:
+                  format: double
+                  type: number
+                description:
+                  type: string
+                display_name:
+                  maxLength: 128
+                  type: string
+                has_reasoning:
+                  type: boolean
+                input_cost:
+                  format: double
+                  type: number
+                max_tokens:
+                  format: int64
+                  type: integer
+                model_developer:
+                  type: string
+                model_family:
+                  type: string
+                model_id:
+                  type: string
+                output_cost:
+                  format: double
+                  type: number
+                region:
+                  type: string
+                supports_adaptive_reasoning:
+                  type: boolean
+                supports_extended_thinking:
+                  type: boolean
+                supports_json_mode:
+                  type: boolean
+                supports_json_schema:
+                  type: boolean
+                supports_strict_tool:
+                  type: boolean
+                supports_tool_calling:
+                  type: boolean
+                supports_vision:
+                  type: boolean
+                temperature:
+                  format: double
+                  type: number
+              type: object
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  configuration:
+                    $ref: '#/components/schemas/ModelConfigurationResponse'
+                  created:
+                    type: string
+                  description:
+                    type:
+                    - string
+                    - 'null'
+                  display_name:
+                    type: string
+                  docs_url:
+                    type:
+                    - string
+                    - 'null'
+                  enabled:
+                    type: boolean
+                  enabled_for_endpoints:
+                    type: boolean
+                  enabled_for_playground:
+                    type: boolean
+                  has_cpu_pricing:
+                    type: boolean
+                  has_functions:
+                    type: boolean
+                  id:
+                    type: string
+                  input_cost:
+                    format: double
+                    type:
+                    - number
+                    - 'null'
+                  input_currency:
+                    type: string
+                  is_active:
+                    type: boolean
+                  legacy_uuid:
+                    deprecated: true
+                    type: string
+                  metadata:
+                    $ref: '#/components/schemas/ModelMetadata'
+                  model_developer:
+                    type: string
+                  model_family:
+                    type: string
+                  model_id:
+                    type: string
+                  model_type:
+                    type: string
+                  output_cost:
+                    format: double
+                    type:
+                    - number
+                    - 'null'
+                  output_currency:
+                    type: string
+                  owner:
+                    type: string
+                  parameters:
+                    items:
+                      $ref: '#/components/schemas/ModelParameterDocument'
+                    type:
+                    - array
+                    - 'null'
+                  pricing_url:
+                    type:
+                    - string
+                    - 'null'
+                  provider:
+                    type: string
+                  refId:
+                    type: string
+                  sharing:
+                    $ref: '#/components/schemas/ModelSharingConfig'
+                  updated:
+                    type: string
+                required:
+                - id
+                - created
+                - updated
+                - display_name
+                - model_id
+                - is_active
+                - provider
+                - owner
+                - input_cost
+                - input_currency
+                - output_cost
+                - output_currency
+                - description
+                - pricing_url
+                - docs_url
+                - model_type
+                - has_functions
+                - has_cpu_pricing
+                - enabled_for_playground
+                - enabled_for_endpoints
+                - configuration
+                - metadata
+                - parameters
+                - enabled
+                - refId
+                type: object
+          description: AWS Bedrock model updated successfully
+        '400':
+          description: Invalid ARN format or request
+        '401':
+          description: Unauthorized
+        '404':
+          description: Model not found or not accessible in this workspace
+      summary: Update AWS Bedrock custom model
+      tags:
+      - Models
+      x-cli-group: models
+      x-cli-name: updateAwsBedrock
+      x-code-samples:
+      - label: Node.js
+        lang: typescript
+        source: "await orq.models.updateAwsBedrock({\n  id: \"019d...\",\n  displayName: \"Updated name\",\n  region: \"us-east-1\",\n});"
+      x-speakeasy-group: models
+      x-speakeasy-name-override: updateAwsBedrock
+  /v2/models/azure-foundry/deployments:
+    post:
+      description: Lists Azure Foundry deployments under the given base_url and merges each entry with the matching Orq model catalog entry. Only OpenAI-developed deployments in succeeded state with chat/completion/embedding/vision model types are returned.
+      operationId: ModelAzureFoundryDeployments
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              properties:
+                api_key:
+                  type: string
+                api_version:
+                  type: string
+                base_url:
+                  type: string
+                provider:
+                  type: string
+              required:
+              - provider
+              - base_url
+              - api_key
+              type: object
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  deployments:
+                    items:
+                      $ref: '#/components/schemas/AzureFoundryDeployment'
+                    type:
+                    - array
+                    - 'null'
+                  region:
+                    type: string
+                required:
+                - region
+                - deployments
+                type: object
+          description: Azure Foundry deployments listed
+        '400':
+          description: Invalid request or base_url
+        '401':
+          description: Unauthorized
+      summary: List Azure Foundry deployments under a resource
+      tags:
+      - Models
+      x-cli-group: models
+      x-cli-name: azureFoundryDeployments
+      x-code-samples:
+      - label: Node.js
+        lang: typescript
+        source: "await orq.models.azureFoundryDeployments({\n  provider: \"azure\",\n  baseUrl: \"https://my-resource.openai.azure.com/openai/v1\",\n  apiKey: \"...\",\n});"
+      x-speakeasy-group: models
+      x-speakeasy-name-override: azureFoundryDeployments
+  /v2/models/litellm/import:
+    post:
+      description: Bulk-imports a list of LiteLLM model definitions into the workspace model garden.
+      operationId: ModelLiteLLMImport
+      requestBody:
+        content:
+          application/json:
+            schema:
+              items:
+                $ref: '#/components/schemas/LiteLLMModel'
+              type:
+              - array
+              - 'null'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/ModelDocument'
+                type:
+                - array
+                - 'null'
+          description: LiteLLM models imported successfully
+        '400':
+          description: Invalid request
+        '401':
+          description: Unauthorized
+        '404':
+          description: Workspace not found
+      summary: Import models from LiteLLM
+      tags:
+      - Models
+      x-cli-group: models
+      x-cli-name: importLitellm
+      x-code-samples:
+      - label: Node.js
+        lang: typescript
+        source: "await orq.models.importLitellm([\n  {\n    modelName: \"gpt-4o-proxy\",\n    litellmParams: {\n      useInPassThrough: false,\n      useLitellmProxy: true,\n      mergeReasoningContentInChoices: false,\n      model: \"openai/gpt-4o\",\n    },\n    modelInfo: {\n      id: null, dbModel: null, key: null, litellmProvider: \"openai\", mode: \"chat\",\n      inputCostPerToken: 0.0000025, outputCostPerToken: 0.00001,\n      supportsFunctionCalling: true,\n      supportedOpenaiParams: [\"temperature\", \"max_tokens\", \"top_p\"],\n    },\n  },\n]);"
+      x-speakeasy-group: models
+      x-speakeasy-name-override: importLitellm
+  /v2/models/litellm/models:
+    get:
+      description: Fetches the list of models from the LiteLLM instance configured for the workspace. Requires a stored LiteLLM integration.
+      operationId: ModelListLitellm
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  additionalProperties: {}
+                  type: object
+                type:
+                - array
+                - 'null'
+          description: LiteLLM models retrieved
+        '401':
+          description: Unauthorized
+        '404':
+          description: LiteLLM integration not found
+        '500':
+          description: Error fetching models from LiteLLM
+      summary: List models from configured LiteLLM instance
+      tags:
+      - Models
+      x-cli-group: models
+      x-cli-name: listLitellm
+      x-code-samples:
+      - label: Node.js
+        lang: typescript
+        source: await orq.models.listLitellm();
+      x-speakeasy-group: models
+      x-speakeasy-name-override: listLitellm
+  /v2/models/openai-like:
+    post:
+      description: Creates a custom model backed by any OpenAI-compatible endpoint. The handler probes the target API with the supplied credentials before persisting the model.
+      operationId: ModelCreateOpenAILike
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              properties:
+                api_key:
+                  type: string
+                base_url:
+                  type: string
+                cache_read_cost:
+                  format: double
+                  type: number
+                cache_write_cost:
+                  format: double
+                  type: number
+                cost_per_image:
+                  format: double
+                  type: number
+                description:
+                  type: string
+                display_name:
+                  maxLength: 128
+                  type: string
+                has_reasoning:
+                  type: boolean
+                input_cost:
+                  format: double
+                  type: number
+                max_tokens:
+                  format: int64
+                  type: integer
+                model_id:
+                  type: string
+                model_type:
+                  type: string
+                output_cost:
+                  format: double
+                  type: number
+                region:
+                  type: string
+                supports_image_edit:
+                  type: boolean
+                supports_strict_tool:
+                  type: boolean
+                supports_tool_calling:
+                  type: boolean
+                supports_vision:
+                  type: boolean
+                temperature:
+                  format: double
+                  type: number
+              required:
+              - display_name
+              - region
+              - base_url
+              - model_id
+              - api_key
+              - model_type
+              type: object
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  configuration:
+                    $ref: '#/components/schemas/ModelConfigurationResponse'
+                  created:
+                    type: string
+                  description:
+                    type:
+                    - string
+                    - 'null'
+                  display_name:
+                    type: string
+                  docs_url:
+                    type:
+                    - string
+                    - 'null'
+                  enabled:
+                    type: boolean
+                  enabled_for_endpoints:
+                    type: boolean
+                  enabled_for_playground:
+                    type: boolean
+                  has_cpu_pricing:
+                    type: boolean
+                  has_functions:
+                    type: boolean
+                  id:
+                    type: string
+                  input_cost:
+                    format: double
+                    type:
+                    - number
+                    - 'null'
+                  input_currency:
+                    type: string
+                  is_active:
+                    type: boolean
+                  legacy_uuid:
+                    deprecated: true
+                    type: string
+                  metadata:
+                    $ref: '#/components/schemas/ModelMetadata'
+                  model_developer:
+                    type: string
+                  model_family:
+                    type: string
+                  model_id:
+                    type: string
+                  model_type:
+                    type: string
+                  output_cost:
+                    format: double
+                    type:
+                    - number
+                    - 'null'
+                  output_currency:
+                    type: string
+                  owner:
+                    type: string
+                  parameters:
+                    items:
+                      $ref: '#/components/schemas/ModelParameterDocument'
+                    type:
+                    - array
+                    - 'null'
+                  pricing_url:
+                    type:
+                    - string
+                    - 'null'
+                  provider:
+                    type: string
+                  refId:
+                    type: string
+                  sharing:
+                    $ref: '#/components/schemas/ModelSharingConfig'
+                  updated:
+                    type: string
+                required:
+                - id
+                - created
+                - updated
+                - display_name
+                - model_id
+                - is_active
+                - provider
+                - owner
+                - input_cost
+                - input_currency
+                - output_cost
+                - output_currency
+                - description
+                - pricing_url
+                - docs_url
+                - model_type
+                - has_functions
+                - has_cpu_pricing
+                - enabled_for_playground
+                - enabled_for_endpoints
+                - configuration
+                - metadata
+                - parameters
+                - enabled
+                - refId
+                type: object
+          description: OpenAI-like model created successfully
+        '400':
+          description: Invalid model configuration or validation failed
+        '401':
+          description: Unauthorized
+        '404':
+          description: Workspace not found
+      summary: Create OpenAI-compatible custom model
+      tags:
+      - Models
+      x-cli-group: models
+      x-cli-name: createOpenaiLike
+      x-code-samples:
+      - label: Node.js
+        lang: typescript
+        source: "await orq.models.createOpenaiLike({\n  displayName: \"My Local Model\",\n  region: \"us\",\n  baseUrl: \"https://api.example.com\",\n  modelId: \"my-model\",\n  apiKey: \"sk-...\",\n  modelType: \"chat\",\n  inputCost: 0,\n  outputCost: 0,\n});"
+      x-speakeasy-group: models
+      x-speakeasy-name-override: createOpenaiLike
+  /v2/models/openai-like/{id}:
+    patch:
+      description: Updates an OpenAI-compatible custom model. Live-re-probes the target API when base_url or model_id changes, using the stored encrypted api_key. Metadata is merged (existing preserved, new overrides).
+      operationId: ModelUpdateOpenAILike
+      parameters:
+      - description: The ID of the model
+        in: path
+        name: id
+        required: true
+        schema:
+          description: The ID of the model
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              properties:
+                base_url:
+                  type: string
+                cache_read_cost:
+                  format: double
+                  type: number
+                cache_write_cost:
+                  format: double
+                  type: number
+                cost_per_image:
+                  format: double
+                  type: number
+                description:
+                  type: string
+                display_name:
+                  maxLength: 128
+                  type: string
+                has_reasoning:
+                  type: boolean
+                input_cost:
+                  format: double
+                  type: number
+                max_tokens:
+                  format: int64
+                  type: integer
+                model_id:
+                  type: string
+                model_type:
+                  type: string
+                output_cost:
+                  format: double
+                  type: number
+                region:
+                  type: string
+                supports_image_edit:
+                  type: boolean
+                supports_strict_tool:
+                  type: boolean
+                supports_tool_calling:
+                  type: boolean
+                supports_vision:
+                  type: boolean
+                temperature:
+                  format: double
+                  type: number
+              required:
+              - display_name
+              - region
+              - model_type
+              type: object
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  configuration:
+                    $ref: '#/components/schemas/ModelConfigurationResponse'
+                  created:
+                    type: string
+                  description:
+                    type:
+                    - string
+                    - 'null'
+                  display_name:
+                    type: string
+                  docs_url:
+                    type:
+                    - string
+                    - 'null'
+                  enabled:
+                    type: boolean
+                  enabled_for_endpoints:
+                    type: boolean
+                  enabled_for_playground:
+                    type: boolean
+                  has_cpu_pricing:
+                    type: boolean
+                  has_functions:
+                    type: boolean
+                  id:
+                    type: string
+                  input_cost:
+                    format: double
+                    type:
+                    - number
+                    - 'null'
+                  input_currency:
+                    type: string
+                  is_active:
+                    type: boolean
+                  legacy_uuid:
+                    deprecated: true
+                    type: string
+                  metadata:
+                    $ref: '#/components/schemas/ModelMetadata'
+                  model_developer:
+                    type: string
+                  model_family:
+                    type: string
+                  model_id:
+                    type: string
+                  model_type:
+                    type: string
+                  output_cost:
+                    format: double
+                    type:
+                    - number
+                    - 'null'
+                  output_currency:
+                    type: string
+                  owner:
+                    type: string
+                  parameters:
+                    items:
+                      $ref: '#/components/schemas/ModelParameterDocument'
+                    type:
+                    - array
+                    - 'null'
+                  pricing_url:
+                    type:
+                    - string
+                    - 'null'
+                  provider:
+                    type: string
+                  refId:
+                    type: string
+                  sharing:
+                    $ref: '#/components/schemas/ModelSharingConfig'
+                  updated:
+                    type: string
+                required:
+                - id
+                - created
+                - updated
+                - display_name
+                - model_id
+                - is_active
+                - provider
+                - owner
+                - input_cost
+                - input_currency
+                - output_cost
+                - output_currency
+                - description
+                - pricing_url
+                - docs_url
+                - model_type
+                - has_functions
+                - has_cpu_pricing
+                - enabled_for_playground
+                - enabled_for_endpoints
+                - configuration
+                - metadata
+                - parameters
+                - enabled
+                - refId
+                type: object
+          description: OpenAI-like model updated successfully
+        '400':
+          description: Invalid request or validation failed
+        '401':
+          description: Unauthorized
+        '404':
+          description: Model not found or not accessible in this workspace
+      summary: Update OpenAI-compatible custom model
+      tags:
+      - Models
+      x-cli-group: models
+      x-cli-name: updateOpenaiLike
+      x-code-samples:
+      - label: Node.js
+        lang: typescript
+        source: "await orq.models.updateOpenaiLike({\n  id: \"019d...\",\n  displayName: \"My Renamed Model\",\n  region: \"us\",\n  modelType: \"chat\",\n  inputCost: 0.002,\n  outputCost: 0.004,\n});"
+      x-speakeasy-group: models
+      x-speakeasy-name-override: updateOpenaiLike
+  /v2/models/validate:
+    post:
+      description: Validates a provider endpoint by performing a minimal live probe. Currently supports Azure OpenAI. Response includes the resolved region, whether the model is known to Orq, and either the full model document or a synthesized default.
+      operationId: ModelValidate
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              properties:
+                api_key:
+                  type: string
+                api_version:
+                  type: string
+                base_url:
+                  type: string
+                deployment_name:
+                  type: string
+                endpoint:
+                  type: string
+                provider:
+                  type: string
+                subtype:
+                  type: string
+              required:
+              - provider
+              - api_key
+              type: object
+        required: true
+      responses:
+        '200':
+          description: Model validated
+        '400':
+          description: Invalid request or unsupported provider
+        '401':
+          description: Unauthorized
+        '415':
+          description: Image models not supported
+      summary: Validate model endpoint
+      tags:
+      - Models
+      x-cli-group: models
+      x-cli-name: validate
+      x-code-samples:
+      - label: Node.js
+        lang: typescript
+        source: "await orq.models.validate({\n  provider: \"azure\",\n  endpoint: \"https://my-deployment.openai.azure.com/openai/deployments/gpt-4o/chat/completions?api-version=2024-06-01\",\n  apiKey: \"...\",\n});"
+      x-speakeasy-group: models
+      x-speakeasy-name-override: validate
+  /v2/models/vertex:
+    post:
+      description: Registers a Google Vertex AI model as a custom model for the workspace. The service account credentials are probed against Vertex AI with a minimal GenerateContent call before persisting.
+      operationId: ModelCreateVertex
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              properties:
+                configuration:
+                  $ref: '#/components/schemas/VertexConfiguration'
+                display_name:
+                  type: string
+              required:
+              - display_name
+              - configuration
+              type: object
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  configuration:
+                    $ref: '#/components/schemas/ModelConfigurationResponse'
+                  created:
+                    type: string
+                  description:
+                    type:
+                    - string
+                    - 'null'
+                  display_name:
+                    type: string
+                  docs_url:
+                    type:
+                    - string
+                    - 'null'
+                  enabled:
+                    type: boolean
+                  enabled_for_endpoints:
+                    type: boolean
+                  enabled_for_playground:
+                    type: boolean
+                  has_cpu_pricing:
+                    type: boolean
+                  has_functions:
+                    type: boolean
+                  id:
+                    type: string
+                  input_cost:
+                    format: double
+                    type:
+                    - number
+                    - 'null'
+                  input_currency:
+                    type: string
+                  is_active:
+                    type: boolean
+                  legacy_uuid:
+                    deprecated: true
+                    type: string
+                  metadata:
+                    $ref: '#/components/schemas/ModelMetadata'
+                  model_developer:
+                    type: string
+                  model_family:
+                    type: string
+                  model_id:
+                    type: string
+                  model_type:
+                    type: string
+                  output_cost:
+                    format: double
+                    type:
+                    - number
+                    - 'null'
+                  output_currency:
+                    type: string
+                  owner:
+                    type: string
+                  parameters:
+                    items:
+                      $ref: '#/components/schemas/ModelParameterDocument'
+                    type:
+                    - array
+                    - 'null'
+                  pricing_url:
+                    type:
+                    - string
+                    - 'null'
+                  provider:
+                    type: string
+                  refId:
+                    type: string
+                  sharing:
+                    $ref: '#/components/schemas/ModelSharingConfig'
+                  updated:
+                    type: string
+                required:
+                - id
+                - created
+                - updated
+                - display_name
+                - model_id
+                - is_active
+                - provider
+                - owner
+                - input_cost
+                - input_currency
+                - output_cost
+                - output_currency
+                - description
+                - pricing_url
+                - docs_url
+                - model_type
+                - has_functions
+                - has_cpu_pricing
+                - enabled_for_playground
+                - enabled_for_endpoints
+                - configuration
+                - metadata
+                - parameters
+                - enabled
+                - refId
+                type: object
+          description: Vertex AI model created successfully
+        '400':
+          description: Invalid model configuration or validation failed
+        '401':
+          description: Unauthorized
+        '404':
+          description: Workspace not found
+      summary: Create Vertex AI custom model
+      tags:
+      - Models
+      x-cli-group: models
+      x-cli-name: createVertex
+      x-code-samples:
+      - label: Node.js
+        lang: typescript
+        source: "await orq.models.createVertex({\n  displayName: \"My Vertex Gemini\",\n  configuration: {\n    projectId: \"my-gcp-project\",\n    location: \"us-central1\",\n    serviceAccount: { type: \"service_account\", project_id: \"...\" },\n    modelConfiguration: {\n      id: \"gemini-2.0-flash\",\n      inputCost: 0,\n      outputCost: 0,\n      parameters: {\n        temperature: { min: 0, max: 2 },\n        maxTokens: { min: 1, max: 8192 },\n        topP: { min: 0, max: 1 },\n      },\n      capabilities: { supportToolCalling: true, structuredOutput: true, vision: false },\n    },\n  },\n});"
+      x-speakeasy-group: models
+      x-speakeasy-name-override: createVertex
+  /v2/models/{id}:
+    delete:
+      description: Deletes a custom model from the workspace. System models cannot be deleted. Returns 200 with an explanatory message if the model is a system model or is still referenced by experiments.
+      operationId: ModelDelete
+      parameters:
+      - description: The ID of the model
+        in: path
+        name: id
+        required: true
+        schema:
+          description: The ID of the model
+          type: string
+      responses:
+        '200':
+          description: Model deleted, or deletion refused with reason
+        '401':
+          description: Workspace ID required
+      summary: Delete custom model
+      tags:
+      - Models
+      x-cli-group: models
+      x-cli-name: delete
+      x-code-samples:
+      - label: Node.js
+        lang: typescript
+        source: 'await orq.models.delete({ id: "019d..." });'
+      x-speakeasy-group: models
+      x-speakeasy-name-override: delete
+    patch:
+      description: Updates a custom model. Only fields present in the request body are modified, except for `metadata` and `parameters`, which are fully replaced when present.
+      operationId: ModelUpdate
+      parameters:
+      - description: The ID of the model
+        in: path
+        name: id
+        required: true
+        schema:
+          description: The ID of the model
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              properties:
+                display_name:
+                  maxLength: 128
+                  type: string
+                has_functions:
+                  type: boolean
+                input_cost:
+                  format: double
+                  type: number
+                metadata:
+                  $ref: '#/components/schemas/ModelMetadata'
+                model_type:
+                  type: string
+                output_cost:
+                  format: double
+                  type: number
+                parameters:
+                  items:
+                    $ref: '#/components/schemas/UpdateModelParameter'
+                  type: array
+              type: object
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  configuration:
+                    $ref: '#/components/schemas/ModelConfigurationResponse'
+                  created:
+                    type: string
+                  description:
+                    type:
+                    - string
+                    - 'null'
+                  display_name:
+                    type: string
+                  docs_url:
+                    type:
+                    - string
+                    - 'null'
+                  enabled:
+                    type: boolean
+                  enabled_for_endpoints:
+                    type: boolean
+                  enabled_for_playground:
+                    type: boolean
+                  has_cpu_pricing:
+                    type: boolean
+                  has_functions:
+                    type: boolean
+                  id:
+                    type: string
+                  input_cost:
+                    format: double
+                    type:
+                    - number
+                    - 'null'
+                  input_currency:
+                    type: string
+                  is_active:
+                    type: boolean
+                  legacy_uuid:
+                    deprecated: true
+                    type: string
+                  metadata:
+                    $ref: '#/components/schemas/ModelMetadata'
+                  model_developer:
+                    type: string
+                  model_family:
+                    type: string
+                  model_id:
+                    type: string
+                  model_type:
+                    type: string
+                  output_cost:
+                    format: double
+                    type:
+                    - number
+                    - 'null'
+                  output_currency:
+                    type: string
+                  owner:
+                    type: string
+                  parameters:
+                    items:
+                      $ref: '#/components/schemas/ModelParameterDocument'
+                    type:
+                    - array
+                    - 'null'
+                  pricing_url:
+                    type:
+                    - string
+                    - 'null'
+                  provider:
+                    type: string
+                  refId:
+                    type: string
+                  sharing:
+                    $ref: '#/components/schemas/ModelSharingConfig'
+                  updated:
+                    type: string
+                required:
+                - id
+                - created
+                - updated
+                - display_name
+                - model_id
+                - is_active
+                - provider
+                - owner
+                - input_cost
+                - input_currency
+                - output_cost
+                - output_currency
+                - description
+                - pricing_url
+                - docs_url
+                - model_type
+                - has_functions
+                - has_cpu_pricing
+                - enabled_for_playground
+                - enabled_for_endpoints
+                - configuration
+                - metadata
+                - parameters
+                - enabled
+                - refId
+                type: object
+          description: Model updated successfully
+        '400':
+          description: Invalid request
+        '401':
+          description: Unauthorized
+        '404':
+          description: Model not found or not accessible in this workspace
+      summary: Update custom model
+      tags:
+      - Models
+      x-cli-group: models
+      x-cli-name: update
+      x-code-samples:
+      - label: Node.js
+        lang: typescript
+        source: "await orq.models.update({\n  id: \"019d...\",\n  displayName: \"New display name\",\n  hasFunctions: true,\n});"
+      x-speakeasy-group: models
+      x-speakeasy-name-override: update
+  /v2/workspace-models:
+    post:
+      description: Adds the model to the workspace's enabled set. Idempotent — re-enabling an already-enabled model returns 204 with no state change.
+      operationId: ModelEnable
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              properties:
+                model_id:
+                  type: string
+              required:
+              - model_id
+              type: object
+        required: true
+      responses:
+        '204':
+          description: Model enabled
+        '400':
+          description: Invalid request body
+        '404':
+          description: Model not found
+        '500':
+          description: Internal server error
+      summary: Enable model for workspace
+      tags:
+      - Models
+      x-cli-group: models
+      x-cli-name: enable
+      x-code-samples:
+      - label: Node.js
+        lang: typescript
+        source: 'await orq.models.enable({ modelId: "model_123" });'
+      x-speakeasy-group: models
+      x-speakeasy-name-override: enable
+  /v2/workspace-models/{model_id}:
+    delete:
+      description: Removes the model from the workspace's enabled set. Idempotent — disabling an already-disabled model returns 204.
+      operationId: ModelDisable
+      parameters:
+      - description: The ID of the model to disable
+        in: path
+        name: model_id
+        required: true
+        schema:
+          description: The ID of the model to disable
+          type: string
+      responses:
+        '204':
+          description: Model disabled
+        '400':
+          description: Invalid request
+        '500':
+          description: Internal server error
+      summary: Disable model for workspace
+      tags:
+      - Models
+      x-cli-group: models
+      x-cli-name: disable
+      x-code-samples:
+      - label: Node.js
+        lang: typescript
+        source: 'await orq.models.disable({ modelId: "model_123" });'
+      x-speakeasy-group: models
+      x-speakeasy-name-override: disable
+  /v3/router/models:
+    get:
+      description: Lists all models available through the AI Router. Returns each model in OpenAI-compatible shape with its provider, ID, and creation timestamp.
+      operationId: list-models
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    description: Available models.
+                    items:
+                      $ref: '#/components/schemas/PublicModelEntry'
+                    type:
+                    - array
+                    - 'null'
+                  object:
+                    description: Always "list".
+                    enum:
+                    - list
+                    type: string
+                required:
+                - object
+                - data
+                type: object
+          description: Models listed.
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIErrorResponse'
+      summary: List models
+      tags:
+      - Models
+      x-cli-group: models
+      x-cli-name: list
+      x-orq-gateway-group: true
+      x-speakeasy-group: models
+      x-speakeasy-name-override: list
+components:
+  schemas:
+    EmbeddingDimensionSupport:
+      additionalProperties: false
+      properties:
+        max:
+          format: int64
+          type: integer
+        min:
+          format: int64
+          type: integer
+        options:
+          items:
+            format: int64
+            type: integer
+          type:
+          - array
+          - 'null'
+      type: object
+    APIError:
+      additionalProperties: false
+      properties:
+        code:
+          type:
+          - string
+          - 'null'
+        failures: {}
+        message:
+          type: string
+        param:
+          type:
+          - string
+          - 'null'
+        type:
+          type: string
+      required:
+      - message
+      - type
+      - param
+      - code
+      type: object
+    Price:
+      additionalProperties: false
+      properties:
+        cost:
+          format: double
+          type: number
+        currency:
+          type: string
+        per:
+          format: int64
+          type: integer
+        unit:
+          type: string
+      required:
+      - cost
+      - currency
+      - unit
+      - per
+      type: object
+    VertexParamRange:
+      additionalProperties: false
+      properties:
+        max:
+          format: double
+          type: number
+        min:
+          format: double
+          type: number
+      required:
+      - min
+      - max
+      type: object
+    VertexParameters:
+      additionalProperties: false
+      properties:
+        maxTokens:
+          $ref: '#/components/schemas/VertexParamRangeInt'
+        temperature:
+          $ref: '#/components/schemas/VertexParamRange'
+        topP:
+          $ref: '#/components/schemas/VertexParamRange'
+      required:
+      - temperature
+      - maxTokens
+      - topP
+      type: object
+    VertexModelConfiguration:
+      additionalProperties: false
+      properties:
+        capabilities:
+          $ref: '#/components/schemas/VertexCapabilities'
+        id:
+          type: string
+        inputCost:
+          format: double
+          type: number
+        outputCost:
+          format: double
+          type: number
+        parameters:
+          $ref: '#/components/schemas/VertexParameters'
+      required:
+      - id
+      - inputCost
+      - outputCost
+      - parameters
+      - capabilities
+      type: object
+    LiteLLMModelInfo:
+      additionalProperties: false
+      properties:
+        db_model:
+          type:
+          - boolean
+          - 'null'
+        id:
+          type:
+          - string
+          - 'null'
+        input_cost_per_token:
+          format: double
+          type: number
+        key:
+          type:
+          - string
+          - 'null'
+        litellm_provider:
+          type:
+          - string
+          - 'null'
+        max_input_tokens:
+          format: int64
+          type: integer
+        max_output_tokens:
+          format: int64
+          type: integer
+        mode:
+          type:
+          - string
+          - 'null'
+        output_cost_per_token:
+          format: double
+          type: number
+        supported_openai_params:
+          items:
+            type: string
+          type:
+          - array
+          - 'null'
+        supports_function_calling:
+          type: boolean
+        supports_native_streaming:
+          type: boolean
+        supports_reasoning:
+          type: boolean
+        supports_response_schema:
+          type: boolean
+        supports_system_messages:
+          type: boolean
+        supports_tool_choice:
+          type: boolean
+        supports_vision:
+          type: boolean
+      required:
+      - id
+      - db_model
+      - key
+      - litellm_provider
+      - mode
+      type: object
+    ModelParameterDocument:
+      additionalProperties: false
+      properties:
+        config:
+          additionalProperties: {}
+          type: object
+        description:
+          type:
+          - string
+          - 'null'
+        hints:
+          type: string
+        id:
+          type: string
+        is_active:
+          type: boolean
+        name:
+          type: string
+        parameter:
+          type: string
+        parameter_type:
+          type: string
+        position:
+          format: int64
+          type: integer
+      required:
+      - id
+      - name
+      - parameter
+      - description
+      - config
+      - parameter_type
+      - is_active
+      type: object
+    PublicModelEntry:
+      additionalProperties: false
+      properties:
+        created:
+          description: Unix timestamp (seconds) when the model was added.
+          format: int64
+          type: integer
+        id:
+          description: Model identifier in provider/model format (e.g. openai/gpt-4o).
+          type: string
+        object:
+          description: Always "model".
+          enum:
+          - model
+          type: string
+        owned_by:
+          description: The provider that owns the model (e.g. openai, anthropic).
+          type: string
+      required:
+      - id
+      - object
+      - owned_by
+      - created
+      type: object
+    LiteLLMParams:
+      additionalProperties: false
+      properties:
+        merge_reasoning_content_in_choices:
+          type: boolean
+        model:
+          type: string
+        use_in_pass_through:
+          type: boolean
+        use_litellm_proxy:
+          type: boolean
+      required:
+      - use_in_pass_through
+      - use_litellm_proxy
+      - merge_reasoning_content_in_choices
+      - model
+      type: object
+    APIErrorResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        error:
+          $ref: '#/components/schemas/APIError'
+      required:
+      - error
+    ModelSharingConfig:
+      additionalProperties: false
+      properties:
+        allow_fork:
+          type: boolean
+        allow_version_pin:
+          type: boolean
+        auto_grant_new_projects:
+          type: boolean
+        mode:
+          type: string
+        project_ids:
+          items:
+            type: string
+          type:
+          - array
+          - 'null'
+      required:
+      - mode
+      - allow_version_pin
+      - allow_fork
+      - auto_grant_new_projects
+      type: object
+    CreateModelParameter:
+      additionalProperties: false
+      properties:
+        config:
+          additionalProperties: {}
+          type: object
+        description:
+          type: string
+        hints:
+          type: string
+        name:
+          type: string
+        parameter:
+          type: string
+        parameter_type:
+          type: string
+        position:
+          format: int64
+          type: integer
+      required:
+      - name
+      - parameter
+      - config
+      - parameter_type
+      type: object
+    VertexConfiguration:
+      additionalProperties: false
+      properties:
+        location:
+          type: string
+        modelConfiguration:
+          $ref: '#/components/schemas/VertexModelConfiguration'
+        projectId:
+          type: string
+        serviceAccount:
+          additionalProperties: {}
+          type: object
+      required:
+      - projectId
+      - location
+      - serviceAccount
+      - modelConfiguration
+      type: object
+    AutoRouterV2CreatorConfig:
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        slug:
+          type: string
+      required:
+      - id
+      - name
+      - slug
+      type: object
+    PricingVariant:
+      additionalProperties: false
+      properties:
+        audio_input:
+          $ref: '#/components/schemas/Price'
+        audio_output:
+          $ref: '#/components/schemas/Price'
+        cache_read:
+          $ref: '#/components/schemas/Price'
+        cache_write_1h:
+          $ref: '#/components/schemas/Price'
+        cache_write_5m:
+          $ref: '#/components/schemas/Price'
+        input:
+          $ref: '#/components/schemas/Price'
+        output:
+          $ref: '#/components/schemas/Price'
+        reasoning:
+          $ref: '#/components/schemas/Price'
+        when:
+          type: string
+        cache_write_30m:
+          $ref: '#/components/schemas/Price'
+        cache_write_12h:
+          $ref: '#/components/schemas/Price'
+      required:
+      - when
+      type: object
+    Pricing:
+      additionalProperties: false
+      properties:
+        audio_input:
+          $ref: '#/components/schemas/Price'
+        audio_output:
+          $ref: '#/components/schemas/Price'
+        cache_read:
+          $ref: '#/components/schemas/Price'
+        cache_write_1h:
+          $ref: '#/components/schemas/Price'
+        cache_write_5m:
+          $ref: '#/components/schemas/Price'
+        input:
+          $ref: '#/components/schemas/Price'
+        output:
+          $ref: '#/components/schemas/Price'
+        reasoning:
+          $ref: '#/components/schemas/Price'
+        variants:
+          items:
+            $ref: '#/components/schemas/PricingVariant'
+          type:
+          - array
+          - 'null'
+        cache_write_30m:
+          $ref: '#/components/schemas/Price'
+        cache_write_12h:
+          $ref: '#/components/schemas/Price'
+      type: object
+    VertexCapabilities:
+      additionalProperties: false
+      properties:
+        structuredOutput:
+          type: boolean
+        supportToolCalling:
+          type: boolean
+        vision:
+          type: boolean
+      required:
+      - supportToolCalling
+      - structuredOutput
+      - vision
+      type: object
+    ModelMetadata:
+      additionalProperties: false
+      properties:
+        allowed_passthrough_parameters:
+          items:
+            type: string
+          type:
+          - array
+          - 'null'
+        autorouter:
+          $ref: '#/components/schemas/AutoRouterConfig'
+        batch_endpoints:
+          items:
+            type: string
+          type:
+          - array
+          - 'null'
+        cached_image_input_cost:
+          format: double
+          type: number
+        cached_input_cost:
+          format: double
+          type: number
+        chain_of_thought:
+          type: boolean
+        context_length:
+          format: int64
+          type: integer
+        context_window:
+          format: int64
+          type: integer
+        cost_efficiency_rating:
+          format: int64
+          type: integer
+        cost_per_image:
+          format: double
+          type: number
+        deprecation_date:
+          type: string
+        embedding_dimensions:
+          format: int64
+          type: integer
+        extended_context_pricing_mode:
+          type: string
+        extended_context_threshold:
+          format: int64
+          type: integer
+        function_tools_require_effort_none:
+          type: boolean
+        generate_audio:
+          type: boolean
+        image_input_cost:
+          format: double
+          type: number
+        image_output_cost:
+          format: double
+          type: number
+        image_token_cost:
+          format: double
+          type: number
+        intelligence_rating:
+          format: int64
+          type: integer
+        is_private:
+          type: boolean
+        is_realtime:
+          type: boolean
+        knowledge_cutoff:
+          type: string
+        max_images_per_request:
+          format: int64
+          type: integer
+        max_input_tokens:
+          format: int64
+          type: integer
+        max_output_tokens:
+          format: int64
+          type: integer
+        max_temperature:
+          format: double
+          type: number
+        million_searches_cost:
+          format: double
+          type: number
+        million_tokens_above_128k_cache_read_cost:
+          format: double
+          type: number
+        million_tokens_above_128k_cache_write_cost:
+          format: double
+          type: number
+        million_tokens_above_128k_input_cost:
+          format: double
+          type: number
+        million_tokens_above_128k_output_cost:
+          format: double
+          type: number
+        million_tokens_above_200k_cache_read_cost:
+          format: double
+          type: number
+        million_tokens_above_200k_cache_write_cost:
+          format: double
+          type: number
+        million_tokens_above_200k_input_cost:
+          format: double
+          type: number
+        million_tokens_above_200k_output_cost:
+          format: double
+          type: number
+        million_tokens_audio_input_cost:
+          format: double
+          type: number
+        million_tokens_audio_output_cost:
+          format: double
+          type: number
+        million_tokens_batches_input_cost:
+          format: double
+          type: number
+        million_tokens_batches_output_cost:
+          format: double
+          type: number
+        million_tokens_cache_read_cost:
+          format: double
+          type: number
+        million_tokens_cache_write_1h_cost:
+          format: double
+          type: number
+        million_tokens_cache_write_5m_cost:
+          format: double
+          type: number
+        million_tokens_cache_write_cost:
+          format: double
+          type: number
+        million_tokens_input_cost:
+          format: double
+          type: number
+        million_tokens_output_cost:
+          format: double
+          type: number
+        million_tokens_reasoning_cost:
+          format: double
+          type: number
+        multilingual:
+          type: boolean
+        offline:
+          type: boolean
+        per_video_second_cost:
+          format: double
+          type: number
+        per_video_second_cost_1080p:
+          format: double
+          type: number
+        pricing:
+          $ref: '#/components/schemas/Pricing'
+        reasoning_cost:
+          format: double
+          type: number
+        reasoning_tokens:
+          format: int64
+          type: integer
+        region:
+          type: string
+        speed_rating:
+          format: int64
+          type: integer
+        supported_embedding_dimensions:
+          $ref: '#/components/schemas/EmbeddingDimensionSupport'
+        supported_video_aspect_ratios:
+          items:
+            type: string
+          type:
+          - array
+          - 'null'
+        supported_video_durations:
+          items:
+            format: int64
+            type: integer
+          type:
+          - array
+          - 'null'
+        supported_video_frame_images:
+          items:
+            type: string
+          type:
+          - array
+          - 'null'
+        supported_video_resolutions:
+          items:
+            type: string
+          type:
+          - array
+          - 'null'
+        supported_video_sizes:
+          items:
+            type: string
+          type:
+          - array
+          - 'null'
+        supports_adaptive_reasoning:
+          type: boolean
+        supports_audio_input:
+          type: boolean
+        supports_audio_output:
+          type: boolean
+        supports_b64_json_response_format:
+          type: boolean
+        supports_batch_api:
+          type: boolean
+        supports_cache_control:
+          type: boolean
+        supports_citations:
+          type: boolean
+        supports_code_execution:
+          type: boolean
+        supports_commercial_use:
+          type: boolean
+        supports_computer_use:
+          type: boolean
+        supports_developer_message:
+          type: boolean
+        supports_direct_cost:
+          type: boolean
+        supports_distillation:
+          type: boolean
+        supports_extended_thinking:
+          type: boolean
+        supports_fine_tuning:
+          type: boolean
+        supports_google_realtime_api:
+          type: boolean
+        supports_image_edit:
+          type: boolean
+        supports_image_input:
+          type: boolean
+        supports_image_output:
+          type: boolean
+        supports_images:
+          type: boolean
+        supports_json_mode_response_format:
+          type: boolean
+        supports_json_schema_response_format:
+          type: boolean
+        supports_max_completion_tokens:
+          type: boolean
+        supports_openai_realtime_api:
+          type: boolean
+        supports_openai_sdk:
+          type: boolean
+        supports_parallel_tool_calls:
+          type: boolean
+        supports_pdf_input:
+          type: boolean
+        supports_prompt_caching:
+          type: boolean
+        supports_reasoning:
+          type: boolean
+        supports_reasoning_effort_default:
+          type: boolean
+        supports_reasoning_effort_high:
+          type: boolean
+        supports_reasoning_effort_low:
+          type: boolean
+        supports_reasoning_effort_max:
+          type: boolean
+        supports_reasoning_effort_medium:
+          type: boolean
+        supports_reasoning_effort_minimal:
+          type: boolean
+        supports_reasoning_effort_none:
+          type: boolean
+        supports_reasoning_effort_xhigh:
+          type: boolean
+        supports_responses_api:
+          type: boolean
+        supports_sampling_params:
+          type: boolean
+        supports_service_tier:
+          type: boolean
+        supports_streaming:
+          type: boolean
+        supports_strict_tool:
+          type: boolean
+        supports_structured_outputs:
+          type: boolean
+        supports_system_message:
+          type: boolean
+        supports_text:
+          type: boolean
+        supports_text_input:
+          type: boolean
+        supports_text_output:
+          type: boolean
+        supports_thinking_level:
+          type: boolean
+        supports_thinking_level_low:
+          type: boolean
+        supports_thinking_level_medium:
+          type: boolean
+        supports_thinking_level_minimal:
+          type: boolean
+        supports_tool_calling:
+          type: boolean
+        supports_tool_choice:
+          type: boolean
+        supports_url_context:
+          type: boolean
+        supports_url_response_format:
+          type: boolean
+        supports_video_input:
+          type: boolean
+        supports_video_output:
+          type: boolean
+        supports_video_seed:
+          type: boolean
+        supports_vision:
+          type: boolean
+        supports_web_search:
+          type: boolean
+        supports_zdr:
+          type: boolean
+        thinking_enforced:
+          type: boolean
+      required:
+      - is_private
+      type: object
+    SessionAffinityConfig:
+      additionalProperties: false
+      properties:
+        enabled:
+          description: Whether later turns of a thread stay on the model chosen for its first turn. Only requests that carry a thread id take part. Off by default.
+          type: boolean
+        ttl_seconds:
+          description: Sliding idle window in seconds. A thread that stays quiet longer than this is routed afresh on its next turn. Between 60 and 3600. Defaults to 600 when omitted.
+          format: int64
+          maximum: 3600
+          minimum: 60
+          type: integer
+      required:
+      - enabled
+      type: object
+    ModelDocument:
+      additionalProperties: false
+      properties:
+        configuration:
+          $ref: '#/components/schemas/ModelConfigurationResponse'
+        created:
+          type: string
+        description:
+          type:
+          - string
+          - 'null'
+        display_name:
+          type: string
+        docs_url:
+          type:
+          - string
+          - 'null'
+        enabled:
+          type: boolean
+        enabled_for_endpoints:
+          type: boolean
+        enabled_for_playground:
+          type: boolean
+        has_cpu_pricing:
+          type: boolean
+        has_functions:
+          type: boolean
+        id:
+          type: string
+        input_cost:
+          format: double
+          type:
+          - number
+          - 'null'
+        input_currency:
+          type: string
+        is_active:
+          type: boolean
+        legacy_uuid:
+          deprecated: true
+          type: string
+        metadata:
+          $ref: '#/components/schemas/ModelMetadata'
+        model_developer:
+          type: string
+        model_family:
+          type: string
+        model_id:
+          type: string
+        model_type:
+          type: string
+        output_cost:
+          format: double
+          type:
+          - number
+          - 'null'
+        output_currency:
+          type: string
+        owner:
+          type: string
+        parameters:
+          items:
+            $ref: '#/components/schemas/ModelParameterDocument'
+          type:
+          - array
+          - 'null'
+        pricing_url:
+          type:
+          - string
+          - 'null'
+        provider:
+          type: string
+        refId:
+          type: string
+        sharing:
+          $ref: '#/components/schemas/ModelSharingConfig'
+        updated:
+          type: string
+      required:
+      - id
+      - created
+      - updated
+      - display_name
+      - model_id
+      - is_active
+      - provider
+      - owner
+      - input_cost
+      - input_currency
+      - output_cost
+      - output_currency
+      - description
+      - pricing_url
+      - docs_url
+      - model_type
+      - has_functions
+      - has_cpu_pricing
+      - enabled_for_playground
+      - enabled_for_endpoints
+      - configuration
+      - metadata
+      - parameters
+      - enabled
+      - refId
+      type: object
+    AutoRouterV2Config:
+      additionalProperties: false
+      properties:
+        aa_creator:
+          $ref: '#/components/schemas/AutoRouterV2CreatorConfig'
+        aa_evaluations:
+          additionalProperties:
+            format: double
+            type:
+            - number
+            - 'null'
+          type: object
+        aa_median_output_tokens_per_second:
+          format: double
+          type: number
+        aa_median_time_to_first_answer_token:
+          format: double
+          type: number
+        aa_median_time_to_first_token_seconds:
+          format: double
+          type: number
+        aa_model_id:
+          type: string
+        aa_name:
+          type: string
+        aa_pricing:
+          additionalProperties:
+            format: double
+            type:
+            - number
+            - 'null'
+          type: object
+        aa_release_date:
+          type: string
+        aa_slug:
+          type: string
+        default_effort:
+          type: string
+        intelligence_index:
+          format: double
+          type: number
+        price:
+          format: double
+          type: number
+        reasoning_efforts:
+          additionalProperties:
+            $ref: '#/components/schemas/AutoRouterV2EffortConfig'
+          type: object
+      required:
+      - intelligence_index
+      - price
+      type: object
+    ModelConfigurationResponse:
+      additionalProperties: false
+      properties:
+        api_key_env:
+          type: string
+        api_version:
+          type: string
+        auth_mode:
+          type: string
+        auth_type:
+          type: string
+        base_url:
+          type: string
+        deployment_name:
+          type: string
+        endpoint:
+          type: string
+        inference_profile_arn:
+          type: string
+        integration_id:
+          type: string
+        is_openai_compatible:
+          type: boolean
+        is_tuned_model:
+          type: boolean
+        location:
+          type: string
+        project_id:
+          type: string
+        provider:
+          type: string
+        region:
+          type: string
+        should_use_beta_features:
+          type: boolean
+        subtype:
+          type: string
+        workspace_id:
+          type: string
+      required:
+      - provider
+      type: object
+    VertexParamRangeInt:
+      additionalProperties: false
+      properties:
+        max:
+          format: int64
+          type: integer
+        min:
+          format: int64
+          type: integer
+      required:
+      - min
+      - max
+      type: object
+    AzureFoundryDeploymentMasterData:
+      additionalProperties: false
+      properties:
+        has_functions:
+          type: boolean
+        id:
+          type: string
+        input_cost:
+          format: double
+          type: number
+        metadata:
+          additionalProperties: {}
+          type: object
+        model_developer:
+          type:
+          - string
+          - 'null'
+        model_family:
+          type:
+          - string
+          - 'null'
+        model_id:
+          type: string
+        model_type:
+          type: string
+        output_cost:
+          format: double
+          type: number
+        parameters:
+          items: {}
+          type:
+          - array
+          - 'null'
+      required:
+      - input_cost
+      - output_cost
+      - has_functions
+      - model_type
+      - id
+      - model_id
+      - parameters
+      - model_developer
+      - model_family
+      type: object
+    AzureFoundryDeployment:
+      additionalProperties: false
+      properties:
+        base_url:
+          type: string
+        id:
+          type: string
+        master_data:
+          $ref: '#/components/schemas/AzureFoundryDeploymentMasterData'
+        model:
+          type: string
+        publisher:
+          type: string
+        wire:
+          type: string
+      required:
+      - id
+      - model
+      type: object
+    AutoRouterConfig:
+      additionalProperties: false
+      properties:
+        economical_model:
+          type: string
+        id:
+          type: string
+        models:
+          items:
+            type: string
+          type:
+          - array
+          - 'null'
+        profile:
+          type: string
+        session_affinity:
+          $ref: '#/components/schemas/SessionAffinityConfig'
+        strong_model:
+          type: string
+        v2:
+          $ref: '#/components/schemas/AutoRouterV2Config'
+        version:
+          type: string
+      type: object
+    AutoRouterV2EffortConfig:
+      additionalProperties: false
+      properties:
+        aa_slug:
+          type: string
+        intelligence_index:
+          format: double
+          type: number
+      required:
+      - intelligence_index
+      type: object
+    LiteLLMModel:
+      additionalProperties: false
+      properties:
+        litellm_params:
+          $ref: '#/components/schemas/LiteLLMParams'
+        model_info:
+          $ref: '#/components/schemas/LiteLLMModelInfo'
+        model_name:
+          type: string
+      required:
+      - model_name
+      - litellm_params
+      - model_info
+      type: object
+    UpdateModelParameter:
+      additionalProperties: false
+      properties:
+        config:
+          additionalProperties: {}
+          type: object
+        description:
+          type: string
+        hints:
+          type: string
+        id:
+          type: string
+        is_active:
+          type: boolean
+        name:
+          type: string
+        parameter:
+          type: string
+        parameter_type:
+          type: string
+        position:
+          format: int64
+          type: integer
+      required:
+      - id
+      type: object
+  securitySchemes:
+    ApiKey:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+externalDocs:
+  url: https://docs.orq.ai
+  description: orq.ai Documentation
+x-speakeasy-timeout: 600000

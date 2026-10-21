@@ -1,0 +1,269 @@
+openapi: 3.2.0
+info:
+  title: orq.ai Workspaces API
+  version: '2.0'
+  description: orq.ai API documentation
+servers:
+- url: https://my.orq.ai
+security:
+- ApiKey: []
+tags:
+- name: Workspaces
+  description: A workspace is the tenant. Create is called from a user session during onboarding; Get, List, and Update are the public management surface.
+paths:
+  /v2/workspaces:
+    get:
+      tags:
+      - Workspaces
+      summary: List workspaces
+      description: Returns workspaces the caller can access. A user session lists every membership. A management key lists only the workspace bound to the key. Project keys are rejected.
+      operationId: WorkspaceList
+      parameters:
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          format: int32
+      - name: starting_after
+        in: query
+        schema:
+          type: string
+      - name: ending_before
+        in: query
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListWorkspacesResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: workspaces
+      x-speakeasy-name-override: list
+  /v2/workspaces/{key}:
+    get:
+      tags:
+      - Workspaces
+      summary: Retrieve a workspace
+      description: Retrieves a workspace by its key. A user session must be a member and does not need a workspace-scoped token. A management key may only retrieve the workspace bound to the key.
+      operationId: WorkspaceGet
+      parameters:
+      - name: key
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetWorkspaceResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Not permitted for this key, project or workspace. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: workspaces
+      x-speakeasy-name-override: get
+    patch:
+      tags:
+      - Workspaces
+      summary: Update a workspace
+      description: Partially updates a workspace. Omit a field to leave it unchanged. Set `archived` to true to archive, false to restore. The workspace key cannot be changed.
+      operationId: WorkspaceUpdate
+      parameters:
+      - name: key
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateWorkspaceRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateWorkspaceResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: workspaces
+      x-speakeasy-name-override: update
+components:
+  schemas:
+    GetWorkspaceResponse:
+      required:
+      - workspace
+      type: object
+      properties:
+        workspace:
+          $ref: '#/components/schemas/Workspace'
+    UpdateWorkspaceResponse:
+      required:
+      - workspace
+      type: object
+      properties:
+        workspace:
+          $ref: '#/components/schemas/Workspace'
+    ChatKitResources:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChatKitResource'
+    ChatKitResource:
+      type: object
+      properties:
+        id:
+          type: string
+        display_name:
+          type: string
+        resource_id:
+          type: string
+        resource_type:
+          type: string
+    WorkspaceOrganization:
+      type: object
+      properties:
+        id:
+          type: string
+        key:
+          type: string
+    WorkspaceCapabilities:
+      type: object
+      properties:
+        roles:
+          type: array
+          items:
+            type: string
+        projects:
+          type: array
+          items:
+            type: string
+    WorkspaceSettingsFields:
+      type: object
+      properties:
+        same_project_entities_enabled:
+          type: boolean
+        model_garden_settings:
+          type: object
+        plugins:
+          type: object
+    Workspace:
+      required:
+      - id
+      - key
+      - display_name
+      type: object
+      properties:
+        id:
+          type: string
+        key:
+          type: string
+        display_name:
+          type: string
+        logo_url:
+          type: string
+        archived_on:
+          type: string
+          format: date-time
+        archived_by_id:
+          type: string
+        organization:
+          $ref: '#/components/schemas/WorkspaceOrganization'
+        settings:
+          $ref: '#/components/schemas/WorkspaceSettingsFields'
+        sidebar_version:
+          type: string
+        features:
+          type: object
+        total_members:
+          type: integer
+          format: int32
+        metadata:
+          type: object
+        capabilities:
+          $ref: '#/components/schemas/WorkspaceCapabilities'
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Human-readable error message.
+        code:
+          type: integer
+          description: gRPC status code, when the service reports one.
+        details:
+          type: array
+          items: {}
+          description: Additional error details, when the service reports any.
+      required:
+      - message
+    ListWorkspacesResponse:
+      required:
+      - object
+      - data
+      - has_more
+      type: object
+      properties:
+        object:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Workspace'
+        has_more:
+          type: boolean
+    UpdateWorkspaceRequest:
+      required: []
+      type: object
+      properties:
+        display_name:
+          type: string
+        logo_url:
+          type: string
+        archived:
+          type: boolean
+        settings:
+          $ref: '#/components/schemas/WorkspaceSettingsFields'
+        metadata:
+          type: object
+        enforce_enabled_models:
+          type: boolean
+        chat_kit:
+          $ref: '#/components/schemas/ChatKitResources'
+  securitySchemes:
+    ApiKey:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+externalDocs:
+  url: https://docs.orq.ai
+  description: orq.ai Documentation
+x-speakeasy-timeout: 600000

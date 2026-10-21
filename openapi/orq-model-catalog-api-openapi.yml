@@ -1,0 +1,511 @@
+openapi: 3.2.0
+info:
+  title: orq.ai Model Catalog API
+  version: '2.0'
+  description: orq.ai API documentation
+servers:
+- url: https://my.orq.ai
+security:
+- ApiKey: []
+tags:
+- name: Model Catalog
+  description: 'Browse the orq.ai model catalog: every model orq offers, across every provider, with pricing, capabilities and benchmark data. List endpoints only return models that are not deprecated. This API is public, requires no authentication, and is rate limited to 120 requests per minute per IP. Responses carry a 5-minute cache-control max-age.'
+paths:
+  /v2/model-catalog:
+    get:
+      tags:
+      - Model Catalog
+      summary: List the model catalog
+      description: Returns every model orq offers, optionally filtered, searched and sorted. Deprecated models are never listed; fetch one directly by id to inspect it. Unset `limit` returns the whole catalog. Use `starting_after` or `ending_before` to page through the collection.
+      operationId: ModelCatalogList
+      parameters:
+      - name: limit
+        in: query
+        description: Page size, 1–1000. Unset returns every non-deprecated model in one response.
+        schema:
+          type: integer
+          format: int32
+      - name: starting_after
+        in: query
+        description: "Cursor for forward pagination. Set to the `id` of the last item from\n the previous page."
+        schema:
+          type: string
+      - name: ending_before
+        in: query
+        description: "Cursor for backward pagination. Set to the `id` of the first item\n from the previous page."
+        schema:
+          type: string
+      - name: provider
+        in: query
+        description: "Filter by catalog provider key. Repeat to match any of several\n providers."
+        schema:
+          type: array
+          items:
+            type: string
+      - name: endpoint
+        in: query
+        description: Filter by API endpoint. Repeat to match any of several endpoints.
+        schema:
+          type: array
+          items:
+            type: string
+      - name: input_modality
+        in: query
+        description: Filter by input modality. Repeat to match any of several modalities.
+        schema:
+          type: array
+          items:
+            type: string
+      - name: output_modality
+        in: query
+        description: Filter by output modality. Repeat to match any of several modalities.
+        schema:
+          type: array
+          items:
+            type: string
+      - name: location
+        in: query
+        description: Filter by region. Repeat to match any of several regions.
+        schema:
+          type: array
+          items:
+            type: string
+      - name: feature
+        in: query
+        description: "Filter by normalized feature name. Repeat to match any of several\n features."
+        schema:
+          type: array
+          items:
+            type: string
+      - name: supported_parameter
+        in: query
+        description: "Filter by supported parameter key. Repeat to match any of several\n parameters."
+        schema:
+          type: array
+          items:
+            type: string
+      - name: tier
+        in: query
+        description: "Filter by supported service tier. Repeat to match any of several\n tiers."
+        schema:
+          type: array
+          items:
+            type: string
+      - name: offering_of
+        in: query
+        description: Filter to offerings of one base model reference, `<developer>/<stem>`.
+        schema:
+          type: string
+      - name: search
+        in: query
+        description: Case-insensitive substring search over `id`, `name` and `description`.
+        schema:
+          type: string
+      - name: sort_by
+        in: query
+        description: Field to sort by.
+        schema:
+          type: string
+      - name: order
+        in: query
+        description: Sort order. Defaults to ascending.
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListModelCatalogResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: modelCatalog
+      x-speakeasy-name-override: list
+      x-mint:
+        metadata:
+          sidebarTitle: List catalog models
+      security: []
+      x-code-samples:
+      - lang: curl
+        label: Core - List the model catalog
+        source: "curl --get 'https://my.orq.ai/v2/model-catalog' \\\n  --data-urlencode 'provider=openai' \\\n  --data-urlencode 'limit=10'\n"
+      - lang: python
+        label: Python - List the model catalog
+        source: "import os\nfrom orq_ai_sdk import Orq\n\nclient = Orq(api_key=os.environ[\"ORQ_API_KEY\"])\n\npage = client.model_catalog.list(\n    provider=\"openai\",\n    limit=10,\n)\n\nfor model in page.data:\n    print(model.id, model.name)\n"
+      - lang: typescript
+        label: Node.js - List the model catalog
+        source: "import { Orq } from '@orq-ai/node';\n\nconst client = new Orq({\n  apiKey: process.env.ORQ_API_KEY,\n});\n\nconst page = await client.modelCatalog.list({\n  provider: 'openai',\n  limit: 10,\n});\n\nfor (const model of page.data) {\n  console.log(model.id, model.name);\n}\n"
+  /v2/model-catalog/{model}/offerings:
+    get:
+      tags:
+      - Model Catalog
+      summary: List model catalog offerings
+      description: Returns every provider offering of one base model, identified by `/` (for example `anthropic/claude-opus-4-7`). Deprecated models are never listed.
+      operationId: ModelCatalogListOfferings
+      parameters:
+      - name: model
+        in: path
+        description: "Base model reference, `<developer>/<stem>` (for example\n `anthropic/claude-opus-4-7`)."
+        required: true
+        schema:
+          type: string
+      - name: limit
+        in: query
+        description: Page size, 1–1000. Unset returns every non-deprecated model in one response.
+        schema:
+          type: integer
+          format: int32
+      - name: starting_after
+        in: query
+        description: "Cursor for forward pagination. Set to the `id` of the last item from\n the previous page."
+        schema:
+          type: string
+      - name: ending_before
+        in: query
+        description: "Cursor for backward pagination. Set to the `id` of the first item\n from the previous page."
+        schema:
+          type: string
+      - name: provider
+        in: query
+        description: "Filter by catalog provider key. Repeat to match any of several\n providers."
+        schema:
+          type: array
+          items:
+            type: string
+      - name: endpoint
+        in: query
+        description: Filter by API endpoint. Repeat to match any of several endpoints.
+        schema:
+          type: array
+          items:
+            type: string
+      - name: input_modality
+        in: query
+        description: Filter by input modality. Repeat to match any of several modalities.
+        schema:
+          type: array
+          items:
+            type: string
+      - name: output_modality
+        in: query
+        description: Filter by output modality. Repeat to match any of several modalities.
+        schema:
+          type: array
+          items:
+            type: string
+      - name: location
+        in: query
+        description: Filter by region. Repeat to match any of several regions.
+        schema:
+          type: array
+          items:
+            type: string
+      - name: feature
+        in: query
+        description: "Filter by normalized feature name. Repeat to match any of several\n features."
+        schema:
+          type: array
+          items:
+            type: string
+      - name: supported_parameter
+        in: query
+        description: "Filter by supported parameter key. Repeat to match any of several\n parameters."
+        schema:
+          type: array
+          items:
+            type: string
+      - name: tier
+        in: query
+        description: "Filter by supported service tier. Repeat to match any of several\n tiers."
+        schema:
+          type: array
+          items:
+            type: string
+      - name: search
+        in: query
+        description: Case-insensitive substring search over `id`, `name` and `description`.
+        schema:
+          type: string
+      - name: sort_by
+        in: query
+        description: Field to sort by.
+        schema:
+          type: string
+      - name: order
+        in: query
+        description: Sort order. Defaults to ascending.
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListModelCatalogOfferingsResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: modelCatalog
+      x-speakeasy-name-override: listOfferings
+      x-mint:
+        metadata:
+          sidebarTitle: List model offerings
+      security: []
+      x-code-samples:
+      - lang: curl
+        label: Core - List model catalog offerings
+        source: 'curl --get ''https://my.orq.ai/v2/model-catalog/anthropic/claude-opus-4-7/offerings''
+
+          '
+      - lang: python
+        label: Python - List model catalog offerings
+        source: "import os\nfrom orq_ai_sdk import Orq\n\nclient = Orq(api_key=os.environ[\"ORQ_API_KEY\"])\n\npage = client.model_catalog.list_offerings(\n    model=\"anthropic/claude-opus-4-7\",\n)\n\nfor offering in page.data:\n    print(offering.provider.id, offering.id)\n"
+      - lang: typescript
+        label: Node.js - List model catalog offerings
+        source: "import { Orq } from '@orq-ai/node';\n\nconst client = new Orq({\n  apiKey: process.env.ORQ_API_KEY,\n});\n\nconst page = await client.modelCatalog.listOfferings({\n  model: 'anthropic/claude-opus-4-7',\n});\n\nfor (const offering of page.data) {\n  console.log(offering.provider.id, offering.id);\n}\n"
+  /v2/model-catalog/{id}:
+    get:
+      tags:
+      - Model Catalog
+      summary: Retrieve a model catalog entry
+      description: Retrieves a single catalog entry by its id, `/` (for example `openai/gpt-4o`). Unlike the list endpoints this also resolves deprecated models; check `deprecated` and `deprecation` on the response.
+      operationId: ModelCatalogGet
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetModelCatalogModelResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: The resource does not exist. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: modelCatalog
+      x-speakeasy-name-override: get
+      x-mint:
+        metadata:
+          sidebarTitle: Get catalog entry
+      security: []
+      parameters:
+      - schema:
+          type: string
+          description: Catalog identifier, `<provider>/<model>` (for example `openai/gpt-4o`).
+        required: true
+        description: Catalog identifier, `<provider>/<model>` (for example `openai/gpt-4o`).
+        name: id
+        in: path
+      x-code-samples:
+      - lang: curl
+        label: Core - Retrieve a model catalog entry
+        source: 'curl --get ''https://my.orq.ai/v2/model-catalog/openai/gpt-4o''
+
+          '
+      - lang: python
+        label: Python - Retrieve a model catalog entry
+        source: "import os\nfrom orq_ai_sdk import Orq\n\nclient = Orq(api_key=os.environ[\"ORQ_API_KEY\"])\n\nresult = client.model_catalog.get(\n    id=\"openai/gpt-4o\",\n)\n\nprint(result.model.name, result.model.pricing)\n"
+      - lang: typescript
+        label: Node.js - Retrieve a model catalog entry
+        source: "import { Orq } from '@orq-ai/node';\n\nconst client = new Orq({\n  apiKey: process.env.ORQ_API_KEY,\n});\n\nconst result = await client.modelCatalog.get({\n  id: 'openai/gpt-4o',\n});\n\nconsole.log(result.model.name, result.model.pricing);\n"
+components:
+  schemas:
+    ListModelCatalogOfferingsResponse:
+      required:
+      - object
+      - data
+      - has_more
+      type: object
+      properties:
+        object:
+          type: string
+          description: Object discriminator for list responses; always `list`.
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Model'
+          description: Page of catalog offerings, ordered by `offering_of` then `id`.
+        has_more:
+          type: boolean
+          description: "Whether more offerings are available in the selected pagination\n direction."
+    Model:
+      required:
+      - id
+      - created
+      - name
+      - description
+      - provider
+      - endpoints
+      - modalities
+      - offering_of
+      - supported_parameters
+      - supported_tiers
+      - location
+      - features
+      - deprecated
+      - zdr
+      type: object
+      properties:
+        id:
+          type: string
+          description: Catalog identifier, `<provider>/<model>` (for example `openai/gpt-4o`).
+        created:
+          type: string
+          description: When orq listed this offering, as an RFC 3339 UTC timestamp.
+          format: date-time
+        deprecation:
+          type: string
+          description: "When this offering stops being served, as an RFC 3339 UTC timestamp:\n orq's own sunset date if one is set, otherwise the developer's announced\n deprecation date. Absent when neither is set."
+          format: date-time
+        name:
+          type: string
+          description: Display name shown in the orq model garden.
+        description:
+          type: string
+          description: Short model description.
+        provider:
+          allOf:
+          - $ref: '#/components/schemas/ModelProvider'
+          description: Provider that serves this offering.
+        endpoints:
+          type: array
+          items:
+            type: string
+          description: API endpoints this offering exposes (chat, batch, ...).
+        modalities:
+          allOf:
+          - $ref: '#/components/schemas/ModelModalities'
+          description: Content modalities this offering consumes and produces.
+        offering_of:
+          type: string
+          description: Provider-independent model reference this offering serves, `<developer>/<stem>`.
+        pricing:
+          type: object
+          description: "Resolved commercial pricing, including service-tier variants. Each\n variant carries a `when` CEL condition string evaluated against\n `input_tokens`, `output_tokens`, `total_tokens` and `tier`; all\n variants whose condition is true are merged onto the base pricing in\n order, later variants winning per field. Absent when this offering has\n no representable token-based pricing."
+        supported_parameters:
+          type: array
+          items:
+            type: string
+          description: API parameter keys this offering accepts, snake_case (e.g. `temperature`, `max_tokens`).
+        supported_tiers:
+          type: array
+          items:
+            type: string
+          description: Paid service tier names available to this offering.
+        context_window:
+          type: string
+          description: "Maximum input context size in tokens (string-encoded int64 in JSON).\n Absent when not applicable."
+        location:
+          type: array
+          items:
+            type: string
+          description: Regions this offering routes to, lowercased.
+        artificial_intelligence:
+          type: object
+          description: "Artificial Analysis benchmark scores keyed by evaluation name. Absent\n when unavailable for this offering."
+        features:
+          type: array
+          items:
+            type: string
+          description: "Normalized capability names this offering supports, snake_case and\n alphabetical (e.g. `json_mode`, `tool_calling`, `vision`, `web_search`)."
+        deprecated:
+          type: boolean
+          description: "True when this offering is deprecated, whether or not a deprecation\n date is known. `deprecation` carries the date when one is announced."
+        zdr:
+          type: boolean
+          description: True when this offering guarantees zero data retention.
+    ModelProvider:
+      required:
+      - id
+      - logo
+      type: object
+      properties:
+        id:
+          type: string
+          description: Catalog provider key (openai, anthropic, aws, ...).
+        logo:
+          type: string
+          description: Absolute URL of the provider logo. Empty when no logo is known.
+    ModelModalities:
+      required:
+      - input
+      - output
+      type: object
+      properties:
+        input:
+          type: array
+          items:
+            type: string
+          description: Modalities this offering accepts as input.
+        output:
+          type: array
+          items:
+            type: string
+          description: Modalities this offering produces as output.
+    GetModelCatalogModelResponse:
+      required:
+      - model
+      type: object
+      properties:
+        model:
+          allOf:
+          - $ref: '#/components/schemas/Model'
+          description: Requested catalog entry.
+    ListModelCatalogResponse:
+      required:
+      - object
+      - data
+      - has_more
+      type: object
+      properties:
+        object:
+          type: string
+          description: Object discriminator for list responses; always `list`.
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Model'
+          description: Page of catalog entries.
+        has_more:
+          type: boolean
+          description: "Whether more entries are available in the selected pagination\n direction."
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Human-readable error message.
+        code:
+          type: integer
+          description: gRPC status code, when the service reports one.
+        details:
+          type: array
+          items: {}
+          description: Additional error details, when the service reports any.
+      required:
+      - message
+  securitySchemes:
+    ApiKey:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+externalDocs:
+  url: https://docs.orq.ai
+  description: orq.ai Documentation
+x-speakeasy-timeout: 600000

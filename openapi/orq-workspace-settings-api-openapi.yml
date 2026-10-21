@@ -1,0 +1,173 @@
+openapi: 3.2.0
+info:
+  title: orq.ai Workspace Settings API
+  version: '2.0'
+  description: orq.ai API documentation
+servers:
+- url: https://my.orq.ai
+security:
+- ApiKey: []
+tags:
+- name: Workspace Settings
+  description: Workspace-level settings managed with a workspace credential. A workspace is the tenant, so these settings are a singleton — there is nothing to create or delete, only read and update.
+paths:
+  /v2/workspace-settings:
+    get:
+      tags:
+      - Workspace Settings
+      summary: Retrieve workspace settings
+      description: 'Returns the current settings for the authenticated workspace: its read-only key/slug, display name, the enforce-enabled-models flag, and the workspace-default PII redaction plugin configuration.'
+      operationId: WorkspaceSettingsGet
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetWorkspaceSettingsResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: workspaceSettings
+      x-speakeasy-name-override: get
+    patch:
+      tags:
+      - Workspace Settings
+      summary: Update workspace settings
+      description: Partially updates workspace settings. Every field is optional; an omitted field is left unchanged. Provide `display_name` to rename the workspace, `enforce_enabled_models` to toggle model enforcement, or `pii_redaction` to replace the workspace-default PII redaction plugin configuration.
+      operationId: WorkspaceSettingsUpdate
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateWorkspaceSettingsRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateWorkspaceSettingsResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: workspaceSettings
+      x-speakeasy-name-override: update
+components:
+  schemas:
+    PiiRedactionConfig:
+      type: object
+      properties:
+        language:
+          type: string
+          description: "Detector language. Accepts \"auto\" to detect the language per request; the\n concrete languages come from GET /v2/pii/capabilities. Omitting the field\n defaults to \"auto\". The valid entity catalog depends on this value."
+        entities:
+          type: array
+          items:
+            type: string
+          description: "Entity types to redact (e.g. \"EMAIL_ADDRESS\", \"PERSON\"). Values are\n validated against the entity catalog for `language`; omit to redact every\n type the detector finds."
+        on_failure:
+          type: string
+          description: "Behaviour when redaction cannot run: \"block\" (fail closed, the default) or\n \"passthrough\" (fail open, send the original text)."
+        threshold:
+          type: number
+          description: Detection confidence threshold in the [0, 1] range.
+          format: double
+      description: "PiiRedactionConfig mirrors the workspace-default PII redaction plugin\n configuration. Every field is optional; the gateway applies its own\n defaults for unset fields.\n\n The stored value is validated on write using the same rules the gateway\n applies to live requests. Without that, an invalid workspace default\n would 400 every gateway call for the workspace, since the default plugin\n is injected into each request and validated there."
+    UpdateWorkspaceSettingsRequest:
+      type: object
+      properties:
+        display_name:
+          type: string
+          description: New workspace display name. Omit to keep the current name.
+        enforce_enabled_models:
+          type: boolean
+          description: "New value for the enforce-enabled-models flag. Omit to keep the current\n value."
+        pii_redaction:
+          allOf:
+          - $ref: '#/components/schemas/PiiRedaction'
+          description: "Replacement workspace-default PII redaction configuration. Omit to leave\n the current PII redaction configuration unchanged; when present it fully\n replaces the stored pii_redaction object."
+      description: "UpdateWorkspaceSettingsRequest is a partial update: every field is optional\n and an omitted field is left unchanged.\n\n The workspace slug is immutable through this service: it is embedded in\n resource URLs and API credentials."
+    GetWorkspaceSettingsResponse:
+      required:
+      - settings
+      type: object
+      properties:
+        settings:
+          allOf:
+          - $ref: '#/components/schemas/WorkspaceSettings'
+          description: Current workspace settings.
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Human-readable error message.
+        code:
+          type: integer
+          description: gRPC status code, when the service reports one.
+        details:
+          type: array
+          items: {}
+          description: Additional error details, when the service reports any.
+      required:
+      - message
+    UpdateWorkspaceSettingsResponse:
+      required:
+      - settings
+      type: object
+      properties:
+        settings:
+          allOf:
+          - $ref: '#/components/schemas/WorkspaceSettings'
+          description: Updated workspace settings.
+    PiiRedaction:
+      required:
+      - enabled
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          description: Whether the workspace-default PII redaction plugin is enabled.
+        config:
+          allOf:
+          - $ref: '#/components/schemas/PiiRedactionConfig'
+          description: Plugin configuration applied when enabled. Optional.
+      description: "PiiRedaction is the workspace-default configuration for the pii_redaction\n plugin: an enable flag plus the optional plugin config the gateway applies as\n a floor for requests that send no plugins of their own."
+    WorkspaceSettings:
+      required:
+      - key
+      - display_name
+      - enforce_enabled_models
+      type: object
+      properties:
+        key:
+          type: string
+          description: "Read-only workspace key/slug. Returned for reference; it cannot be changed\n through this service."
+        display_name:
+          type: string
+          description: Human-readable workspace display name.
+        enforce_enabled_models:
+          type: boolean
+          description: Whether only workspace-enabled models may be served.
+        pii_redaction:
+          allOf:
+          - $ref: '#/components/schemas/PiiRedaction'
+          description: "Workspace-default PII redaction plugin configuration. Omitted when the\n workspace has never configured it."
+      description: WorkspaceSettings is the full settings state returned by Get and Update.
+  securitySchemes:
+    ApiKey:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+externalDocs:
+  url: https://docs.orq.ai
+  description: orq.ai Documentation
+x-speakeasy-timeout: 600000

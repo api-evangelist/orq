@@ -1,0 +1,611 @@
+openapi: 3.2.0
+info:
+  title: orq.ai Threads API
+  version: '2.0'
+  description: orq.ai API documentation
+servers:
+- url: https://my.orq.ai
+security:
+- ApiKey: []
+tags:
+- name: Threads
+  description: Threads group related trace invocations and their aggregate usage
+paths:
+  /v2/sessions:
+    post:
+      tags:
+      - Threads
+      summary: Create trace thread
+      description: Create a thread for traces.
+      operationId: CreateSession
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateThreadRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Thread'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: sessions
+      x-speakeasy-name-override: create
+      x-cli-group: sessions
+      x-cli-name: create
+      x-code-samples:
+      - lang: curl
+        label: Core - Create session
+        source: "curl --request POST \\\n  --url 'https://my.orq.ai/v2/sessions' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\" \\\n  --header 'Content-Type: application/json' \\\n  --data '{\n    \"external_id\": \"thread_01HZXW2K7Y8Q9M0N1P2R3S4T5V\",\n    \"duration\": 1240,\n    \"contact_ids\": [],\n    \"billing\": {\n      \"input_cost\": 0.0012,\n      \"output_cost\": 0.0024,\n      \"total_cost\": 0.0036\n    },\n    \"usage\": {\n      \"prompt_tokens\": 480,\n      \"completion_tokens\": 132,\n      \"total_tokens\": 612\n    },\n    \"traces_count\": 1,\n    \"tags\": [\"support\"],\n    \"project_id\": \"proj_01HZXW2K7Y8Q9M0N1P2R3S4T5V\"\n  }'\n"
+      - lang: python
+        label: Python - Create session
+        source: "import os\nfrom orq_ai_sdk import Orq\n\nclient = Orq(api_key=os.environ[\"ORQ_API_KEY\"])\n\nresult = client.sessions.create(\n    external_id=\"thread_01HZXW2K7Y8Q9M0N1P2R3S4T5V\",\n    duration=1240,\n    contact_ids=[],\n    billing={\n        \"input_cost\": 0.0012,\n        \"output_cost\": 0.0024,\n        \"total_cost\": 0.0036,\n    },\n    usage={\n        \"prompt_tokens\": 480,\n        \"completion_tokens\": 132,\n        \"total_tokens\": 612,\n    },\n    traces_count=1,\n    tags=[\"support\"],\n    project_id=\"proj_01HZXW2K7Y8Q9M0N1P2R3S4T5V\",\n)\n\nprint(result.external_id)\n"
+      - lang: typescript
+        label: Node.js - Create session
+        source: "import { Orq } from '@orq-ai/node';\n\nconst client = new Orq({\n  apiKey: process.env.ORQ_API_KEY,\n});\n\nconst result = await client.sessions.create({\n  externalId: 'thread_01HZXW2K7Y8Q9M0N1P2R3S4T5V',\n  duration: 1240,\n  contactIds: [],\n  billing: {\n    inputCost: 0.0012,\n    outputCost: 0.0024,\n    totalCost: 0.0036,\n  },\n  usage: {\n    promptTokens: 480,\n    completionTokens: 132,\n    totalTokens: 612,\n  },\n  tracesCount: 1,\n  tags: ['support'],\n  projectId: 'proj_01HZXW2K7Y8Q9M0N1P2R3S4T5V',\n});\n\nconsole.log(result.externalId);\n"
+  /v2/sessions/count:
+    post:
+      tags:
+      - Threads
+      summary: Get thread count
+      description: Get total count of trace threads.
+      operationId: GetSessionCount
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetThreadCountRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetThreadCountResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: sessions
+      x-speakeasy-name-override: getCount
+      x-cli-group: sessions
+      x-cli-name: getCount
+      x-code-samples:
+      - lang: curl
+        label: Core - Count sessions
+        source: "curl --request POST \\\n  --url 'https://my.orq.ai/v2/sessions/count' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\" \\\n  --header 'Content-Type: application/json' \\\n  --data '{\n    \"filters\": {\n      \"interval\": \"SESSION_INTERVAL_LAST_24_HOURS\",\n      \"project_id\": \"proj_01HZXW2K7Y8Q9M0N1P2R3S4T5V\",\n      \"tags\": [\"support\"]\n    },\n    \"limit\": 25,\n    \"page\": 1\n  }'\n"
+      - lang: python
+        label: Python - Count sessions
+        source: "import os\nfrom orq_ai_sdk import Orq\n\nclient = Orq(api_key=os.environ[\"ORQ_API_KEY\"])\n\nresult = client.sessions.get_count(\n    filters={\n        \"interval\": \"SESSION_INTERVAL_LAST_24_HOURS\",\n        \"project_id\": \"proj_01HZXW2K7Y8Q9M0N1P2R3S4T5V\",\n        \"tags\": [\"support\"],\n    },\n    limit=25,\n    page=1,\n)\n\nprint(result.count)\n"
+      - lang: typescript
+        label: Node.js - Count sessions
+        source: "import { Orq } from '@orq-ai/node';\n\nconst client = new Orq({\n  apiKey: process.env.ORQ_API_KEY,\n});\n\nconst result = await client.sessions.getCount({\n  filters: {\n    interval: 'SESSION_INTERVAL_LAST_24_HOURS',\n    projectId: 'proj_01HZXW2K7Y8Q9M0N1P2R3S4T5V',\n    tags: ['support'],\n  },\n  limit: 25,\n  page: 1,\n});\n\nconsole.log(result.count);\n"
+  /v2/sessions/query:
+    post:
+      tags:
+      - Threads
+      summary: List trace threads
+      description: List trace threads from your workspace.
+      operationId: ListSessions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ListThreadsRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListThreadsResponse'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: sessions
+      x-speakeasy-name-override: list
+      x-cli-group: sessions
+      x-cli-name: list
+      x-code-samples:
+      - lang: curl
+        label: Core - List sessions
+        source: "curl --request POST \\\n  --url 'https://my.orq.ai/v2/sessions/query' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\" \\\n  --header 'Content-Type: application/json' \\\n  --data '{\n    \"filters\": {\n      \"interval\": \"SESSION_INTERVAL_LAST_24_HOURS\",\n      \"project_id\": \"proj_01HZXW2K7Y8Q9M0N1P2R3S4T5V\",\n      \"tags\": [\"support\"]\n    },\n    \"limit\": 25,\n    \"page\": 1\n  }'\n"
+      - lang: python
+        label: Python - List sessions
+        source: "import os\nfrom orq_ai_sdk import Orq\n\nclient = Orq(api_key=os.environ[\"ORQ_API_KEY\"])\n\npage = client.sessions.list(\n    filters={\n        \"interval\": \"SESSION_INTERVAL_LAST_24_HOURS\",\n        \"project_id\": \"proj_01HZXW2K7Y8Q9M0N1P2R3S4T5V\",\n        \"tags\": [\"support\"],\n    },\n    limit=25,\n    page=1,\n)\n\nfor session in page.data:\n    print(session.external_id, session.traces_count)\n"
+      - lang: typescript
+        label: Node.js - List sessions
+        source: "import { Orq } from '@orq-ai/node';\n\nconst client = new Orq({\n  apiKey: process.env.ORQ_API_KEY,\n});\n\nconst page = await client.sessions.list({\n  filters: {\n    interval: 'SESSION_INTERVAL_LAST_24_HOURS',\n    projectId: 'proj_01HZXW2K7Y8Q9M0N1P2R3S4T5V',\n    tags: ['support'],\n  },\n  limit: 25,\n  page: 1,\n});\n\nfor (const session of page.data) {\n  console.log(session.externalId, session.tracesCount);\n}\n"
+  /v2/sessions/tags:
+    get:
+      tags:
+      - Threads
+      summary: List thread tags
+      description: Retrieves all unique thread tags in the workspace.
+      operationId: ListSessionTags
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: sessions
+      x-speakeasy-name-override: listTags
+      x-cli-group: sessions
+      x-cli-name: listTags
+      x-code-samples:
+      - lang: curl
+        label: Core - List session tags
+        source: "curl --request GET \\\n  --url 'https://my.orq.ai/v2/sessions/tags' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\"\n"
+      - lang: python
+        label: Python - List session tags
+        source: 'import os
+
+          from orq_ai_sdk import Orq
+
+
+          client = Orq(api_key=os.environ["ORQ_API_KEY"])
+
+
+          result = client.sessions.list_tags()
+
+
+          print(result)
+
+          '
+      - lang: typescript
+        label: Node.js - List session tags
+        source: "import { Orq } from '@orq-ai/node';\n\nconst client = new Orq({\n  apiKey: process.env.ORQ_API_KEY,\n});\n\nconst result = await client.sessions.listTags();\n\nconsole.log(result);\n"
+  /v2/sessions/{session_id}:
+    get:
+      tags:
+      - Threads
+      summary: Get trace thread
+      description: Get a trace thread.
+      operationId: GetSession
+      parameters:
+      - name: session_id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Thread'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: The resource does not exist. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: sessions
+      x-speakeasy-name-override: get
+      x-cli-group: sessions
+      x-cli-name: get
+      x-code-samples:
+      - lang: curl
+        label: Core - Retrieve session
+        source: "curl --request GET \\\n  --url 'https://my.orq.ai/v2/sessions/thread_01HZXW2K7Y8Q9M0N1P2R3S4T5V' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\"\n"
+      - lang: python
+        label: Python - Retrieve session
+        source: "import os\nfrom orq_ai_sdk import Orq\n\nclient = Orq(api_key=os.environ[\"ORQ_API_KEY\"])\n\nresult = client.sessions.get(\n    session_id=\"thread_01HZXW2K7Y8Q9M0N1P2R3S4T5V\",\n)\n\nprint(result.traces_count)\n"
+      - lang: typescript
+        label: Node.js - Retrieve session
+        source: "import { Orq } from '@orq-ai/node';\n\nconst client = new Orq({\n  apiKey: process.env.ORQ_API_KEY,\n});\n\nconst result = await client.sessions.get({\n  sessionId: 'thread_01HZXW2K7Y8Q9M0N1P2R3S4T5V',\n});\n\nconsole.log(result.tracesCount);\n"
+    delete:
+      tags:
+      - Threads
+      summary: Delete trace thread
+      description: Delete a trace thread.
+      operationId: DeleteSession
+      parameters:
+      - name: session_id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          description: No Content
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: sessions
+      x-speakeasy-name-override: delete
+      x-cli-group: sessions
+      x-cli-name: delete
+      x-code-samples:
+      - lang: curl
+        label: Core - Delete session
+        source: "curl --request DELETE \\\n  --url 'https://my.orq.ai/v2/sessions/thread_01HZXW2K7Y8Q9M0N1P2R3S4T5V' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\"\n"
+      - lang: python
+        label: Python - Delete session
+        source: "import os\nfrom orq_ai_sdk import Orq\n\nclient = Orq(api_key=os.environ[\"ORQ_API_KEY\"])\n\nclient.sessions.delete(\n    session_id=\"thread_01HZXW2K7Y8Q9M0N1P2R3S4T5V\",\n)\n"
+      - lang: typescript
+        label: Node.js - Delete session
+        source: "import { Orq } from '@orq-ai/node';\n\nconst client = new Orq({\n  apiKey: process.env.ORQ_API_KEY,\n});\n\nawait client.sessions.delete({\n  sessionId: 'thread_01HZXW2K7Y8Q9M0N1P2R3S4T5V',\n});\n"
+    patch:
+      tags:
+      - Threads
+      summary: Update trace thread
+      description: Update a trace thread.
+      operationId: UpdateSession
+      parameters:
+      - name: session_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateThreadRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Thread'
+        '401':
+          description: Authentication required. See https://docs.orq.ai/reference/errors for the error codes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-speakeasy-group: sessions
+      x-speakeasy-name-override: update
+      x-cli-group: sessions
+      x-cli-name: update
+      x-code-samples:
+      - lang: curl
+        label: Core - Update session
+        source: "curl --request PATCH \\\n  --url 'https://my.orq.ai/v2/sessions/thread_01HZXW2K7Y8Q9M0N1P2R3S4T5V' \\\n  --header \"Authorization: Bearer $ORQ_API_KEY\" \\\n  --header 'Content-Type: application/json' \\\n  --data '{\n    \"tags\": [\"support\", \"escalated\"],\n    \"traces_count\": 3\n  }'\n"
+      - lang: python
+        label: Python - Update session
+        source: "import os\nfrom orq_ai_sdk import Orq\n\nclient = Orq(api_key=os.environ[\"ORQ_API_KEY\"])\n\nresult = client.sessions.update(\n    session_id=\"thread_01HZXW2K7Y8Q9M0N1P2R3S4T5V\",\n    tags=[\"support\", \"escalated\"],\n    traces_count=3,\n)\n\nprint(result.tags)\n"
+      - lang: typescript
+        label: Node.js - Update session
+        source: "import { Orq } from '@orq-ai/node';\n\nconst client = new Orq({\n  apiKey: process.env.ORQ_API_KEY,\n});\n\nconst result = await client.sessions.update({\n  sessionId: 'thread_01HZXW2K7Y8Q9M0N1P2R3S4T5V',\n  tags: ['support', 'escalated'],\n  tracesCount: 3,\n});\n\nconsole.log(result.tags);\n"
+components:
+  schemas:
+    ThreadKind:
+      type: string
+      enum:
+      - THREAD_KIND_CONVERSATION
+      - THREAD_KIND_CODING_AGENT
+    GetThreadCountResponse:
+      required:
+      - count
+      type: object
+      properties:
+        count:
+          type: integer
+          format: int32
+    CreateThreadRequest:
+      required:
+      - external_id
+      - duration
+      - contact_ids
+      - billing
+      - usage
+      - traces_count
+      - tags
+      type: object
+      properties:
+        external_id:
+          type: string
+        duration:
+          type: number
+          format: double
+        contact_ids:
+          type: array
+          items:
+            type: string
+        billing:
+          $ref: '#/components/schemas/ThreadBilling'
+        usage:
+          $ref: '#/components/schemas/ThreadUsage'
+        traces_count:
+          type: integer
+          format: int32
+        tags:
+          type: array
+          items:
+            type: string
+        project_id:
+          type: string
+        started_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        title:
+          type: string
+        client:
+          type: string
+        repo:
+          type: string
+        kind:
+          $ref: '#/components/schemas/ThreadKind'
+    ThreadBilling:
+      required:
+      - input_cost
+      - output_cost
+      - total_cost
+      type: object
+      properties:
+        input_cost:
+          type: number
+          format: double
+        output_cost:
+          type: number
+          format: double
+        total_cost:
+          type: number
+          format: double
+    Thread:
+      required:
+      - _id
+      - external_id
+      - duration
+      - contact_ids
+      - billing
+      - usage
+      - traces_count
+      - tags
+      type: object
+      properties:
+        _id:
+          type: string
+          description: Internal thread record ID.
+        external_id:
+          type: string
+          description: Client-provided thread identifier used to group related traces.
+        duration:
+          type: number
+          description: Total thread duration in milliseconds.
+          format: double
+        contact_ids:
+          type: array
+          items:
+            type: string
+          description: Contact IDs associated with the thread.
+        billing:
+          $ref: '#/components/schemas/ThreadBilling'
+        usage:
+          $ref: '#/components/schemas/ThreadUsage'
+        traces_count:
+          type: integer
+          description: Number of traces associated with the thread.
+          format: int32
+        tags:
+          type: array
+          items:
+            type: string
+          description: Tags used to categorize the thread.
+        project_id:
+          type: string
+        started_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        title:
+          type: string
+          description: Display title. Does not replace external_id and is not used to group traces.
+        client:
+          type: string
+          description: Originating coding assistant or client, such as claude-code, cursor, or codex.
+        repo:
+          type: string
+          description: Canonical git repository for a coding-agent thread, such as github.com/org/repo.
+        kind:
+          description: Whether this thread is a conversation or a coding-agent chat.
+          $ref: '#/components/schemas/ThreadKind'
+    SessionInterval:
+      type: string
+      enum:
+      - SESSION_INTERVAL_ALL_TIME
+      - SESSION_INTERVAL_LAST_30_MINUTES
+      - SESSION_INTERVAL_LAST_1_HOUR
+      - SESSION_INTERVAL_LAST_6_HOURS
+      - SESSION_INTERVAL_LAST_24_HOURS
+      - SESSION_INTERVAL_LAST_3_DAYS
+      - SESSION_INTERVAL_LAST_7_DAYS
+      - SESSION_INTERVAL_LAST_14_DAYS
+      - SESSION_INTERVAL_LAST_1_MONTH
+      - SESSION_INTERVAL_LAST_3_MONTHS
+    ListThreadsRequest:
+      required:
+      - filters
+      type: object
+      properties:
+        filters:
+          $ref: '#/components/schemas/ThreadFilters'
+        limit:
+          type: integer
+          format: int32
+        page:
+          type: integer
+          format: int32
+    ThreadUsage:
+      required:
+      - prompt_tokens
+      - completion_tokens
+      - total_tokens
+      type: object
+      properties:
+        prompt_tokens:
+          type: integer
+          format: int32
+        completion_tokens:
+          type: integer
+          format: int32
+        total_tokens:
+          type: integer
+          format: int32
+    GetThreadCountRequest:
+      required:
+      - filters
+      type: object
+      properties:
+        filters:
+          $ref: '#/components/schemas/ThreadFilters'
+        limit:
+          type: integer
+          format: int32
+        page:
+          type: integer
+          format: int32
+    UpdateThreadRequest:
+      required: []
+      type: object
+      properties:
+        external_id:
+          type: string
+        duration:
+          type: number
+          format: double
+        contact_ids:
+          type: array
+          items:
+            type: string
+        billing:
+          $ref: '#/components/schemas/ThreadBilling'
+        usage:
+          $ref: '#/components/schemas/ThreadUsage'
+        traces_count:
+          type: integer
+          format: int32
+        tags:
+          type: array
+          items:
+            type: string
+        project_id:
+          type: string
+        started_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        clear_contact_ids:
+          type: boolean
+          description: Remove every contact id. Mutually exclusive with contact_ids.
+        clear_tags:
+          type: boolean
+          description: Remove every tag. Mutually exclusive with tags.
+        title:
+          type: string
+        client:
+          type: string
+        repo:
+          type: string
+        kind:
+          $ref: '#/components/schemas/ThreadKind'
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Human-readable error message.
+        code:
+          type: integer
+          description: gRPC status code, when the service reports one.
+        details:
+          type: array
+          items: {}
+          description: Additional error details, when the service reports any.
+      required:
+      - message
+    ListThreadsResponse:
+      required:
+      - object
+      - data
+      - has_more
+      type: object
+      properties:
+        object:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Thread'
+        has_more:
+          type: boolean
+    ThreadFilters:
+      required:
+      - interval
+      type: object
+      properties:
+        interval:
+          $ref: '#/components/schemas/SessionInterval'
+        project_id:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        start_date:
+          type: string
+          description: Start of a custom activity window in unix milliseconds.
+        end_date:
+          type: string
+          description: End of a custom activity window in unix milliseconds.
+        client:
+          type: string
+        repo:
+          type: string
+        kind:
+          $ref: '#/components/schemas/ThreadKind'
+  securitySchemes:
+    ApiKey:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+externalDocs:
+  url: https://docs.orq.ai
+  description: orq.ai Documentation
+x-speakeasy-timeout: 600000
